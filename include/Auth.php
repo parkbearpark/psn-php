@@ -1,4 +1,5 @@
 <?php
+
 namespace PSN;
 
 class Auth
@@ -198,5 +199,12 @@ class Auth
             "refresh" => $this->refresh_token,
             "npsso" => $this->npsso
         );
+    }
+
+    public static function RenderLoginForm() {
+        $phantomjs = dirname(__FILE__) . '/../bin/phantomjs.exe';
+        $phantom_script = dirname(__FILE__) . '/../test.js';
+        $cmd = $phantomjs . " --web-security=no  --debug=true --ignore-ssl-errors=true " . $phantom_script;
+        return shell_exec($cmd);
     }
 }
