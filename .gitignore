@@ -1,5 +1,7 @@
 # Local files
 test.php
+vendor
+bin
 
 # Windows image file caches
 Thumbs.db
