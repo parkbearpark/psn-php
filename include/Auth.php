@@ -205,6 +205,7 @@ class Auth
         $phantomjs = dirname(__FILE__) . '/../bin/phantomjs.exe';
         $phantom_script = dirname(__FILE__) . '/../test.js';
         $cmd = $phantomjs . " --web-security=no  --debug=true --ignore-ssl-errors=true " . $phantom_script;
-        return shell_exec($cmd);
+        $content = shell_exec($cmd);
+        return $content;
     }
 }

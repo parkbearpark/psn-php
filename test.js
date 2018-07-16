@@ -6,11 +6,11 @@ page.open('https://id.sonyentertainmentnetwork.com/signin/?response_type=code&st
         phantom.exit();
     } else {
         window.setTimeout(function () {
-            //page.switchToFrame(1);
-            var captcha = page.evaluate(function() {
-                return document.getElementsByClassName('g-recaptcha')[0];
-            });
-            console.log(captcha.innerHTML);
+            page.switchToFrame(1);
+            // var captcha = page.evaluate(function() {
+            //     return document.getElementsByClassName('g-recaptcha')[0];
+            // });
+            console.log(page.frameContent);
             phantom.exit();
         }, 4000);
     }
