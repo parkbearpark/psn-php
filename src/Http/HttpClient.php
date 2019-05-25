@@ -5,81 +5,92 @@ namespace PlayStation\Http;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\Response;
 
-class HttpClient {
+use GuzzleHttp\Psr7\Response;
 
-    private $client;
+class HttpClient
+{
+    protected $httpClient;
 
-    // Flags
-    const FORM  = 1;
-    const JSON  = 2;
-    const MULTI = 4;
-
-    public function __construct(ClientInterface $client)
-    {
-        $this->client = $client;
-    }
+    private $lastResponse;
 
     public function get(string $path, array $body = [], array $headers = []) 
     {
-        $response = $this->request('GET', $path, $body, self::FORM, $headers);
+        // We're doing the query building here because Sony's API won't accept encoded query strings.
+        // Unfortunately, Guzzle will automatically encode the query string and there's no way to disable it.
+        // - Tustin 5/24/2019 
+        $path .= (strpos($path, '?') === false) ? '?' : '&';
+        $path .= urldecode(http_build_query($body));
 
-        return ResponseParser::parse($response);
+        return ($this->lastResponse = $this->httpClient->get($path, [
+            'headers' => $headers
+        ]))->getBody()->jsonSerialize();
     }
 
-    public function post(string $path, $body, int $type = self::FORM, array $headers = []) 
+    public function post(string $path, array $body, array $headers = []) 
     {
-        $response = $this->request('POST', $path, $body, $type, $headers);
+        return ($this->lastResponse = $this->httpClient->post($path, [
+            'form_params' => $body,
+            'headers' => $headers
+        ]))->getBody()->jsonSerialize();
+    }
 
-        return ResponseParser::parse($response);
+    public function postJson(string $path, array $body, array $headers = []) 
+    {
+        return ($this->lastResponse = $this->httpClient->post($path, [
+            'json' => $body,
+            'headers' => $headers
+        ]))->getBody()->jsonSerialize();
+    }
+
+    public function postMultiPart(string $path, array $body, array $headers = [])
+    {
+        return ($this->lastResponse = $this->httpClient->post($path, [
+            'multipart' => $body,
+            'headers' => $headers
+        ]))->getBody()->jsonSerialize();
     }
 
     public function delete(string $path, array $headers = [])
     {
-        $response = $this->request('DELETE', $path, null, self::FORM, $headers);
-
-        return ResponseParser::parse($response);
+        return ($this->lastResponse = $this->httpClient->delete($path, [
+            'headers' => $headers
+        ]))->getBody()->jsonSerialize();
     }
 
     public function patch(string $path, $body = null, int $type = self::FORM, array $headers = [])
     {
-        $response = $this->request('PATCH', $path, $body, $type, $headers);
-
-        return ResponseParser::parse($response);
+        return ($this->lastResponse = $this->httpClient->patch($path, [
+            'headers' => $headers
+        ]))->getBody()->jsonSerialize();
     }
 
     public function put(string $path, $body = null, int $type = self::FORM, array $headers = [])
     {
-        $response = $this->request('PUT', $path, $body, $type, $headers);
-
-        return ResponseParser::parse($response);
+        return ($this->lastResponse = $this->httpClient->put($path, [
+            'form_params' => $body,
+            'headers' => $headers
+        ]))->getBody()->jsonSerialize();
     }
 
-    private function request(string $method, string $path, $body = null, int $type = self::FORM, array $headers = []) 
+    public function putJson(string $path, $body = null, int $type = self::FORM, array $headers = [])
     {
-        $options = [];
+        return ($this->lastResponse = $this->httpClient->put($path, [
+            'json' => $body,
+            'headers' => $headers
+        ]))->getBody()->jsonSerialize();
+    }
 
-        if ($method === 'GET' && $body != null) {
-            $path .= (strpos($path, '?') === false) ? '?' : '&';
-            $path .= urldecode(http_build_query($body));
-        } else {
-             if ($type & self::FORM) {
-                $options["form_params"] = $body;
-            } else if ($type & self::JSON) {
-                $options["json"] = $body;
-            } else if ($type & self::MULTI) {
-                $options['multipart'] = $body;
-            }
-        }
+    public function putMultiPart(string $path, $body = null, int $type = self::FORM, array $headers = [])
+    {
+        return ($this->lastResponse = $this->httpClient->put($path, [
+            'multipart' => $body,
+            'headers' => $headers
+        ]))->getBody()->jsonSerialize();
+    }
 
-        $options['headers'] = $headers;
-        $options['allow_redirects'] = false;
-
-        try {
-            return $this->client->request($method, $path, $options);
-        } catch (GuzzleException $e) {
-            throw $e;
-        } 
+    public function lastResponse() : Response
+    {
+        return $this->lastResponse;
     }
 }

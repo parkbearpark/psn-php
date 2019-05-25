@@ -10,12 +10,14 @@ use PlayStation\Api\Community;
 use PlayStation\Http\HttpClient;
 use PlayStation\Http\ResponseParser;
 use PlayStation\Http\TokenMiddleware;
+use PlayStation\Http\ResponseHandlerMiddleware;
 
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\HandlerStack;
 
-class Client {
-
+class Client extends HttpClient
+{
     const AUTH_API      = 'https://auth.api.sonyentertainmentnetwork.com/2.0/';
 
     private const CLIENT_ID     = 'ebee17ac-99fd-487c-9b1e-18ef50c39ab5';
@@ -23,7 +25,6 @@ class Client {
     private const DUID          = '0000000d00040080027BC1C3FBB84112BFC9A4300A78E96A';
     private const SCOPE         = 'kamaji:get_players_met kamaji:get_account_hash kamaji:activity_feed_submit_feed_story kamaji:activity_feed_internal_feed_submit_story kamaji:activity_feed_get_news_feed kamaji:communities kamaji:game_list kamaji:ugc:distributor oauth:manage_device_usercodes psn:sceapp user:account.profile.get user:account.attributes.validate user:account.settings.privacy.get kamaji:activity_feed_set_feed_privacy kamaji:satchel kamaji:satchel_delete user:account.profile.update';
 
-    private $httpClient;
     private $onlineId;
     private $messageThreads;
     private $options;
@@ -32,10 +33,30 @@ class Client {
     private $refreshToken;
     private $expiresIn;
 
+    /**
+     * @param array $options Guzzle Options
+     */
     public function __construct(array $options = [])
     {
+        if (!isset($options['handler']))
+        {
+            $options['handler'] = HandlerStack::create();
+        }
+
+        $options['allow_redirects'] = false;
+
         $this->options = $options;
-        $this->httpClient = new HttpClient(new \GuzzleHttp\Client($this->options));
+
+        $this->httpClient = new \GuzzleHttp\Client($this->options);
+
+        $config  = $this->httpClient->getConfig();
+        $handler = $config['handler'];
+
+        $handler->push(
+            Middleware::mapResponse(
+                new ResponseHandlerMiddleware
+            )
+        );
     }
     
     /**
@@ -45,10 +66,10 @@ class Client {
      * @param string $code 2FA code sent to your device (ignore if using refresh token).
      * @return void
      */
-    public function login(string $ticketUuidOrRefreshToken, string $code = null) 
+    public function login(string $ticketUuidOrRefreshToken, string $code = null) : void
     {
         if ($code === null) {
-            $response = $this->httpClient()->post(self::AUTH_API . 'oauth/token', [
+            $response = $this->post(self::AUTH_API . 'oauth/token', [
                 "app_context" => "inapp_ios",
                 "client_id" => self::CLIENT_ID,
                 "client_secret" => self::CLIENT_SECRET,
@@ -58,7 +79,7 @@ class Client {
                 "scope" => self::SCOPE
             ]);
         } else {
-            $response = $this->httpClient()->post(self::AUTH_API . 'ssocookie', [
+            $response = $this->post(self::AUTH_API . 'ssocookie', [
                 'authentication_type' => 'two_step',
                 'ticket_uuid' => $ticketUuidOrRefreshToken,
                 'code' => $code,
@@ -67,7 +88,7 @@ class Client {
 
             $npsso = $response->npsso;
 
-            $response = $this->httpClient()->get(self::AUTH_API . 'oauth/authorize', [
+            $response = $this->get(self::AUTH_API . 'oauth/authorize', [
                 'duid' => self::DUID,
                 'client_id' => self::CLIENT_ID,
                 'response_type' => 'code',
@@ -77,17 +98,14 @@ class Client {
                 'Cookie' => 'npsso=' . $npsso
             ]);
 
-            if (($response instanceof Response) === false) {
-                throw new \Exception('Unexpected response');
-            }
-
-            $grant = $response->getHeaderLine('X-NP-GRANT-CODE');
+            // Get the last response provided by Guzzle to grab a header value.
+            $grant = $this->lastResponse()->getHeaderLine('X-NP-GRANT-CODE');
 
             if (empty($grant)) {
                 throw new \Exception('Unable to get X-NP-GRANT-CODE');
             }
 
-            $response = $this->httpClient()->post(self::AUTH_API . 'oauth/token', [
+            $response = $this->post(self::AUTH_API . 'oauth/token', [
                 'client_id' => self::CLIENT_ID,
                 'client_secret' => self::CLIENT_SECRET,
                 'duid' => self::DUID,
@@ -103,28 +121,25 @@ class Client {
         $this->refreshToken = $response->refresh_token;
         $this->expiresIn = $response->expires_in;
 
-        $this->httpClient = $this->createTokenMiddleware($this->accessToken);
+        $this->pushTokenMiddleware($this->accessToken);
     }
 
     /**
-     * Creates a new HttpClient using middleware that adds the access token to the header of each request.
+     * Pushes TokenMiddleware onto the HandlerStack with the access token.
      *
      * @param string $accessToken PlayStation access token.
-     * @return HttpClient
+     * @return void
      */
-    private function createTokenMiddleware(string $accessToken) : HttpClient
+    private function pushTokenMiddleware(string $accessToken) : void
     {
-        $handler = \GuzzleHttp\HandlerStack::create();
+        $config  = $this->httpClient->getConfig();
+        $handler = $config['handler'];
 
         $handler->push(
             Middleware::mapRequest(
                 new TokenMiddleware($accessToken)
             )
         );
-
-        $newOptions = array_merge(['handler' => $handler], $this->options);
-    
-        return new HttpClient(new \GuzzleHttp\Client($newOptions));
     }
 
     /**
@@ -133,21 +148,11 @@ class Client {
      * @param string $accessToken
      * @return void
      */
-    public function setAccessToken(string $accessToken)
+    public function setAccessToken(string $accessToken) : void
     {
         $this->accessToken = $accessToken;
 
-        $this->httpClient = $this->createTokenMiddleware($this->accessToken);
-    }
-
-    /**
-     * Gets the HttpClient.
-     *
-     * @return HttpClient
-     */
-    public function httpClient() : HttpClient
-    {
-        return $this->httpClient;
+        $this->pushTokenMiddleware($this->accessToken);
     }
 
     /**
@@ -158,7 +163,7 @@ class Client {
     public function onlineId() : string
     {
         if ($this->onlineId === null) {
-            $response = $this->httpClient()->get(sprintf(User::USERS_ENDPOINT . 'profile2', 'me'), [
+            $response = $this->get(sprintf(User::USERS_ENDPOINT . 'profile2', 'me'), [
                 'fields' => 'onlineId'
             ]);
 
@@ -207,7 +212,7 @@ class Client {
     public function messageThreads(int $offset = 0, int $limit = 20) : \stdClass
     {
         if ($this->messageThreads === null) {
-            $response = $this->httpClient()->get(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/', [
+            $response = $this->get(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/', [
                 'fields' => 'threadMembers',
                 'limit' => $limit,
                 'offset' => $offset,
@@ -253,7 +258,7 @@ class Client {
     {
         if (!empty($type) && !empty($titleId)) {
             // Create the Community.
-            $response = $this->httpClient()->post(Community::COMMUNITY_ENDPOINT . 'communities?action=create', [
+            $response = $this->post(Community::COMMUNITY_ENDPOINT . 'communities?action=create', [
                 'name' => $communityIdOrName,
                 'type' => $type,
                 'titleId' => $titleId
