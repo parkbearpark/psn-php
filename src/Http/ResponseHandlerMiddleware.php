@@ -8,6 +8,7 @@ use GuzzleHttp\Psr7\Response;
 use PlayStation\Exception\PlayStationApiException;
 use PlayStation\Exception\UnauthorizedException;
 use PlayStation\Exception\NotFoundException;
+use PlayStation\Exception\AccessDeniedException;
 
 final class ResponseHandlerMiddleware
 {
@@ -43,6 +44,8 @@ final class ResponseHandlerMiddleware
                 throw new PlayStationApiException($stream);
             case 401:
                 throw new UnauthorizedException;
+            case 403:
+                throw new AccessDeniedException;
             case 404:
                 throw new NotFoundException;
         }
