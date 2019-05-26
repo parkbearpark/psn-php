@@ -27,13 +27,13 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
     public function testInvalidRefreshToken()
     {
-        $this->expectException('\GuzzleHttp\Exception\ClientException');
+        $this->expectException('\PlayStation\Exception\PlayStationApiException');
         $this->client->login('deadbeef');
     }
 
     public function testInvalidTwoFactorLogin()
     {
-        $this->expectException('\GuzzleHttp\Exception\ClientException');
+        $this->expectException('\PlayStation\Exception\PlayStationApiException');
         $this->client->login('abc', 6969);
     }
 
