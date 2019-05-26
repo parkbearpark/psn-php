@@ -17,6 +17,7 @@ class User extends AbstractApi
     private $onlineId;
     private $onlineIdParameter;
     private $profile;
+    private $isLoggedInUser;
 
     private $sessions = [];
 
@@ -24,27 +25,15 @@ class User extends AbstractApi
      * Constructs a new User.
      *
      * @param Client $client
-     * @param object|string $onlineIdOrProfileObject The User's onlineId or their profile data.
+     * @param string $onlineId The User's onlineId.
      */
-    public function __construct(Client $client, $onlineIdOrProfileObject = '') 
+    public function __construct(Client $client, $onlineId = '')
     {
         parent::__construct($client);
 
-        if (gettype($onlineIdOrProfileObject) == 'object') {
-            $this->profile = $onlineIdOrProfileObject;
-            $this->onlineId = $this->profile->onlineId;
-
-            // Probably a cleaner way to set this, but since onlineId() is cached, it'll do for now.
-            $this->onlineIdParameter = ($client->onlineId() == $this->onlineId) ? "me" : $this->onlineId;
-        } else if (gettype($onlineIdOrProfileObject) == 'string') {
-            $this->onlineId = $onlineIdOrProfileObject;
-            // If $onlineIdOrProfileObject is a string and is empty, then that means this object is meant for the logged in user.
-            $this->onlineIdParameter = ($onlineIdOrProfileObject == '') ? "me" : $onlineIdOrProfileObject;
-        } else {
-            throw new \InvalidArgumentException(
-                sprintf('$onlineIdOrProfileObject is intended to be of type object or string, %s given.', gettype($onlineIdOrProfileObject))
-            );
-        }
+        $this->onlineId = $onlineId;
+        $this->onlineIdParameter = ($onlineId == '') ? "me" : $onlineId;
+        $this->isLoggedInUser = $this->onlineIdParameter == "me";
     }
 
     /**
@@ -79,7 +68,6 @@ class User extends AbstractApi
                 'fields' => 'npId,onlineId,accountId,avatarUrls,plus,aboutMe,languagesUsed,trophySummary(@default,progress,earnedTrophies),isOfficiallyVerified,personalDetail(@default,profilePictureUrls),personalDetailSharing,personalDetailSharingRequestMessageFlag,primaryOnlineStatus,presences(@titleInfo,hasBroadcastData),friendRelation,requestMessageFlag,blocking,mutualFriendsCount,following,followerCount,friendsCount,followingUsersCount&avatarSizes=m,xl&profilePictureSizes=m,xl&languagesUsedLanguageSet=set3&psVitaTitleIcon=circled&titleIconSize=s'
             ])->profile;
         }
-
         return $this->profile;
     }
 
@@ -255,23 +243,20 @@ class User extends AbstractApi
      */
     public function friends($sort = 'onlineStatus', $offset = 0, $limit = 36) : array
     {
-        $result = [];
+        $friendsResult = [];
 
-        $friends = $this->get(sprintf(self::USERS_ENDPOINT . 'friends/profiles2', $this->onlineIdParameter()), [
-            'fields' => 'onlineId,accountId,avatarUrls,plus,trophySummary(@default),isOfficiallyVerified,personalDetail(@default,profilePictureUrls),presences(@titleInfo,hasBroadcastData,lastOnlineDate),presences(@titleInfo),friendRelation,consoleAvailability',
+        $friends = $this->client->get(sprintf(self::USERS_ENDPOINT . 'friends/profiles2', $this->onlineIdParameter()), [
+            'fields' => 'onlineId',
             'offset' => $offset,
             'limit' => $limit,
-            'profilePictureSizes' => 'm',
-            'avatarSizes' => 'm',
-            'titleIconSize' => 's',
             'sort' => $sort
         ]);
         
         foreach ($friends->profiles as $friend) {
-            $result[] = new self($this->client, $friend);
+            $friendsResult[] = new self($this->client, $friend->onlineId);
         }
 
-        return $result;
+        return $friendsResult;
     }
 
     /**
@@ -300,7 +285,7 @@ class User extends AbstractApi
      */
     public function fetchPlayedGames($limit)
     {
-        return $this->get(sprintf(Game::GAME_ENDPOINT . 'users/%s/titles', $this->onlineIdParameter()), [
+        return $this->client->get(sprintf(Game::GAME_ENDPOINT . 'users/%s/titles', $this->onlineId()), [
             'type'  => 'played',
             'app'   => 'richProfile', // ??
             'sort'  => '-lastPlayedDate',
@@ -358,6 +343,8 @@ class User extends AbstractApi
 
     /**
      * Get all MessageThreads with the User.
+     * 
+     * If User instance is of the logged in user, this will return ALL message threads.
      *
      * @return array Array of Api\MessageThread.
      */
@@ -365,13 +352,31 @@ class User extends AbstractApi
     {
         $returnThreads = [];
 
-        $threads = $this->get(MessageThread::MESSAGE_THREAD_ENDPOINT . 'users/me/threadIds', [
-            'withOnlineIds' => $this->onlineId()
+        $threads = $this->client->get(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads', [
+            'fields' => 'threadMembers'
         ]);
 
-        if (empty($threads->threadIds)) return [];
+        if (empty($threads->threads)) return [];
 
-        foreach ($threads->threadIds as $thread) {
+        if (!$this->isLoggedInUser)
+        {
+            $threads->threads = array_filter($threads->threads, function($thread) {
+
+                if (!isset($thread->threadMembers) || count($thread->threadMembers) <= 1) return false;
+
+                // We're going to use a foreach loop for this so we can return once we find the user.
+                // Otherwise using some callback function might be an issue if a thread has lots of members.
+                // Just wastes time!
+                foreach ($thread->threadMembers as $member)
+                {
+                    if ($member->onlineId === $this->onlineId()) return true;
+                }
+
+                return false; // Necessary??
+            });
+        }
+
+        foreach ($threads->threads as $thread) {
             $returnThreads[] = new MessageThread($this->client, $thread->threadId);
         }
 
@@ -430,7 +435,7 @@ class User extends AbstractApi
     public function story(int $page = 0, bool $includeComments = true, int $offset = 0, int $blockSize = 10) : array
     {
         $returnActivity = [];
-        $activity = $this->get(sprintf(Story::ACTIVITY_ENDPOINT . 'v2/users/%s/feed/%d', $this->onlineIdParameter, $page), [
+        $activity = $this->client->get(sprintf(Story::ACTIVITY_ENDPOINT . 'v2/users/%s/feed/%d', $this->onlineId(), $page), [
             'includeComments' => $includeComments,
             'offset' => $offset,
             'blockSize' => $blockSize
@@ -460,7 +465,7 @@ class User extends AbstractApi
     {
         $returnCommunities = [];
 
-        $communities = $this->get(Community::COMMUNITY_ENDPOINT . 'communities', [
+        $communities = $this->client->get(Community::COMMUNITY_ENDPOINT . 'communities', [
             'fields' => 'backgroundImage,description,id,isCommon,members,name,profileImage,role,unreadMessageCount,sessions,timezoneUtcOffset,language,titleName',
             'includeFields' => 'gameSessions,timezoneUtcOffset,parties',
             'sort' => 'common',
@@ -474,7 +479,6 @@ class User extends AbstractApi
         }
         
         return $returnCommunities;
-
     }
 
     /**
@@ -550,7 +554,7 @@ class User extends AbstractApi
 
         $returnSessions = [];
 
-        $sessions = $this->get(sprintf(Session::SESSION_ENDPOINT, $this->onlineIdParameter), [
+        $sessions = $this->client->get(sprintf(Session::SESSION_ENDPOINT, $this->onlineId()), [
             'fields' => '@default,npTitleDetail,npTitleDetail.platform,sessionName,sessionCreateTimestamp,availablePlatforms,members,memberCount,sessionMaxUser',
             'titleIconSize' => 's',
             'npLanguage' => 'en'

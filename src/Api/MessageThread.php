@@ -14,17 +14,11 @@ class MessageThread extends AbstractApi
     private $messageThread;
     private $messageThreadId;
 
-    public function __construct(Client $client, $messageThreadOrId)
+    public function __construct(Client $client, string $messageThreadId)
     {
         parent::__construct($client);
 
-        $type = gettype($messageThreadOrId);
-        if ($type === 'string') {
-            $this->messageThreadId = $messageThreadOrId;
-        } else if ($type === 'object') {
-            $this->messageThread = $messageThread;
-            $this->messageThreadId =  $this->messageThread->threadId;
-        }
+        $this->messageThreadId = $messageThreadId;
     }
 
     /**
@@ -37,7 +31,7 @@ class MessageThread extends AbstractApi
     public function info(int $count = 1, bool $force = false) : \stdClass
     {
         if ($this->messageThread === null || $force) {
-            $this->messageThread = $this->get(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'threads/%s', $this->messageThreadId), [
+            $this->messageThread = $this->client->get(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'threads/%s', $this->messageThreadId), [
                 'fields' => 'threadMembers,threadNameDetail,threadThumbnailDetail,threadProperty,latestTakedownEventDetail,newArrivalEventDetail,threadEvents',
                 'count' => $count,
             ]);
@@ -79,13 +73,11 @@ class MessageThread extends AbstractApi
     /**
      * Gets the MessageThread thumbnail URL.
      *
-     * @return string
+     * @return string|null
      */
-    public function thumbnailUrl() : string
+    public function thumbnailUrl() : ?string
     {
-        return ($this->info()->threadThumbnailDetail->status == 2) ? 
-        "" : 
-        $this->info()->threadThumbnailDetail->resourcePath;
+        return $this->info()->threadThumbnailDetail->resourcePath;
     }
 
     /**
@@ -105,7 +97,7 @@ class MessageThread extends AbstractApi
      */
     public function leave() : void
     {
-        $this->delete(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'threads/%s/users/me', $this->messageThreadId));
+        $this->client->delete(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'threads/%s/users/me', $this->messageThreadId));
     }
 
     /**
@@ -126,7 +118,6 @@ class MessageThread extends AbstractApi
         return $members;
     }
 
-
     /**
      * Set the name of the MessageThread.
      *
@@ -141,7 +132,7 @@ class MessageThread extends AbstractApi
             ]
         ];
 
-        $this->putJson(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'threads/%s/name', $this->messageThreadId), $data);
+        $this->client->putJson(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'threads/%s/name', $this->messageThreadId), $data);
     }
 
     /**
@@ -157,7 +148,7 @@ class MessageThread extends AbstractApi
             ]
         ];
 
-        $this->putJson(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'users/me/threads/%s/favorites', $this->messageThreadId), $data);
+        $this->client->putJson(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'users/me/threads/%s/favorites', $this->messageThreadId), $data);
     }
 
     /**
@@ -173,7 +164,7 @@ class MessageThread extends AbstractApi
             ]
         ];
 
-        $this->putJson(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'users/me/threads/%s/favorites', $this->messageThreadId), $data);
+        $this->client->putJson(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'users/me/threads/%s/favorites', $this->messageThreadId), $data);
     }
 
     /**
@@ -203,7 +194,7 @@ class MessageThread extends AbstractApi
             ]
         ];
 
-        $response = $this->postMultiPart(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/messages', $this->messageThreadId), $parameters);
+        $response = $this->client->postMultiPart(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/messages', $this->messageThreadId), $parameters);
 
         $messageFields = $this->info(1, true);
 
@@ -250,7 +241,7 @@ class MessageThread extends AbstractApi
             ]
         ];
 
-        $response = $this->postMultiPart(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/messages', $this->messageThreadId), $parameters);
+        $response = $this->client->postMultiPart(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/messages', $this->messageThreadId), $parameters);
 
         $messageFields = $this->info(1, true);
 
@@ -301,7 +292,7 @@ class MessageThread extends AbstractApi
             ]
         ];
 
-        $response = $this->postMultiPart(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/messages', $this->messageThreadId), $parameters);
+        $response = $this->client->postMultiPart(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/messages', $this->messageThreadId), $parameters);
 
         $messageFields = $this->info(1, true);
 
@@ -350,7 +341,7 @@ class MessageThread extends AbstractApi
             ]
         ];
 
-        $this->putMultiPart(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/thumbnail', $this->messageThreadId), $parameters);
+        $this->client->putMultiPart(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/thumbnail', $this->messageThreadId), $parameters);
     }
 
     /**
@@ -360,7 +351,6 @@ class MessageThread extends AbstractApi
      */
     public function removeThumbnail() : void
     {
-        $this->delete(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/thumbnail', $this->messageThreadId));
+        $this->client->delete(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/thumbnail', $this->messageThreadId));
     }
-
 }
