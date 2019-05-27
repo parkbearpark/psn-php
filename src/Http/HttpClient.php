@@ -58,14 +58,14 @@ class HttpClient
         ]))->getBody()->jsonSerialize();
     }
 
-    public function patch(string $path, $body = null, int $type = self::FORM, array $headers = [])
+    public function patch(string $path, $body = null, array $headers = [])
     {
         return ($this->lastResponse = $this->httpClient->patch($path, [
             'headers' => $headers
         ]))->getBody()->jsonSerialize();
     }
 
-    public function put(string $path, $body = null, int $type = self::FORM, array $headers = [])
+    public function put(string $path, $body = null, array $headers = [])
     {
         return ($this->lastResponse = $this->httpClient->put($path, [
             'form_params' => $body,
@@ -73,7 +73,7 @@ class HttpClient
         ]))->getBody()->jsonSerialize();
     }
 
-    public function putJson(string $path, $body = null, int $type = self::FORM, array $headers = [])
+    public function putJson(string $path, $body = null, array $headers = [])
     {
         return ($this->lastResponse = $this->httpClient->put($path, [
             'json' => $body,
@@ -81,7 +81,7 @@ class HttpClient
         ]))->getBody()->jsonSerialize();
     }
 
-    public function putMultiPart(string $path, $body = null, int $type = self::FORM, array $headers = [])
+    public function putMultiPart(string $path, $body = null, array $headers = [])
     {
         return ($this->lastResponse = $this->httpClient->put($path, [
             'multipart' => $body,

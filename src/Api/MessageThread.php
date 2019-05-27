@@ -93,11 +93,13 @@ class MessageThread extends AbstractApi
     /**
      * Leave the MessageThread.
      *
-     * @return void
+     * @return bool
      */
-    public function leave() : void
+    public function leave() : bool
     {
         $this->client->delete(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'threads/%s/users/me', $this->messageThreadId));
+
+        return true;
     }
 
     /**
@@ -122,9 +124,9 @@ class MessageThread extends AbstractApi
      * Set the name of the MessageThread.
      *
      * @param string $name Name of the MessageThread.
-     * @return void
+     * @return bool
      */
-    public function setName(string $name) : void
+    public function setName(string $name) : bool
     {
         $data = (object)[
             'threadNameDetail' => (object)[
@@ -133,14 +135,16 @@ class MessageThread extends AbstractApi
         ];
 
         $this->client->putJson(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'threads/%s/name', $this->messageThreadId), $data);
+
+        return true;
     }
 
     /**
      * Favorite the MessageThread.
      *
-     * @return void
+     * @return bool
      */
-    public function favorite() : void
+    public function favorite() : bool
     {
         $data = (object)[
             'favoriteDetail' => (object)[
@@ -149,14 +153,16 @@ class MessageThread extends AbstractApi
         ];
 
         $this->client->putJson(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'users/me/threads/%s/favorites', $this->messageThreadId), $data);
+    
+        return true;
     }
 
     /**
      * Unfavorite the MessageThread.
      *
-     * @return void
+     * @return bool
      */
-    public function unfavorite() : void
+    public function unfavorite() : bool
     {
         $data = (object)[
             'favoriteDetail' => (object)[
@@ -165,6 +171,8 @@ class MessageThread extends AbstractApi
         ];
 
         $this->client->putJson(sprintf(self::MESSAGE_THREAD_ENDPOINT . 'users/me/threads/%s/favorites', $this->messageThreadId), $data);
+    
+        return true;
     }
 
     /**
@@ -306,7 +314,7 @@ class MessageThread extends AbstractApi
     /**
      * Get all the messages.
      *
-     * @param integer $count Amount of messages to send.
+     * @param integer $count Amount of messages to get.
      * @return array Array of Api\Message.
      */
     public function messages(int $count = 200) : array
@@ -326,9 +334,9 @@ class MessageThread extends AbstractApi
      * Set the MessageThread thumbnail
      *
      * @param string $imageContents Raw bytes of the image.
-     * @return void
+     * @return bool
      */
-    public function setThumbnail(string $imageContents) : void
+    public function setThumbnail(string $imageContents) : bool
     {
         $parameters = [
             [
@@ -342,15 +350,19 @@ class MessageThread extends AbstractApi
         ];
 
         $this->client->putMultiPart(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/thumbnail', $this->messageThreadId), $parameters);
+
+        return true;
     }
 
     /**
      * Removes the MessageThread thumbnail.
      *
-     * @return void
+     * @return bool
      */
-    public function removeThumbnail() : void
+    public function removeThumbnail() : bool
     {
         $this->client->delete(sprintf(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/%s/thumbnail', $this->messageThreadId));
+
+        return true;
     }
 }

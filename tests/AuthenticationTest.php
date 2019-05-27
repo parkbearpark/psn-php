@@ -6,7 +6,6 @@ use PlayStation\Client;
 
 class AuthenticationTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * PlayStation Client
      *
@@ -37,15 +36,13 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
         $this->client->login('abc', 6969);
     }
 
+    /**
+     * @depends testEnvironment
+     */
     public function testLoginWithRefreshToken()
     {
         $refreshToken = getenv('PSN_PHP_REFRESH_TOKEN');
         
-        if (!$refreshToken)
-        {
-            $this->markTestsSkipped('Missing refresh token in environment.');
-        }
-
         $this->client->login($refreshToken);
 
         $this->assertEquals($this->client->onlineId(), 'speedy424key');
