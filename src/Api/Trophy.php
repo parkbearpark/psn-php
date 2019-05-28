@@ -115,7 +115,7 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets when the User earned the Trophy.
+     * Gets the DateTime when the User earned the Trophy.
      *
      * @return \DateTime|null
      */
