@@ -77,7 +77,8 @@ class MessagingTest extends PlayStationApiTestCase
      */
     public function testSetMessageThreadThumbnailImage(MessageThread $thread)
     {
-        $pugImage = file_get_contents('./files/pug.jpg');
+        $pugImagePath = realpath(__DIR__ . '/files/pug.jpg');
+        $pugImage = file_get_contents($pugImagePath);
         $this->assertTrue($thread->setThumbnail($pugImage));
     }
 
