@@ -114,7 +114,7 @@ class Game extends AbstractApi
             // This endpoint doesn't give exactly the same information as the proper Game endpoint would,
             // But I wasn't able to find a way to get info from the Game endpoint with just a titleId.
             // It works, but I'd rather it be more consistent with the other endpoint.
-            $game = $this->get(Trophy::TROPHY_ENDPOINT . 'apps/trophyTitles', [
+            $game = $this->client->get(Trophy::TROPHY_ENDPOINT . 'apps/trophyTitles', [
                 'npTitleIds' => $this->titleId,
                 'fields' => '@default',
                 'npLanguage' => 'en'
@@ -132,7 +132,7 @@ class Game extends AbstractApi
                 $data['comparedUser'] = $this->user()->onlineId();
             }
 
-            $game = $this->get(sprintf(Trophy::TROPHY_ENDPOINT . 'trophyTitles/%s', $this->npCommunicationId), $data);
+            $game = $this->client->get(sprintf(Trophy::TROPHY_ENDPOINT . 'trophyTitles/%s', $this->npCommunicationId), $data);
 
             if ($game->totalResults !== 1 || !count($game->trophyTitles)) return null;
 
@@ -152,7 +152,7 @@ class Game extends AbstractApi
     {
         $returnPlayers = [];
 
-        $players = $this->get(sprintf(self::GAME_ENDPOINT . 'titles/%s/players', $this->titleId));
+        $players = $this->client->get(sprintf(self::GAME_ENDPOINT . 'titles/%s/players', $this->titleId));
 
         if ($players->size === 0) return $returnPlayers;
 
@@ -182,7 +182,7 @@ class Game extends AbstractApi
             $data['comparedUser'] = $this->user()->onlineId();
         }
 
-        $groups = $this->get(sprintf(Trophy::TROPHY_ENDPOINT . 'trophyTitles/%s/trophyGroups', $this->communicationId()), $data);
+        $groups = $this->client->get(sprintf(Trophy::TROPHY_ENDPOINT . 'trophyTitles/%s/trophyGroups', $this->communicationId()), $data);
 
         foreach ($groups->trophyGroups as $group) {
             $returnGroups[] = new TrophyGroup($this->client, $group, $this);
@@ -212,7 +212,7 @@ class Game extends AbstractApi
             $data['comparedUser'] = $this->user()->onlineId();
         }
 
-        $trophies = $this->get(sprintf(Trophy::TROPHY_ENDPOINT . 'trophyTitles/%s/trophyGroups/all/trophies', $this->communicationId()), $data);
+        $trophies = $this->client->get(sprintf(Trophy::TROPHY_ENDPOINT . 'trophyTitles/%s/trophyGroups/all/trophies', $this->communicationId()), $data);
 
         foreach ($trophies->trophies as $trophy) {
             $returnTrophies[] = new Trophy($this->client, $trophy, $this);

@@ -3,6 +3,8 @@
 namespace PlayStation\Tests;
 
 use PlayStation\Api\Game;
+use PlayStation\Api\TrophyGroup;
+use PlayStation\Api\Trophy;
 
 class GameTest extends PlayStationApiTestCase
 {
@@ -58,7 +60,7 @@ class GameTest extends PlayStationApiTestCase
      */
     public function testGameIsBeingCompared(Game $game)
     {
-        $this->assertTrue($game->comparing());
+        $this->assertTrue($game->isComparing());
     }
 
     /**
@@ -84,7 +86,7 @@ class GameTest extends PlayStationApiTestCase
     {
         $groups = $game->trophyGroups();
 
-        $this->assertInternalType('array', $games);
+        $this->assertInternalType('array', $groups);
 
         // There should be at least 4
         // Base game, Classified, Dead of the Night, Ancient Evil
@@ -95,7 +97,7 @@ class GameTest extends PlayStationApiTestCase
 
         $this->assertInstanceOf('\PlayStation\Api\TrophyGroup', $baseTrophyGroup);
 
-        return $trophyGroup;
+        return $baseTrophyGroup;
     }
 
     /**
@@ -103,7 +105,7 @@ class GameTest extends PlayStationApiTestCase
      */
     public function testEnsureThatTrophyGroupIsBaseTrophyGroup(TrophyGroup $group)
     {
-        $this->assertEqual($group->id(), 0);
+        $this->assertEquals($group->id(), 'default');
     }
 
     /**
@@ -111,6 +113,75 @@ class GameTest extends PlayStationApiTestCase
      */
     public function testEnsureThatTrophyGroupNameIsCorrect(TrophyGroup $group)
     {
-        
+        $this->assertEquals($group->name(), 'Call of Duty®: Black Ops 4');
+    }
+
+    /**
+     * @depends testCheckThatGameHasTrophyGroups
+     */
+    public function testEnsureThatTrophyGroupDetailIsCorrect(TrophyGroup $group)
+    {
+        $this->assertEquals($group->detail(), 'Call of Duty®: Black Ops 4');
+    }
+
+    /**
+     * @depends testCheckThatGameHasTrophyGroups
+     */
+    public function testEnsureThatTrophyGroupHasCorrectAmountOfTrophies(TrophyGroup $group)
+    {
+        $this->assertEquals($group->trophyCount(), 53);
+    }
+
+    /**
+     * @depends testCheckThatGameHasTrophyGroups
+     */
+    public function testGetAllTrophiesInGroupAndReturnPlatinumTrophy(TrophyGroup $group)
+    {
+        $trophies = $group->trophies();
+
+        $this->assertInternalType('array', $trophies);
+
+        // Should be the same as the above test.
+        $this->assertGreaterThanOrEqual(count($trophies), 53);
+
+        $platinumTrophy = $trophies[0];
+
+        $this->assertInstanceOf('\PlayStation\Api\Trophy', $platinumTrophy);
+
+        $this->assertEquals($platinumTrophy->type(), 'platinum');
+
+        return $platinumTrophy;
+    }
+
+    /**
+     * @depends testGetAllTrophiesInGroupAndReturnPlatinumTrophy
+     */
+    public function testEnsureThatTrophyIdMatchesPlatinumTrophyId(Trophy $trophy)
+    {
+        $this->assertEquals($trophy->id(), 0);
+    }
+
+    /**
+     * @depends testGetAllTrophiesInGroupAndReturnPlatinumTrophy
+     */
+    public function testEnsurePlatinumTrophyIsNotHidden(Trophy $trophy)
+    {
+        $this->assertFalse($trophy->hidden());
+    }
+
+    /**
+     * @depends testGetAllTrophiesInGroupAndReturnPlatinumTrophy
+     */
+    public function testEnsureTrophyNameMatchesPlatinumTrophyName(Trophy $trophy)
+    {
+        $this->assertEquals($trophy->name(), 'Platinum');
+    }
+
+    /**
+     * @depends testGetAllTrophiesInGroupAndReturnPlatinumTrophy
+     */
+    public function testEnsureTrophyDetailMatchesPlatinumTrophyDetail(Trophy $trophy)
+    {
+        $this->assertEquals($trophy->detail(), 'Awarded when all other trophies have been unlocked');
     }
 }

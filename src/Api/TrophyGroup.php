@@ -20,10 +20,12 @@ class TrophyGroup extends AbstractApi
 
     /**
      * Get TrophyGroup ID.
+     * 
+     * Examples: default, 001, 002, etc
      *
-     * @return void
+     * @return string
      */
-    public function id()
+    public function id() : string
     {
         return $this->group->trophyGroupId;
     }
@@ -119,7 +121,7 @@ class TrophyGroup extends AbstractApi
             $data['comparedUser'] = $this->game()->user()->onlineId();
         }
 
-        $trophies = $this->get(sprintf(Trophy::TROPHY_ENDPOINT . 'trophyTitles/%s/trophyGroups/%s/trophies', $this->game()->communicationId(), $this->id()), $data);
+        $trophies = $this->client->get(sprintf(Trophy::TROPHY_ENDPOINT . 'trophyTitles/%s/trophyGroups/%s/trophies', $this->game()->communicationId(), $this->id()), $data);
 
         foreach ($trophies->trophies as $trophy) {
             $returnTrophies[] = new Trophy($this->client, $trophy, $this);

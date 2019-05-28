@@ -23,7 +23,7 @@ class Trophy extends AbstractApi
     /**
      * Gets the Trophy ID.
      *
-     * @return integer
+     * @return int
      */
     public function id() : int 
     {
@@ -33,7 +33,7 @@ class Trophy extends AbstractApi
     /**
      * Checks if Trophy is hidden.
      *
-     * @return boolean
+     * @return bool
      */
     public function hidden() : bool 
     {
@@ -93,7 +93,7 @@ class Trophy extends AbstractApi
     /**
      * Checks if User has earned the Trophy.
      *
-     * @return boolean
+     * @return bool
      */
     public function earned() : bool
     {
@@ -152,8 +152,10 @@ class Trophy extends AbstractApi
 
     /**
      * Returns whether or not the TrophySet is for another user.
+     * 
+     * TODO (Tustin) - This needs to be cleaned up. No wonder why this can be finicky.
      *
-     * @return boolean
+     * @return bool
      */
     public function comparing() : bool
     {
@@ -164,11 +166,10 @@ class Trophy extends AbstractApi
      * Calculate all the types of Trophies.	
      *	
      * @param object $trophyTypes Trophy type information.	
-     * @return integer	
+     * @return int	
      */	
-    public static function calculateTrophies(object $trophyTypes) : int	
+    public static function calculateTrophies(object $trophyTypes) : int
     {	
         return ($trophyTypes->bronze + $trophyTypes->silver + $trophyTypes->gold + $trophyTypes->platinum);	
     }
-
 }
