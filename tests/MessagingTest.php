@@ -2,8 +2,6 @@
 
 namespace PlayStation\Tests;
 
-use PlayStation\Tests\PlayStationApiTestCase;
-
 use PlayStation\Api\MessageThread;
 use PlayStation\Api\Message;
 

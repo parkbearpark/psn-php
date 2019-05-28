@@ -2,8 +2,6 @@
 
 namespace PlayStation\Tests;
 
-use PlayStation\Tests\PlayStationApiTestCase;
-
 class UserTest extends PlayStationApiTestCase
 {
     public function testInvalidOnlineId()
