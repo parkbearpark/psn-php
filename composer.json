@@ -9,6 +9,11 @@
             "PlayStation\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": { 
+            "PlayStation\\Tests\\": "tests/"
+        }
+    },
     "require": {
         "guzzlehttp/guzzle": "^6.3",
         "php": "^7.2"
