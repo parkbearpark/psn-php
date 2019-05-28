@@ -177,20 +177,22 @@ class User extends AbstractApi
     /**
      * Add the User to friends list.
      *
-     *  Will not do anything if called on the logged in user.
+     *  Will return false if you try to add the logged in user.
      * 
      * @param string $requestMessage Message to send with the request.
-     * @return void
+     * @return bool
      */
-    public function add(string $requestMessage = null) : void
+    public function add(string $requestMessage = null) : bool
     {
-        if ($this->onlineIdParameter() === 'me') return;
+        if ($this->isLoggedInUser) return false;
 
         $data = ($requestMessage === null) ? new \stdClass() : [
             "requestMessage" => $requestMessage
         ];
 
         $this->postJson(sprintf(self::USERS_ENDPOINT . 'friendList/%s', $this->client->onlineId(), $this->onlineId()), $data);
+
+        return true;
     }
 
     /**
@@ -198,25 +200,29 @@ class User extends AbstractApi
      *
      *  Will not do anything if called on the logged in user.
      * 
-     * @return void
+     * @return bool
      */
-    public function remove() : void
+    public function remove() : bool
     {
-        if ($this->onlineIdParameter() === 'me') return;
+        if ($this->isLoggedInUser) return false;
 
         $this->delete(sprintf(self::USERS_ENDPOINT . 'friendList/%s', $this->client->onlineId(), $this->onlineId()));
+        
+        return true;
     }
 
     /**
      * Block the User.
      *
-     * @return void
+     * @return bool
      */
-    public function block() : void
+    public function block() : bool
     {
-        if ($this->onlineIdParameter() === 'me') return;
+        if ($this->isLoggedInUser) return false;
 
         $this->post(sprintf(self::USERS_ENDPOINT . 'blockList/%s', $this->client->onlineId(), $this->onlineId()), null);
+
+        return true;
     }
 
     /**
@@ -224,13 +230,15 @@ class User extends AbstractApi
      * 
      * Will not do anything if called on the logged in user.
      *
-     * @return void
+     * @return bool
      */
-    public function unblock() : void
+    public function unblock() : bool
     {
-        if ($this->onlineIdParameter() === 'me') return;
+        if ($this->isLoggedInUser) return false;
 
         $this->delete(sprintf(self::USERS_ENDPOINT . 'blockList/%s', $this->client->onlineId(), $this->onlineId()));
+
+        return true;
     }
 
     /**
@@ -281,9 +289,9 @@ class User extends AbstractApi
 
     /**
      * @param int $limit
-     * @return 
+     * @return object
      */
-    public function fetchPlayedGames($limit)
+    public function fetchPlayedGames($limit) : \stdClass
     {
         return $this->client->get(sprintf(Game::GAME_ENDPOINT . 'users/%s/titles', $this->onlineId()), [
             'type'  => 'played',
@@ -319,9 +327,9 @@ class User extends AbstractApi
     public function sendImage(string $imageContents) : ?Message
     {
         $thread = $this->messageGroup();
-        
-        if ($thread === null) return null;
 
+        if ($thread === null) return null;
+        
         return $thread->sendImage($imageContents);
     }
 
@@ -337,7 +345,7 @@ class User extends AbstractApi
         $thread = $this->messageGroup();
         
         if ($thread === null) return null;
-
+        
         return $thread->sendAudio($audioContents, $audioLengthSeconds);
     }
 
@@ -393,7 +401,7 @@ class User extends AbstractApi
         $threads = $this->messageThreads();
 
         if (count($threads) === 0) return null;
-        
+
         foreach ($threads as $thread) {
             if ($thread->memberCount() === 2) {
                 return $thread;
@@ -411,7 +419,7 @@ class User extends AbstractApi
     public function partySession() : ?Session 
     {
         $sessions = $this->filterSessions(SessionType::Party);
-        
+
         return $sessions[0] ?? null;
     }
 
@@ -423,7 +431,7 @@ class User extends AbstractApi
     public function gameSession() : ?Session
     {
         $sessions = $this->filterSessions(SessionType::Game);
-        
+
         return $sessions[0] ?? null;
     }
 
@@ -468,7 +476,7 @@ class User extends AbstractApi
         $communities = $this->client->get(Community::COMMUNITY_ENDPOINT . 'communities', [
             'fields' => 'backgroundImage,description,id,isCommon,members,name,profileImage,role,unreadMessageCount,sessions,timezoneUtcOffset,language,titleName',
             'includeFields' => 'gameSessions,timezoneUtcOffset,parties',
-            'sort' => 'common',
+            'sort' => 'common', // What other filters can be used here?? - Tustin 5/27/2019
             'onlineId' => $this->onlineId()
         ]);
 
