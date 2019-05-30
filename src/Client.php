@@ -258,11 +258,11 @@ class Client extends HttpClient
     {
         if (!empty($type) && !empty($titleId)) {
             // Create the Community.
-            $response = $this->post(Community::COMMUNITY_ENDPOINT . 'communities?action=create', [
-                'name' => $communityIdOrName,
-                'type' => $type,
-                'titleId' => $titleId
-            ], HttpClient::JSON);
+            // $response = $this->postJson(Community::COMMUNITY_ENDPOINT . 'communities?action=create', [
+            //     'name' => $communityIdOrName,
+            //     'type' => $type,
+            //     'titleId' => $titleId
+            // ]);
 
             $communityIdOrName = $response->id;
         }

@@ -23,6 +23,14 @@ class PlayStationApiException extends \Exception
             $message = $data->data;
             $code = $data->code;
         }
+        else if (isset($data->errors) && is_array($data->errors) && count($data->errors) > 0)
+        {
+            // Just grab the first error.
+            $error = $data->errors[0];
+
+            $code = $error->code;
+            $message = $error->message;
+        }
 
         if (isset($message, $code))
         {

@@ -496,13 +496,12 @@ class User extends AbstractApi
      */
     private function messageGroup() : ?MessageThread
     {
-        if ($this->onlineIdParameter() === 'me') return null;
+        if ($this->isLoggedInUser) return null;
 
         $thread = $this->privateMessageThread();
 
         if ($thread === null) {
             // If we couldn't find an existing message thread, let's make one.
-     
             $data = [
                 'threadDetail' => [
                     'threadMembers' => [

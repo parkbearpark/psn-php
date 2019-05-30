@@ -105,4 +105,33 @@ class UserTest extends PlayStationApiTestCase
 
         $this->assertInstanceOf('\PlayStation\Api\Game', $game);
     }
+
+    public function testGetCommunitiesUserIsInWithPrivacySettingsEnabled()
+    {
+        $this->expectException('\PlayStation\Exception\AccessDeniedException');
+
+        self::$testUser->communities();
+    }
+
+    public function testTryToGetCommunitiesUserIsExpectNone()
+    {
+        $communities = self::$loggedInUser->communities();
+
+        $this->assertInternalType('array', $communities);
+
+        $this->assertEmpty($communities);
+    }
+
+    public function testGetCommunitiesUserIsInExpectMultiple()
+    {
+        $communities = self::$tustinUser->communities();
+
+        $this->assertInternalType('array', $communities);
+
+        $this->assertNotEmpty($communities);
+
+        $community = $communities[0];
+
+        $this->assertInstanceOf('\PlayStation\Api\Community', $community);
+    }
 }

@@ -25,7 +25,7 @@ class Community extends AbstractApi
     public function info(bool $force = false) : \stdClass
     {
         if ($this->community === null || $force) {
-            $this->community = $this->get(sprintf(self::COMMUNITY_ENDPOINT . 'communities/%s', $this->communityId), [
+            $this->community = $this->client->get(sprintf(self::COMMUNITY_ENDPOINT . 'communities/%s', $this->communityId), [
                 'includeFields' => 'backgroundImage,description,id,isCommon,members,name,profileImage,role,unreadMessageCount,sessions,timezoneUtcOffset,language,titleName',
             ]);
         }
@@ -68,6 +68,13 @@ class Community extends AbstractApi
     {
         $this->set([
             'titleId' => $titleId
+        ]);
+    }
+
+    public function setName(string $name) : void
+    {
+        $this->set([
+            'name' => $name
         ]);
     }
 
@@ -237,6 +244,6 @@ class Community extends AbstractApi
      */
     private function set(array $postData)
     {
-        return $this->putJson(sprintf(self::COMMUNITY_ENDPOINT . 'communities/%s', $this->id()), $postData);
+        return $this->client->putJson(sprintf(self::COMMUNITY_ENDPOINT . 'communities/%s', $this->id()), $postData);
     }
 }
