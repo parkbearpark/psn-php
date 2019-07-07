@@ -1,8 +1,8 @@
 <?php
 
-namespace PlayStation\Tests;
+namespace Tustin\PlayStation\Tests;
 
-use PlayStation\Client;
+use Tustin\PlayStation\Client;
 
 class PlayStationApiTestCase extends \PHPUnit\Framework\TestCase
 {

@@ -1,15 +1,14 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api;
 
-use PlayStation\Client;
+use Tustin\PlayStation\Client;
 
-use PlayStation\Api\User;
-use PlayStation\Api\Trophy;
+use Tustin\PlayStation\Api\User;
+use Tustin\PlayStation\Api\Trophy;
 
 class Game extends AbstractApi 
 {
-
     const GAME_ENDPOINT = 'https://gamelist.api.playstation.com/v1/';
 
     private $titleId;
@@ -18,11 +17,11 @@ class Game extends AbstractApi
     private $user;
 
     /**
-     * New instance of Api\Game.
+     * New instance of \Tustin\PlayStation\Api\Game.
      *
-     * @param Client $client 
-     * @param string $titleId
-     * @param User $user
+     * @param \Tustin\PlayStation\Client $client The client
+     * @param string $titleId The game's title ID
+     * @param \Tustin\PlayStation\Api\User $user
      */
     public function __construct(Client $client, string $titleId, User $user = null)
     {
@@ -33,7 +32,7 @@ class Game extends AbstractApi
     }
 
     /**
-     * Gets the title ID for the Game.
+     * Gets the title ID for the game.
      *
      * @return string
      */
@@ -43,7 +42,7 @@ class Game extends AbstractApi
     }
 
     /**
-     * Gets the name of the Game's trophy set.
+     * Gets the name of the game's trophy set.
      *
      * @return string
      */
@@ -53,7 +52,7 @@ class Game extends AbstractApi
     }
     
     /**
-     * Gets the Game's image URL.
+     * Gets the game's image URL.
      *
      * @return string
      */
@@ -63,7 +62,7 @@ class Game extends AbstractApi
     }
 
     /**
-     * Gets the Game's NP communication ID.
+     * Gets the game's NP communication ID.
      *
      * @return string
      */
@@ -73,9 +72,9 @@ class Game extends AbstractApi
     }
 
     /**
-     * Checks if the Game has trophies.
+     * Checks if the game has trophies.
      *
-     * @return boolean
+     * @return bool
      */
     public function hasTrophies() : bool
     {
@@ -85,7 +84,7 @@ class Game extends AbstractApi
     /**
      * Checks if the User has earned the platinum trophy.
      *
-     * @return boolean
+     * @return bool
      */
     public function earnedPlatinum() : bool
     {
@@ -111,8 +110,8 @@ class Game extends AbstractApi
     {
         if ($this->game === null) {
             // Kind of a hack here.
-            // This endpoint doesn't give exactly the same information as the proper Game endpoint would,
-            // But I wasn't able to find a way to get info from the Game endpoint with just a titleId.
+            // This endpoint doesn't give exactly the same information as the proper game endpoint would,
+            // But I wasn't able to find a way to get info from the gane endpoint with just a titleId.
             // It works, but I'd rather it be more consistent with the other endpoint.
             $game = $this->client->get(Trophy::TROPHY_ENDPOINT . 'apps/trophyTitles', [
                 'npTitleIds' => $this->titleId,
@@ -144,9 +143,11 @@ class Game extends AbstractApi
 
 
     /**
-     * Gets the Users who have played this game.
+     * Gets the users who have played this game.
+     * 
+     * This will only return players who the logged in user is friends with.
      *
-     * @return array Array of Api\User.
+     * @return array Array of \Tustin\PlayStation\Api\User.
      */
     public function players() : array 
     {
@@ -164,20 +165,25 @@ class Game extends AbstractApi
     }
 
     /**
-     * Gets the TrophyGroups for this Game.
+     * Gets all the trophy groups for this game.
+     * 
+     * Each game with trophies will have at least one trophy group, that being the base trophies.
+     * 
+     * Subsequent trophy groups will be additional trophies added with DLC or a game update.
      *
-     * @return array Array of Api\TrophyGroup
+     * @return array Array of \Tustin\PlayStation\Api\TrophyGroup
      */
-    public function trophyGroups() : array
+    public function trophyGroups(string $iconSize = 'm', string $language = 'en') : array
     {
         $returnGroups = [];
 
         $data = [
             'fields' => '@default,trophyTitleSmallIconUrl,trophyGroupSmallIconUrl',
-            'iconSize' => 'm',
-            'npLanguage' => 'en'
+            'iconSize' => $iconSize,
+            'npLanguage' => $language
         ];
 
+        // If we're currently checking another user's trophies, we want to persist this to the trophy groups as well.
         if ($this->isComparing()) {
             $data['comparedUser'] = $this->user()->onlineId();
         }
@@ -193,19 +199,19 @@ class Game extends AbstractApi
     
 
     /**
-     * Gets all Trophies for this Game.
+     * Gets all trophies for this game.
      *
-     * @return array Array of Api\Trophy
+     * @return array Array of \Tustin\PlayStation\Api\Trophy
      */
-    public function trophies() : array 
+    public function trophies(string $iconSize = 'm', string $language = 'en') : array 
     {
         $returnTrophies = [];
 
         $data = [
             'fields' => '@default,trophyRare,trophyEarnedRate,hasTrophyGroups,trophySmallIconUrl',
-            'iconSize' => 'm',
-            'visibleType' => 1,
-            'npLanguage' => 'en'
+            'iconSize' => $iconSize,
+            'visibleType' => 1, // What is this for?? Maybe this only shows non-hidden trophies? - Tustin 6 July 2019
+            'npLanguage' => $language
         ];
 
         if ($this->isComparing()) {
@@ -223,7 +229,7 @@ class Game extends AbstractApi
 
 
     /**
-     * Gets the User who played this game.
+     * Gets the user who played this game.
      *
      * @return User
      */
@@ -233,9 +239,9 @@ class Game extends AbstractApi
     }
 
     /**
-     * Gets whether we're getting trophies for the logged in User or another User.
+     * Gets whether we're getting trophies for the logged in user or another user.
      *
-     * @return boolean
+     * @return bool
      */
     public function isComparing() : bool
     {
@@ -247,9 +253,9 @@ class Game extends AbstractApi
     }
 
     /**
-     * Gets whether the User has played the game or not.
+     * Gets whether the user has played the game or not.
      *
-     * @return boolean
+     * @return bool
      */
     public function hasPlayed() : bool
     {
@@ -285,6 +291,8 @@ class Game extends AbstractApi
      */
     public function userTrophyInfo() : ?object
     {
+        // @Cleanup: Does this really need to be so convoluted?
+        // - Tustin July 6 2019
         $comparedUserTrophyInfo = $this->comparedUserTrophyInfo();
         $fromUserTrophyInfo = $this->fromUserTrophyInfo();
 

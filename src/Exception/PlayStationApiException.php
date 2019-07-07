@@ -1,8 +1,8 @@
 <?php
 
-namespace PlayStation\Exception;
+namespace Tustin\PlayStation\Exception;
 
-use PlayStation\Http\JsonStream;
+use Tustin\PlayStation\Http\JsonStream;
 
 class PlayStationApiException extends \Exception
 {

@@ -1,20 +1,22 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api\Trophy;
 
-use PlayStation\Client;
-use PlayStation\Api\User;
+use Tustin\PlayStation\Client;
+
+use Tustin\PlayStation\Api\User;
+use \Tustin\PlayStation\Api\Game;
 
 class TrophyGroup extends AbstractApi 
 {
-    private $group;
+    private $groupData;
     private $game;
 
-    public function __construct(Client $client, object $group, Game $game) 
+    public function __construct(Client $client, object $groupData, Game $game) 
     {
         parent::__construct($client);
 
-        $this->group = $group;
+        $this->groupData = $groupData;
         $this->game = $game;
     }
 
@@ -27,7 +29,7 @@ class TrophyGroup extends AbstractApi
      */
     public function id() : string
     {
-        return $this->group->trophyGroupId;
+        return $this->grogroupDataup->trophyGroupId;
     }
 
     /**
@@ -37,7 +39,7 @@ class TrophyGroup extends AbstractApi
      */
     public function name() : string
     {
-        return $this->group->trophyGroupName;
+        return $this->groupData->trophyGroupName;
     }
 
     /**
@@ -47,7 +49,7 @@ class TrophyGroup extends AbstractApi
      */
     public function detail() : string
     {
-        return $this->group->trophyGroupDetail;
+        return $this->groupData->trophyGroupDetail;
     }
 
     /**
@@ -57,29 +59,29 @@ class TrophyGroup extends AbstractApi
      */
     public function iconUrl() : string
     {
-        return $this->group->trophyGroupIconUrl;
+        return $this->groupData->trophyGroupIconUrl;
     }
 
     /**
      * Get amount of Trophies.
      *
-     * @return integer
+     * @return int
      */
     public function trophyCount() : int 
     {
-        return Trophy::calculateTrophies($this->group->definedTrophies);
+        return Trophy::calculateTrophies($this->groupData->definedTrophies);
     }
 
     /**
      * Get completion progress of TrophyGroup.
      *
-     * @return integer
+     * @return int
      */
     public function progress() : int
     {
         return $this->comparing() ?
-        $this->group->comparedUser->progress :
-        $this->group->fromUser->progress;
+        $this->groupData->comparedUser->progress :
+        $this->groupData->fromUser->progress;
     }
 
     /**
@@ -91,8 +93,8 @@ class TrophyGroup extends AbstractApi
     {
         return new \DateTime(
             $this->comparing() ?
-            $this->group->comparedUser->lastUpdateDate :
-            $this->group->fromUser->lastUpdateDate
+            $this->groupData->comparedUser->lastUpdateDate :
+            $this->groupData->fromUser->lastUpdateDate
         );
     }
 
@@ -103,9 +105,14 @@ class TrophyGroup extends AbstractApi
      */
     public function lastUpdateDate() : \DateTime 
     {
-        return new \DateTime($this->group->lastUpdateDate);
+        return new \DateTime($this->groupData->lastUpdateDate);
     }
 
+    /**
+     * Get all the trophies in the trophy group.
+     *
+     * @return array Array of \Tustin\PlayStation\Api\Trophy\Trophy
+     */
     public function trophies() : array 
     {
         $returnTrophies = [];
@@ -130,15 +137,20 @@ class TrophyGroup extends AbstractApi
         return $returnTrophies;
     }
 
+    /**
+     * Get the game that the trophy group belongs to.
+     *
+     * @return \Tustin\PlayStation\Api\Game
+     */
     public function game() : Game
     {
         return $this->game;
     }
 
     /**
-     * Returns whether or not the Game is for another user.
+     * Returns whether or not the game is for another user.
      *
-     * @return boolean
+     * @return bool
      */
     public function comparing() : bool
     {

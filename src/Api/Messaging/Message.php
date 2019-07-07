@@ -1,9 +1,9 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api\Messaging;
 
-use PlayStation\Client;
-use PlayStation\Api\User;
+use Tustin\PlayStation\Client;
+use Tustin\PlayStation\Api\User;
 
 class Message extends AbstractApi 
 {
@@ -19,9 +19,9 @@ class Message extends AbstractApi
     }
 
     /**
-     * Get the sender of the Message.
+     * Get the sender of the message.
      *
-     * @return User
+     * @return \Tustin\PlayStation\Api\User
      */
     public function sender() : User
     {
@@ -29,9 +29,9 @@ class Message extends AbstractApi
     }
 
     /**
-     * Get the MessageThread the Message is in.
+     * Get the message thread the message is in.
      *
-     * @return MessageThread
+     * @return \Tustin\PlayStation\Api\MessageThread
      */
     public function thread() : MessageThread
     {
@@ -39,7 +39,7 @@ class Message extends AbstractApi
     }
 
     /**
-     * Get the Message body text.
+     * Get the message body text.
      *
      * @return string
      */
@@ -49,7 +49,7 @@ class Message extends AbstractApi
     }
 
     /**
-     * Get the DateTime when the Message was sent.
+     * Get the date and time when the message was sent.
      *
      * @return \DateTime
      */

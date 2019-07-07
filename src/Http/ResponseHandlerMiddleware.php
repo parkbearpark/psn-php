@@ -1,14 +1,14 @@
 <?php
 
-namespace PlayStation\Http;
+namespace Tustin\PlayStation\Http;
 
-use PlayStation\Http\ResponseParser;
+use Tustin\PlayStation\Http\ResponseParser;
 use GuzzleHttp\Psr7\Response;
 
-use PlayStation\Exception\PlayStationApiException;
-use PlayStation\Exception\UnauthorizedException;
-use PlayStation\Exception\NotFoundException;
-use PlayStation\Exception\AccessDeniedException;
+use Tustin\PlayStation\Exception\PlayStationApiException;
+use Tustin\PlayStation\Exception\UnauthorizedException;
+use Tustin\PlayStation\Exception\NotFoundException;
+use Tustin\PlayStation\Exception\AccessDeniedException;
 
 final class ResponseHandlerMiddleware
 {
@@ -25,7 +25,13 @@ final class ResponseHandlerMiddleware
         $this->handleErrorResponse($response, $jsonStream);
     }
 
-    public function isSuccessful(Response $response)
+    /**
+     * Checks if the HTTP status code is successful.
+     *
+     * @param Response $response The response
+     * @return bool
+     */
+    public function isSuccessful(Response $response) : bool
     {
         return $response->getStatusCode() < 400;
     }
@@ -33,10 +39,10 @@ final class ResponseHandlerMiddleware
     /**
      * Handles unsuccessful error codes by throwing the proper exception.
      *
-     * @param Response $response
+     * @param Response $response The response
      * @return void
      */
-    public function handleErrorResponse(Response $response, JsonStream $stream)
+    public function handleErrorResponse(Response $response, JsonStream $stream) : void
     {
         switch ($response->getStatusCode())
         {

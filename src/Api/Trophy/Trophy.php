@@ -1,9 +1,9 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api\Trophy;
 
-use PlayStation\Client;
-use PlayStation\Api\User;
+use Tustin\PlayStation\Client;
+use Tustin\PlayStation\Api\User;
 
 class Trophy extends AbstractApi 
 {
@@ -115,7 +115,7 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets the DateTime when the User earned the Trophy.
+     * Gets the date and time when the user earned the trophy.
      *
      * @return \DateTime|null
      */
@@ -131,9 +131,9 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets the TrophyGroup the Trophy is in.
+     * Gets the trophy group the trophy is in.
      *
-     * @return TrophyGroup
+     * @return \Tustin\PlayStation\Api\TrophyGroup
      */
     public function trophyGroup() : TrophyGroup
     {
@@ -141,9 +141,9 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets the Game the Trophy is for.
+     * Gets the game the trophy is for.
      *
-     * @return Game
+     * @return \Tustin\PlayStation\Api\Game
      */
     public function game() : Game
     {

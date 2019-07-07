@@ -1,6 +1,6 @@
 <?php
 
-namespace PlayStation;
+namespace Tustin\PlayStation;
 
 class MessageType 
 {

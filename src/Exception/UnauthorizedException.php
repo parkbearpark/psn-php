@@ -1,5 +1,5 @@
 <?php
 
-namespace PlayStation\Exception;
+namespace Tustin\PlayStation\Exception;
 
 class UnauthorizedException extends \Exception {}

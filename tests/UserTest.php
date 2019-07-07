@@ -1,6 +1,6 @@
 <?php
 
-namespace PlayStation\Tests;
+namespace Tustin\PlayStation\Tests;
 
 class UserTest extends PlayStationApiTestCase
 {

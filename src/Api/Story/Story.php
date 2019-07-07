@@ -1,9 +1,12 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api\Story;
 
-use PlayStation\Client;
-use PlayStation\Api\User;
+use Tustin\PlayStation\Client;
+
+use Tustin\PlayStation\Api\User;
+use Tustin\PlayStation\Api\Game;
+use Tustin\PlayStation\Api\Story\Comment;
 
 class Story extends AbstractApi 
 {
@@ -21,7 +24,7 @@ class Story extends AbstractApi
     }
 
     /**
-     * Gets the info for the Story.
+     * Gets the info for the story.
      *
      * @return object
      */
@@ -31,9 +34,9 @@ class Story extends AbstractApi
     }
 
     /**
-     * Gets the User who posted the Story.
+     * Gets the user who posted the story.
      *
-     * @return User
+     * @return \Tustin\PlayStation\Api\User
      */
     public function user() : User
     {
@@ -41,7 +44,7 @@ class Story extends AbstractApi
     }
 
     /**
-     * Gets the Story ID.
+     * Gets the story ID.
      *
      * @return string
      */
@@ -61,7 +64,7 @@ class Story extends AbstractApi
     }
 
     /**
-     * Gets the title ID for the game the Story is for.
+     * Gets the title ID for the game the story is for.
      *
      * @return string
      */
@@ -71,9 +74,9 @@ class Story extends AbstractApi
     }
 
     /**
-     * Checks if the logged in user has liked this Story.
+     * Checks if the logged in user has liked this story.
      *
-     * @return boolean
+     * @return bool
      */
     public function liked() : bool
     {
@@ -91,9 +94,9 @@ class Story extends AbstractApi
     }
 
     /**
-     * Gets the amount of comments on the Story.
+     * Gets the amount of comments on the story.
      *
-     * @return integer
+     * @return int
      */
     public function commentCount() : int
     {
@@ -101,9 +104,9 @@ class Story extends AbstractApi
     }
 
     /**
-     * Gets the amount of likes on the Story.
+     * Gets the amount of likes on the story.
      *
-     * @return integer
+     * @return int
      */
     public function likeCount() : int
     {
@@ -127,9 +130,9 @@ class Story extends AbstractApi
     }
 
     /**
-     * Gets the Game the Story is for.
+     * Gets the game the story is for.
      *
-     * @return Game
+     * @return \Tustin\PlayStation\Api\Game
      */
     public function Game() : Game
     {
@@ -137,10 +140,10 @@ class Story extends AbstractApi
     }
 
     /**
-     * Leave a comment on the Story.
+     * Leave a comment on the story.
      *
      * @param string $message The comment.
-     * @return Comment|null
+     * @return \Tustin\PlayStation\Api\Comment|null
      */
     public function comment(string $message) : ?Comment
     {
@@ -157,12 +160,12 @@ class Story extends AbstractApi
     }
 
     /**
-     * Gets all the Comments for the Story.
+     * Gets all the comments for the story.
      *
-     * @param integer $start Which comments to start from.
-     * @param integer $count How many comments to get.
+     * @param int $start Which comments to start from.
+     * @param int $count How many comments to get.
      * @param string $sort How comments are sorted (ASC/DESC).
-     * @return array Array of API\Comment.
+     * @return array Array of \Tustin\PlayStation\Api\Comment.
      */
     public function comments(int $start = 0, int $count = 10, string $sort = 'ASC') : array
     {

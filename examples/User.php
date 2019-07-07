@@ -1,7 +1,7 @@
 <?php
 require_once "../vendor/autoload.php";
 
-use PlayStation\Client;
+use Tustin\PlayStation\Client;
 
 $client = new Client(["verify" => false, "proxy" => "127.0.0.1:8888"]);
 

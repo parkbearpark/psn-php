@@ -1,11 +1,11 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api;
 
-use PlayStation\Client;
-use PlayStation\SessionType;
+use Tustin\PlayStation\Client;
+use Tustin\PlayStation\SessionType;
 
-use PlayStation\Api\User;
+use Tustin\PlayStation\Api\User;
 
 class Session extends AbstractApi 
 {
@@ -31,7 +31,7 @@ class Session extends AbstractApi
     }
     
     /**
-     * Get platform the Session is on.
+     * Get platform the session is on.
      *
      * @return string
      */
@@ -41,7 +41,7 @@ class Session extends AbstractApi
     }
 
     /**
-     * Get the ID of the Session.
+     * Get the ID of the session.
      *
      * @return string
      */
@@ -51,7 +51,7 @@ class Session extends AbstractApi
     }
 
     /**
-     * Get the name of the Session.
+     * Get the name of the session.
      *
      * @return string
      */
@@ -61,9 +61,9 @@ class Session extends AbstractApi
     }
 
     /**
-     * Get maximum amount of users allowed in the Session.
+     * Get maximum amount of users allowed in the session.
      *
-     * @return integer
+     * @return int
      */
     public function maxUsers() : int
     {
@@ -71,7 +71,7 @@ class Session extends AbstractApi
     }
 
     /**
-     * Get DateTime of when the Session was created.
+     * Get the date and time when the session was created.
      *
      * @return \DateTime
      */
@@ -81,51 +81,59 @@ class Session extends AbstractApi
     }
 
     /**
-     * Get name of the game the Session is for.
+     * Get the game name of the session (if applicable).
      *
      * @return string|null
      */
     public function gameName() : ?string
     {
-        if ($this->titleType() & SessionType::Unknown) return null; 
+        if ($this->titleType() & SessionType::Unknown) {
+            return null;
+        }
 
         return $this->session->npTitleDetail->npTitleName;
     }
 
     /**
-     * Get title ID of the game the Session is for.
+     * Get title ID of the game the session is for (if applicable).
      *
      * @return string|null
      */
     public function gameTitleId() : ?string
     {
-        if ($this->titleType() & SessionType::Unknown) return null; 
+        if ($this->titleType() & SessionType::Unknown) {
+            return null;
+        }
 
         return $this->session->npTitleDetail->npTitleId;
     }
 
     /**
-     * Get icon URL of the game the Session is for.
+     * Get icon URL of the game the session is for (if applicable).
      *
      * @return string|null
      */
     public function gameIconUrl() : ?string
     {
-        if ($this->titleType() & SessionType::Unknown) return null; 
+        if ($this->titleType() & SessionType::Unknown) {
+            return null;
+        }
 
         return $this->session->npTitleDetail->npTitleIconUrl;
     }
 
     /**
-     * Get Users in the Session.
+     * Get all users in the session.
      *
-     * @return array|null Array of Api\User.
+     * @return array|null Array of \Tustin\PlayStation\Api\User.
      */
     public function members() : array
     {
         $members = [];
 
-        if (!isset($this->session->members) || $this->session->memberCount <= 0) return $members;
+        if (!isset($this->session->members) || $this->session->memberCount <= 0) {
+            return $members;
+        }
 
         foreach ($this->session->members as $member) {
             $members[] = new User($this->client, $member->onlineId);
@@ -135,21 +143,23 @@ class Session extends AbstractApi
     }
 
     /**
-     * Get SessionType of Session.
+     * Get SessionType of session.
      *
-     * @return integer SessionType flag.
+     * @return int SessionType flag.
      */
     public function titleType() : int
     {
-        if (!isset($this->session->npTitleDetail)) return SessionType::Unknown;
+        if (!isset($this->session->npTitleDetail)) {
+            return SessionType::UNKNOWN;
+        }
 
         switch ($this->session->npTitleType) {
             case 'party':
-            return SessionType::Party;
+            return SessionType::PARTY;
             case 'game':
-            return sessionType::Game;
+            return sessionType::GAME;
             default:
-            return SessionType::Unknown;
+            return SessionType::UNKNOWN;
         }
     }
 }

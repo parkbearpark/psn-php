@@ -1,9 +1,11 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api\Story;
 
-use PlayStation\Client;
-use PlayStation\Api\User;
+use Tustin\PlayStation\Client;
+
+use Tustin\PlayStation\Api\User;
+use Tustin\PlayStation\Api\Story\Story;
 
 class Comment extends AbstractApi 
 {
@@ -19,9 +21,9 @@ class Comment extends AbstractApi
     }
 
     /**
-     * Gets the Story this Comment is for.
+     * Gets the comment's parent story.
      *
-     * @return Story
+     * @return \Tustin\PlayStation\Api\Story
      */
     public function story() : Story 
     {
@@ -39,9 +41,9 @@ class Comment extends AbstractApi
     }
 
     /**
-     * Gets the User who made the Comment.
+     * Gets the comment poster.
      *
-     * @return User
+     * @return \Tustin\PlayStation\Api\User
      */
     public function user() : User
     {
@@ -49,7 +51,7 @@ class Comment extends AbstractApi
     }
 
     /**
-     * Gets the Comments message.
+     * Gets the comment message text.
      *
      * @return string
      */
@@ -59,7 +61,7 @@ class Comment extends AbstractApi
     }
 
     /**
-     * Gets the Comment ID.
+     * Gets the comment ID.
      *
      * @return string
      */
@@ -69,7 +71,7 @@ class Comment extends AbstractApi
     }
 
     /**
-     * Gets the DateTime of the Comment.
+     * Gets the date and time the comment was posted.
      *
      * @return \DateTime
      */
@@ -77,5 +79,4 @@ class Comment extends AbstractApi
     {
         return new \DateTime($this->info()->date);
     }
-
 }

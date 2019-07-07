@@ -1,6 +1,6 @@
 <?php
 
-namespace PlayStation\Http;
+namespace Tustin\PlayStation\Http;
 
 use GuzzleHttp\Psr7\Request;
 

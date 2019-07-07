@@ -1,11 +1,11 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api\Messaging;
 
-use PlayStation\Client;
-use PlayStation\MessageType;
+use Tustin\PlayStation\Client;
+use Tustin\PlayStation\MessageType;
 
-use PlayStation\Api\User;
+use Tustin\PlayStation\Api\User;
 
 class MessageThread extends AbstractApi 
 {
@@ -24,8 +24,8 @@ class MessageThread extends AbstractApi
     /**
      * Get the MessageThread info.
      *
-     * @param integer $count Amount of messages to return.
-     * @param boolean $force Force an update.
+     * @param int $count Amount of messages to return.
+     * @param bool $force Force an update.
      * @return object
      */
     public function info(int $count = 1, bool $force = false) : \stdClass
@@ -53,7 +53,7 @@ class MessageThread extends AbstractApi
     /**
      * Get the amount of members.
      *
-     * @return integer
+     * @return int
      */
     public function memberCount() : int 
     {
@@ -71,7 +71,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Gets the MessageThread thumbnail URL.
+     * Gets the message thread thumbnail URL.
      *
      * @return string|null
      */
@@ -81,7 +81,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Gets the last time the MessageThread was modified.
+     * Gets the last time the message thread was modified.
      *
      * @return \DateTime
      */
@@ -91,7 +91,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Leave the MessageThread.
+     * Leave the message thread.
      *
      * @return bool
      */
@@ -103,15 +103,17 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Get members in the MessageThread.
+     * Get members in the message thread.
      *
-     * @return array Array of Api\User.
+     * @return array Array of \Tustin\PlayStation\Api\User.
      */
     public function members() : array
     {
         $members = [];
 
-        if (!isset($this->info()->threadMembers) || $this->info()->threadMembers <= 0) return null;
+        if (!isset($this->info()->threadMembers) || $this->info()->threadMembers == 0) {
+            return $members;
+        }
 
         foreach ($this->info()->threadMembers as $member) {
             $members[] = new User($this->client, $member->onlineId);
@@ -140,7 +142,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Favorite the MessageThread.
+     * Favorite the message thread.
      *
      * @return bool
      */
@@ -158,7 +160,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Unfavorite the MessageThread.
+     * Unfavorite the message thread.
      *
      * @return bool
      */
@@ -178,8 +180,8 @@ class MessageThread extends AbstractApi
     /**
      * Send a text message.
      *
-     * @param string $message The message to send.
-     * @return Message|null
+     * @param string $message The message text to send.
+     * @return \Tustin\PlayStation\Api\Message|null
      */
     public function sendMessage(string $message) : ?Message 
     {
@@ -217,7 +219,7 @@ class MessageThread extends AbstractApi
      * Send an image message.
      *
      * @param string $imageContents Raw bytes of the image.
-     * @return Message|null
+     * @return \Tustin\PlayStation\Api\Message|null
      */
     public function sendImage(string $imageContents) : ?Message
     {
@@ -264,8 +266,8 @@ class MessageThread extends AbstractApi
      * Send an audio message.
      *
      * @param string $audioContents Raw bytes of the audio.
-     * @param integer $audioLengthSeconds Length of the audio in seconds.
-     * @return Message|null
+     * @param int $audioLengthSeconds Length of the audio in seconds.
+     * @return \Tustin\PlayStation\Api\Message|null
      */
     public function sendAudio(string $audioContents, int $audioLengthSeconds) : ?Message
     {
@@ -314,8 +316,8 @@ class MessageThread extends AbstractApi
     /**
      * Get all the messages.
      *
-     * @param integer $count Amount of messages to get.
-     * @return array Array of Api\Message.
+     * @param int $count Amount of messages to get.
+     * @return array Array of \Tustin\PlayStation\Api\Message.
      */
     public function messages(int $count = 200) : array
     {
@@ -331,7 +333,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Set the MessageThread thumbnail
+     * Set the message thread thumbnail.
      *
      * @param string $imageContents Raw bytes of the image.
      * @return bool
@@ -355,7 +357,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Removes the MessageThread thumbnail.
+     * Removes the message thread thumbnail.
      *
      * @return bool
      */

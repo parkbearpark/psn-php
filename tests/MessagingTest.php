@@ -1,9 +1,9 @@
 <?php
 
-namespace PlayStation\Tests;
+namespace Tustin\PlayStation\Tests;
 
-use PlayStation\Api\MessageThread;
-use PlayStation\Api\Message;
+use Tustin\PlayStation\Api\MessageThread;
+use Tustin\PlayStation\Api\Message;
 
 class MessagingTest extends PlayStationApiTestCase
 {

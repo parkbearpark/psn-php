@@ -6,12 +6,12 @@
     "keywords": ["playstation", "api", "php"],
     "autoload": {
         "psr-4": {
-            "PlayStation\\": "src/"
+            "Tustin\\PlayStation\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": { 
-            "PlayStation\\Tests\\": "tests/"
+            "Tustin\\PlayStation\\Tests\\": "tests/"
         }
     },
     "require": {

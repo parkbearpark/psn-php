@@ -1,13 +1,13 @@
 <?php
 
-namespace PlayStation\Api\Community;
+namespace Tustin\PlayStation\Api\Community;
 
-use PlayStation\Client;
+use Tustin\PlayStation\Client;
 
-use PlayStation\Api\AbstractApi;
-use PlayStation\Api\User;
+use Tustin\PlayStation\Api\AbstractApi;
+use Tustin\PlayStation\Api\User;
 
-use PlayStation\Api\Community\Message;
+use Tustin\PlayStation\Api\Community\Message;
 
 class Message extends AbstractApi 
 {

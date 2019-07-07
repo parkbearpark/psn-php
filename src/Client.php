@@ -1,16 +1,16 @@
 <?php
 
-namespace PlayStation;
+namespace Tustin\PlayStation;
 
-use PlayStation\Api\MessageThread;
-use PlayStation\Api\User;
-use PlayStation\Api\Game;
-use PlayStation\Api\Community;
+use Tustin\PlayStation\Api\MessageThread;
+use Tustin\PlayStation\Api\User;
+use Tustin\PlayStation\Api\Game;
+use Tustin\PlayStation\Api\Community;
 
-use PlayStation\Http\HttpClient;
-use PlayStation\Http\ResponseParser;
-use PlayStation\Http\TokenMiddleware;
-use PlayStation\Http\ResponseHandlerMiddleware;
+use Tustin\PlayStation\Http\HttpClient;
+use Tustin\PlayStation\Http\ResponseParser;
+use Tustin\PlayStation\Http\TokenMiddleware;
+use Tustin\PlayStation\Http\ResponseHandlerMiddleware;
 
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
@@ -20,34 +20,56 @@ class Client extends HttpClient
 {
     const AUTH_API      = 'https://auth.api.sonyentertainmentnetwork.com/2.0/';
 
+    // The client id and client secret are for the iOS PlayStation app.
+    // These cannot be generated at this time; therefore, we have to use their permissions scopes as well.
     private const CLIENT_ID     = 'ebee17ac-99fd-487c-9b1e-18ef50c39ab5';
     private const CLIENT_SECRET = 'e4Ru_s*LrL4_B2BD';
     private const DUID          = '0000000d00040080027BC1C3FBB84112BFC9A4300A78E96A';
-    private const SCOPE         = 'kamaji:get_players_met kamaji:get_account_hash kamaji:activity_feed_submit_feed_story kamaji:activity_feed_internal_feed_submit_story kamaji:activity_feed_get_news_feed kamaji:communities kamaji:game_list kamaji:ugc:distributor oauth:manage_device_usercodes psn:sceapp user:account.profile.get user:account.attributes.validate user:account.settings.privacy.get kamaji:activity_feed_set_feed_privacy kamaji:satchel kamaji:satchel_delete user:account.profile.update';
+    private const SCOPES = [
+        'kamaji:activity_feed_get_news_feed',
+        'kamaji:activity_feed_internal_feed_submit_story',
+        'kamaji:activity_feed_set_feed_privacy',
+        'kamaji:activity_feed_submit_feed_story',
+        'kamaji:communities',
+        'kamaji:game_list',
+        'kamaji:get_account_hash',
+        'kamaji:get_players_met',
+        'kamaji:satchel',
+        'kamaji:satchel_delete',
+        'kamaji:ugc:distributor',
+        'oauth:manage_device_usercodes',
+        'psn:sceapp',
+        'user:account.attributes.validate',
+        'user:account.profile.get',
+        'user:account.profile.update',
+        'user:account.settings.privacy.get'
+    ];
+    private const REDIRECT_URL = 'com.playstation.PlayStationApp://redirect';
 
-    private $onlineId;
-    private $messageThreads;
-    private $options;
+    private $guzzleOptions;
 
     private $accessToken;
     private $refreshToken;
     private $expiresIn;
 
+    private $onlineId;
+    private $messageThreads;
+
     /**
-     * @param array $options Guzzle Options
+     * @param array $guzzleOptions Guzzle options
      */
-    public function __construct(array $options = [])
+    public function __construct(array $guzzleOptions = [])
     {
-        if (!isset($options['handler']))
+        if (!isset($guzzleOptions['handler']))
         {
-            $options['handler'] = HandlerStack::create();
+            $guzzleOptions['handler'] = HandlerStack::create();
         }
 
-        $options['allow_redirects'] = false;
+        $guzzleOptions['allow_redirects'] = false;
 
-        $this->options = $options;
+        $this->guzzleOptions = $guzzleOptions;
 
-        $this->httpClient = new \GuzzleHttp\Client($this->options);
+        $this->httpClient = new \GuzzleHttp\Client($this->guzzleOptions);
 
         $config  = $this->httpClient->getConfig();
         $handler = $config['handler'];
@@ -58,88 +80,93 @@ class Client extends HttpClient
             )
         );
     }
+
+    /**
+     * Create a new Client instance.
+     *
+     * @param array $guzzleOptions Guzzle options
+     * @return \Tustin\PlayStation\Client
+     */
+    public static function create(array $guzzleOptions = []) : \Tustin\PlayStation\Client
+    {
+        return new static($guzzleOptions);
+    }
     
     /**
-     * Login to PlayStation network using a refresh token or 2FA.
+     * Login to the PlayStation Network using information from a 2FA login request on the official Sony website.
+     * 
+     * This should be done for the initial login. Afterwards, make sure you save the refresh token and use loginWithRefreshToken instead.
      *
-     * @param string $ticketUuidOrRefreshToken Ticket UUID for 2FA, or the refresh token.
-     * @param string $code 2FA code sent to your device (ignore if using refresh token).
+     * @param string $ticketUuid Ticket UUID from the 2FA login request.
+     * @param string $code 2FA code sent to your device.
      * @return void
      */
-    public function login(string $ticketUuidOrRefreshToken, string $code = null) : void
+    public function login(string $ticketUuid, string $code) : void
     {
-        if ($code === null) {
-            $response = $this->post(self::AUTH_API . 'oauth/token', [
-                "app_context" => "inapp_ios",
-                "client_id" => self::CLIENT_ID,
-                "client_secret" => self::CLIENT_SECRET,
-                "refresh_token" => $ticketUuidOrRefreshToken,
-                "duid" => self::DUID,
-                "grant_type" => "refresh_token",
-                "scope" => self::SCOPE
-            ]);
-        } else {
-            $response = $this->post(self::AUTH_API . 'ssocookie', [
-                'authentication_type' => 'two_step',
-                'ticket_uuid' => $ticketUuidOrRefreshToken,
-                'code' => $code,
-                'client_id' => self::CLIENT_ID
-            ]);
+        // Get the NPSSO cookie that is needed for the NP grant code.
+        $response = $this->post(self::AUTH_API . 'ssocookie', [
+            'authentication_type' => 'two_step',
+            'ticket_uuid' => $ticketUuid,
+            'code' => $code,
+            'client_id' => self::CLIENT_ID
+        ]);
 
-            $npsso = $response->npsso;
+        $npsso = $response->npsso;
 
-            $response = $this->get(self::AUTH_API . 'oauth/authorize', [
-                'duid' => self::DUID,
-                'client_id' => self::CLIENT_ID,
-                'response_type' => 'code',
-                'scope' => self::SCOPE,
-                'redirect_uri' => 'com.playstation.PlayStationApp://redirect'
-            ], [
-                'Cookie' => 'npsso=' . $npsso
-            ]);
+        // Authorize the client and get the NP grant code.
+        $response = $this->get(self::AUTH_API . 'oauth/authorize', [
+            'duid' => self::DUID,
+            'client_id' => self::CLIENT_ID,
+            'response_type' => 'code',
+            'scope' => implode(' ', self::SCOPE),
+            'redirect_uri' => self::REDIRECT_URL
+        ], [
+            'Cookie' => 'npsso=' . $npsso
+        ]);
 
-            // Get the last response provided by Guzzle to grab a header value.
-            $grant = $this->lastResponse()->getHeaderLine('X-NP-GRANT-CODE');
+        // Get the last response provided by Guzzle to grab a header value.
+        $grant = $this->lastResponse()->getHeaderLine('X-NP-GRANT-CODE');
 
-            if (empty($grant)) {
-                throw new \Exception('Unable to get X-NP-GRANT-CODE');
-            }
-
-            $response = $this->post(self::AUTH_API . 'oauth/token', [
-                'client_id' => self::CLIENT_ID,
-                'client_secret' => self::CLIENT_SECRET,
-                'duid' => self::DUID,
-                'scope' => self::SCOPE,
-                'redirect_uri' => 'com.playstation.PlayStationApp://redirect',
-                'code' => $grant,
-                'grant_type' => 'authorization_code'
-            ]);
-
+        if (empty($grant))
+        {
+            throw new \Exception('Unable to get X-NP-GRANT-CODE');
         }
 
-        $this->accessToken = $response->access_token;
-        $this->refreshToken = $response->refresh_token;
-        $this->expiresIn = $response->expires_in;
+        // Use the NP grant code to get OAuth tokens.
+        $response = $this->post(self::AUTH_API . 'oauth/token', [
+            'client_id' => self::CLIENT_ID,
+            'client_secret' => self::CLIENT_SECRET,
+            'duid' => self::DUID,
+            'scope' => implode(' ', self::SCOPES),
+            'redirect_uri' => self::REDIRECT_URL,
+            'code' => $grant,
+            'grant_type' => 'authorization_code'
+        ]);
 
-        $this->pushTokenMiddleware($this->accessToken);
+        $this->postLogin($response);
     }
 
     /**
-     * Pushes TokenMiddleware onto the HandlerStack with the access token.
+     * Login using an existing refresh token.
+     * 
+     * Use this for quick logins after you've logged in once with the 2FA login method.
      *
-     * @param string $accessToken PlayStation access token.
+     * @param string $refreshToken The refresh token.
      * @return void
      */
-    private function pushTokenMiddleware(string $accessToken) : void
+    public function loginWithRefreshToken(string $refreshToken) : void
     {
-        $config  = $this->httpClient->getConfig();
-        $handler = $config['handler'];
+        $response = $this->post(self::AUTH_API . 'oauth/token', [
+            'app_context' => 'inapp_ios',
+            'client_id' => self::CLIENT_ID,
+            'client_secret' => self::CLIENT_SECRET,
+            'refresh_token' => $ticketUuidOrRefreshToken,
+            'duid' => self::DUID,
+            'grant_type' => 'refresh_token',
+            'scope' => self::SCOPE
+        ]);
 
-        $handler->push(
-            Middleware::mapRequest(
-                new TokenMiddleware($accessToken)
-            )
-        );
+        $this->postLogin($response);
     }
 
     /**
@@ -156,19 +183,54 @@ class Client extends HttpClient
     }
 
     /**
-     * Gets the logged in user's onlineId.
+     * Sets information from a login response.
+     *
+     * @param object $response The login response.
+     * @return void
+     */
+    private function postLogin(object $response) : void
+    {
+        $this->accessToken = $response->access_token;
+        $this->refreshToken = $response->refresh_token;
+        $this->expiresIn = $response->expires_in;
+
+        $this->pushTokenMiddleware($this->accessToken);
+    }
+    
+    /**
+     * Pushes TokenMiddleware onto the HandlerStack with the access token.
+     *
+     * @param string $accessToken PlayStation OAuth access token.
+     * @return void
+     */
+    private function pushTokenMiddleware(string $accessToken) : void
+    {
+        $config  = $this->httpClient->getConfig();
+        $handler = $config['handler'];
+
+        $handler->push(
+            Middleware::mapRequest(
+                new TokenMiddleware($accessToken)
+            )
+        );
+    }
+
+    /**
+     * Gets the logged in user's online ID.
      *
      * @return string
      */
     public function onlineId() : string
     {
-        if ($this->onlineId === null) {
+        if ($this->onlineId === null)
+        {
             $response = $this->get(sprintf(User::USERS_ENDPOINT . 'profile2', 'me'), [
                 'fields' => 'onlineId'
             ]);
 
             $this->onlineId = $response->profile->onlineId;
         }
+
         return $this->onlineId;
     }
 
@@ -205,13 +267,14 @@ class Client extends HttpClient
     /**
      * Gets all MessageThreads for the current Client.
      *
-     * @param integer $offset Where to start.
-     * @param integer $limit Amount of threads.
-     * @return object
+     * @param int $offset Where to start.
+     * @param int $limit Amount of threads.
+     * @return \stdClass
      */
     public function messageThreads(int $offset = 0, int $limit = 20) : \stdClass
     {
-        if ($this->messageThreads === null) {
+        if ($this->messageThreads === null)
+        {
             $response = $this->get(MessageThread::MESSAGE_THREAD_ENDPOINT . 'threads/', [
                 'fields' => 'threadMembers',
                 'limit' => $limit,
@@ -225,10 +288,10 @@ class Client extends HttpClient
     }
 
     /**
-     * Creates a new User object.
+     * Gets a User by their Online ID.
      *
-     * @param string $onlineId The User's onlineId (null to get current User's account).
-     * @return PlayStation\Api\User
+     * @param string $onlineId The user's online ID (leave empty for the logged in user's account)
+     * @return \Tustin\PlayStation\Api\User
      */
     public function user(string $onlineId = '') : User
     {
@@ -239,7 +302,7 @@ class Client extends HttpClient
      * Find a game by it's title ID and return a new Game object.
      *
      * @param string $titleId The Game's title ID
-     * @return PlayStation\Api\Game
+     * @return \Tustin\PlayStation\Api\Game
      */
     public function game(string $titleId) : Game
     {
@@ -247,26 +310,13 @@ class Client extends HttpClient
     }
 
     /**
-     * Get or create a Community.
+     * Gets a Community.
      *
-     * @param string $communityIdOrName Community ID or the name of the new community.
-     * @param string $type 
-     * @param string $titleId Game to associate your Community with.
-     * @return PlayStation\Api\Community
+     * @param string $communityId Community ID
+     * @return \Tustin\PlayStation\Api\Community
      */
-    public function community(string $communityIdOrName, string $type = '', string $titleId = '') : Community
+    public function community(string $communityId) : Community
     {
-        if (!empty($type) && !empty($titleId)) {
-            // Create the Community.
-            // $response = $this->postJson(Community::COMMUNITY_ENDPOINT . 'communities?action=create', [
-            //     'name' => $communityIdOrName,
-            //     'type' => $type,
-            //     'titleId' => $titleId
-            // ]);
-
-            $communityIdOrName = $response->id;
-        }
-
-        return new Community($this, $communityIdOrName);
+        return new Community($this, $communityId);
     }
 }

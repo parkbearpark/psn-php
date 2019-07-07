@@ -1,10 +1,10 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api;
 
-use PlayStation\Client;
-use PlayStation\Http\HttpClient;
-use PlayStation\Http\ResponseParser;
+use Tustin\PlayStation\Client;
+use Tustin\PlayStation\Http\HttpClient;
+use Tustin\PlayStation\Http\ResponseParser;
 
 abstract class AbstractApi 
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace PlayStation\Api;
+namespace Tustin\PlayStation\Api;
 
-use PlayStation\Client;
-use PlayStation\Api\User;
+use Tustin\PlayStation\Client;
+use Tustin\PlayStation\Api\User;
 
 class Community extends AbstractApi 
 {
@@ -22,9 +22,25 @@ class Community extends AbstractApi
         $this->communityId = $communityId;
     }
 
+    // public static function create(string $name, string $type = '', string $titleId = '')
+    // {
+    //     $response = $this->postJson(Community::COMMUNITY_ENDPOINT . 'communities?action=create', [
+    //         'name' => $communityIdOrName,
+    //         'type' => $type,
+    //         'titleId' => $titleId
+    //     ]);
+    // }
+
+    /**
+     * Gets all the information fields of the Community.
+     * 
+     * @param bool $force Force an API request instead of using info from cache.
+     * @return \stdClass
+     */
     public function info(bool $force = false) : \stdClass
     {
-        if ($this->community === null || $force) {
+        if ($this->community === null || $force)
+        {
             $this->community = $this->client->get(sprintf(self::COMMUNITY_ENDPOINT . 'communities/%s', $this->communityId), [
                 'includeFields' => 'backgroundImage,description,id,isCommon,members,name,profileImage,role,unreadMessageCount,sessions,timezoneUtcOffset,language,titleName',
             ]);
@@ -33,16 +49,33 @@ class Community extends AbstractApi
         return $this->community;
     }
 
+    /**
+     * Gets the id of the Community.
+     * 
+     * This is used for searching for the community later on.
+     *
+     * @return string Community id.
+     */
     public function id() : string
     {
         return $this->info()->id;
     }
 
+    /**
+     * Gets the name of the Community.
+     *
+     * @return string Community name.
+     */
     public function name() : string
     {
         return $this->info()->name;
     }
 
+    /**
+     * Gets the description of the Community.
+     *
+     * @return string Community description.
+     */
     public function description() : string
     {
         return $this->info()->description;
@@ -51,7 +84,7 @@ class Community extends AbstractApi
     /**
      * Gets the amount of Users in the Community.
      *
-     * @return integer
+     * @return int
      */
     public function memberCount() : int 
     {
@@ -71,6 +104,12 @@ class Community extends AbstractApi
         ]);
     }
 
+    /**
+     * Sets the name of the Community.
+     *
+     * @param string $name New Community name.
+     * @return void
+     */
     public function setName(string $name) : void
     {
         $this->set([
@@ -115,7 +154,7 @@ class Community extends AbstractApi
     /**
      * Sets the background color for the Community.
      *
-     * @param integer $color RGB value (e.g. 0x000000).
+     * @param int $color RGB value (e.g. 0x000000).
      * @return void
      */
     public function setBackgroundColor(int $color) : void
@@ -161,7 +200,7 @@ class Community extends AbstractApi
     /**
      * Get the Users in the Community.
      *
-     * @param integer $limit Amount of Users to return.
+     * @param int $limit Amount of Users to return.
      * @return array Array of Api\User.
      */
     public function members(int $limit = 100) : array

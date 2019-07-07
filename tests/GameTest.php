@@ -1,10 +1,10 @@
 <?php
 
-namespace PlayStation\Tests;
+namespace Tustin\PlayStation\Tests;
 
-use PlayStation\Api\Game;
-use PlayStation\Api\TrophyGroup;
-use PlayStation\Api\Trophy;
+use Tustin\PlayStation\Api\Game;
+use Tustin\PlayStation\Api\TrophyGroup;
+use Tustin\PlayStation\Api\Trophy;
 
 class GameTest extends PlayStationApiTestCase
 {
