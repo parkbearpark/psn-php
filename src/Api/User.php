@@ -5,6 +5,9 @@ namespace Tustin\PlayStation\Api;
 use Tustin\PlayStation\Client;
 use Tustin\PlayStation\SessionType;
 
+use Tustin\PlayStation\Resource\Image;
+use Tustin\PlayStation\Resource\Audio;
+
 use Tustin\PlayStation\Api\Session;
 use Tustin\PlayStation\Api\Game;
 
@@ -233,7 +236,7 @@ class User extends AbstractApi
      * @param string $imageContents Raw bytes of the image.
      * @return \Tustin\PlayStation\Api\Messaging\Message|null
      */
-    public function sendImage(string $imageContents) : ?Message
+    public function sendImage(Image $image) : ?Message
     {
         $thread = $this->messageGroup();
 

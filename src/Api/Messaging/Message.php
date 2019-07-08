@@ -25,7 +25,7 @@ class Message extends AbstractApi
      */
     public function sender() : User
     {
-        return $this->client->user($this->message->sender->onlineId);
+        return new User($this->client, $this->message->sener->onlineId);
     }
 
     /**

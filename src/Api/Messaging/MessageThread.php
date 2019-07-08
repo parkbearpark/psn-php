@@ -5,6 +5,9 @@ namespace Tustin\PlayStation\Api\Messaging;
 use Tustin\PlayStation\Client;
 use Tustin\PlayStation\MessageType;
 
+use Tustin\PlayStation\Resource\Image;
+use Tustin\PlayStation\Resource\Audio;
+
 use Tustin\PlayStation\Api\User;
 
 class MessageThread extends AbstractApi 
@@ -22,7 +25,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Get the MessageThread info.
+     * Get the message thread info.
      *
      * @param int $count Amount of messages to return.
      * @param bool $force Force an update.
@@ -41,7 +44,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Gets the MessageThread ID.
+     * Gets the message thread ID.
      *
      * @return string
      */
@@ -51,7 +54,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Get the amount of members.
+     * Get the amount of members in the message thread.
      *
      * @return int
      */
@@ -61,7 +64,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Get the MessageThread name.
+     * Get the name of the message thread.
      *
      * @return string
      */
@@ -123,9 +126,9 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Set the name of the MessageThread.
+     * Set the name of the message thread.
      *
-     * @param string $name Name of the MessageThread.
+     * @param string $name New name of the message thread.
      * @return bool
      */
     public function setName(string $name) : bool
@@ -178,7 +181,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Send a text message.
+     * Send a text message to the message thread.
      *
      * @param string $message The message text to send.
      * @return \Tustin\PlayStation\Api\Message|null
@@ -208,7 +211,9 @@ class MessageThread extends AbstractApi
 
         $messageFields = $this->info(1, true);
 
-        if (!isset($messageFields->threadEvents)) return null;
+        if (!isset($messageFields->threadEvents)) {
+            return null;
+        }
 
         $messageData = $messageFields->threadEvents[0];
 
@@ -216,13 +221,17 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Send an image message.
+     * Send an image message to the message thread.
      *
-     * @param string $imageContents Raw bytes of the image.
+     * @param \Tustin\PlayStation\Resource\Image $image The image file.
      * @return \Tustin\PlayStation\Api\Message|null
      */
-    public function sendImage(string $imageContents) : ?Message
+    public function sendImage(Image $image) : ?Message
     {
+        if ($image->type() != IMAGETYPE_PNG) {
+            throw new \InvalidArgumentException("Image file type can only be PNG.");
+        }
+    
         $data = (object)[
             'messageEventDetail' => (object)[
                 'eventCategoryCode' => MessageType::Image, 
@@ -243,7 +252,7 @@ class MessageThread extends AbstractApi
             ],
             [
                 'name' => 'imageData',
-                'contents' => $imageContents,
+                'contents' => $image->data(),
                 'headers' => [
                     'Content-Type' => 'image/png',
                     'Content-Transfer-Encoding' => 'binary',
@@ -255,7 +264,9 @@ class MessageThread extends AbstractApi
 
         $messageFields = $this->info(1, true);
 
-        if (!isset($messageFields->threadEvents)) return null;
+        if (!isset($messageFields->threadEvents)) {
+            return null;
+        }
 
         $messageData = $messageFields->threadEvents[0];
 
@@ -263,14 +274,17 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Send an audio message.
+     * Send an audio message to the message thread.
      *
-     * @param string $audioContents Raw bytes of the audio.
-     * @param int $audioLengthSeconds Length of the audio in seconds.
+     * @param \Tustin\PlayStation\Resource\Audio $audio The audio file.
      * @return \Tustin\PlayStation\Api\Message|null
      */
-    public function sendAudio(string $audioContents, int $audioLengthSeconds) : ?Message
+    public function sendAudio(Audio $audio) : ?Message
     {
+        if ($audio->type() !== 'audio/3gpp') {
+            throw new \InvalidArgumentException("Audio file type can only be audio/3gpp.");
+        }
+
         $data = (object)[
             'messageEventDetail' => (object)[
                 'eventCategoryCode' => MessageType::Audio, 
@@ -306,7 +320,9 @@ class MessageThread extends AbstractApi
 
         $messageFields = $this->info(1, true);
 
-        if (!isset($messageFields->threadEvents)) return null;
+        if (!isset($messageFields->threadEvents)) {
+            return null;
+        }
 
         $messageData = $messageFields->threadEvents[0];
 
@@ -314,7 +330,7 @@ class MessageThread extends AbstractApi
     }
 
     /**
-     * Get all the messages.
+     * Get all the messages in the message thread.
      *
      * @param int $count Amount of messages to get.
      * @return array Array of \Tustin\PlayStation\Api\Message.
@@ -335,15 +351,19 @@ class MessageThread extends AbstractApi
     /**
      * Set the message thread thumbnail.
      *
-     * @param string $imageContents Raw bytes of the image.
+     * @param \Tustin\PlayStation\Resource\Image $image The image file.
      * @return bool
      */
-    public function setThumbnail(string $imageContents) : bool
+    public function setThumbnail(Image $image) : bool
     {
+        if ($image->type() != IMAGETYPE_JPEG) {
+            throw new \InvalidArgumentException("Image file type can only be JPEG.");
+        }
+
         $parameters = [
             [
                 'name' => 'threadThumbnail',
-                'contents' => $imageContents,
+                'contents' => $image->data(),
                 'headers' => [
                     'Content-Type' => 'image/jpeg',
                     'Content-Transfer-Encoding' => 'binary',

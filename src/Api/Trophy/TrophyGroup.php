@@ -21,7 +21,7 @@ class TrophyGroup extends AbstractApi
     }
 
     /**
-     * Get TrophyGroup ID.
+     * Get trophy group ID.
      * 
      * Examples: default, 001, 002, etc
      *
@@ -29,11 +29,11 @@ class TrophyGroup extends AbstractApi
      */
     public function id() : string
     {
-        return $this->grogroupDataup->trophyGroupId;
+        return $this->groupData->trophyGroupId;
     }
 
     /**
-     * Get name.
+     * Get trophy group name.
      *
      * @return string
      */
@@ -43,7 +43,7 @@ class TrophyGroup extends AbstractApi
     }
 
     /**
-     * Get detail.
+     * Get trophy group detail.
      *
      * @return string
      */
@@ -53,7 +53,7 @@ class TrophyGroup extends AbstractApi
     }
 
     /**
-     * Get the icon URL.
+     * Get the trophy group icon URL.
      *
      * @return string
      */
@@ -63,7 +63,7 @@ class TrophyGroup extends AbstractApi
     }
 
     /**
-     * Get amount of Trophies.
+     * Get amount of trophies this trophy group contains.
      *
      * @return int
      */
@@ -113,15 +113,15 @@ class TrophyGroup extends AbstractApi
      *
      * @return array Array of \Tustin\PlayStation\Api\Trophy\Trophy
      */
-    public function trophies() : array 
+    public function trophies(string $iconSize = 'm', string $language = 'en') : array 
     {
         $returnTrophies = [];
 
         $data = [
             'fields' => '@default,trophyRare,trophyEarnedRate,hasTrophyGroups,trophySmallIconUrl',
-            'iconSize' => 'm',
+            'iconSize' => $iconSize,
             'visibleType' => 1,
-            'npLanguage' => 'en'
+            'npLanguage' => $language
         ];
 
         if ($this->comparing()) {

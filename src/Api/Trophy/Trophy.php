@@ -21,7 +21,7 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets the Trophy ID.
+     * Gets the trophy ID.
      *
      * @return int
      */
@@ -31,7 +31,7 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Checks if Trophy is hidden.
+     * Checks if trophy is hidden.
      *
      * @return bool
      */
@@ -41,7 +41,7 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets the type of Trophy (bronze, silver, gold, platinum).
+     * Gets the type of trophy (bronze, silver, gold, platinum).
      *
      * @return string
      */
@@ -51,7 +51,7 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets the name of the Trophy.
+     * Gets the name of the trophy.
      *
      * @return string
      */
@@ -61,7 +61,7 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets the Trophy's detail.
+     * Gets the trophy's detail.
      *
      * @return string
      */
@@ -71,7 +71,7 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets the icon URL for the Trophy.
+     * Gets the icon URL for the trophy.
      *
      * @return string
      */
@@ -81,7 +81,7 @@ class Trophy extends AbstractApi
     }
 
     /**
-     * Gets the total earned rate of the Trophy.
+     * Gets the total earned rate of the trophy.
      *
      * @return float
      */
@@ -163,7 +163,7 @@ class Trophy extends AbstractApi
     }
 
     /**	
-     * Calculate all the types of Trophies.	
+     * Calculate all the types of trophies.	
      *	
      * @param object $trophyTypes Trophy type information.	
      * @return int	
