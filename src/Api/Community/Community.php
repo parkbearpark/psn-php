@@ -1,8 +1,10 @@
 <?php
 
-namespace Tustin\PlayStation\Api;
+namespace Tustin\PlayStation\Api\Community;
 
 use Tustin\PlayStation\Client;
+
+use Tustin\PlayStation\Api\AbstractApi;
 use Tustin\PlayStation\Api\User;
 
 class Community extends AbstractApi 

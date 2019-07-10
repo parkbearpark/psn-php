@@ -2,10 +2,14 @@
 
 namespace Tustin\PlayStation\Resource;
 
-class Image extends ResourceTrait
+class Image
 {
-    public function type() : int
+    use ResourceTrait;
+
+    public function type() : string
     {
-        return exif_imagetype($this->path);
+        $finfo = new \finfo(FILEINFO_MIME);
+        $mime = $finfo->file($this->path);
+        return explode(';', $mime)[0];
     }
 }

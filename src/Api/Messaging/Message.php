@@ -2,6 +2,7 @@
 
 namespace Tustin\PlayStation\Api\Messaging;
 
+use Tustin\PlayStation\Api\AbstractApi;
 use Tustin\PlayStation\Client;
 use Tustin\PlayStation\Api\User;
 
@@ -25,7 +26,7 @@ class Message extends AbstractApi
      */
     public function sender() : User
     {
-        return new User($this->client, $this->message->sener->onlineId);
+        return new User($this->client, $this->message->sender->onlineId);
     }
 
     /**

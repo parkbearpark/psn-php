@@ -13,7 +13,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
      */
     protected $client;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->client = new Client();
     }
@@ -26,13 +26,13 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
 
     public function testInvalidRefreshToken()
     {
-        $this->expectException('\PlayStation\Exception\PlayStationApiException');
-        $this->client->login('deadbeef');
+        $this->expectException('\Tustin\PlayStation\Exception\PlayStationApiException');
+        $this->client->loginWithRefreshToken('deadbeef');
     }
 
     public function testInvalidTwoFactorLogin()
     {
-        $this->expectException('\PlayStation\Exception\PlayStationApiException');
+        $this->expectException('\Tustin\PlayStation\Exception\PlayStationApiException');
         $this->client->login('abc', 6969);
     }
 
@@ -43,7 +43,7 @@ class AuthenticationTest extends \PHPUnit\Framework\TestCase
     {
         $refreshToken = getenv('PSN_PHP_REFRESH_TOKEN');
         
-        $this->client->login($refreshToken);
+        $this->client->loginWithRefreshToken($refreshToken);
 
         $this->assertEquals($this->client->onlineId(), 'speedy424key');
     }

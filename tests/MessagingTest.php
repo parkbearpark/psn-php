@@ -2,8 +2,8 @@
 
 namespace Tustin\PlayStation\Tests;
 
-use Tustin\PlayStation\Api\MessageThread;
-use Tustin\PlayStation\Api\Message;
+use Tustin\PlayStation\Api\Messaging\MessageThread;
+use Tustin\PlayStation\Api\Messaging\Message;
 
 class MessagingTest extends PlayStationApiTestCase
 {
@@ -11,13 +11,13 @@ class MessagingTest extends PlayStationApiTestCase
     {
         $threads = self::$loggedInUser->messageThreads();
 
-        $this->assertInternalType('array', $threads);
+        $this->assertIsArray($threads);
 
         $this->assertGreaterThanOrEqual(count($threads), 1);
 
         $thread = $threads[0];
 
-        $this->assertInstanceOf('\PlayStation\Api\MessageThread', $thread);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\Messaging\MessageThread', $thread);
     }
 
     public function testTryToGetPrivateMessageThreadIAmNotIn()
@@ -33,7 +33,7 @@ class MessagingTest extends PlayStationApiTestCase
         // This thread should exist as long as I don't accidentally leave it ;)
         $thread = self::$tustinUser->privateMessageThread();
 
-        $this->assertInstanceOf('\PlayStation\Api\MessageThread', $thread);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\Messaging\MessageThread', $thread);
 
         return $thread;
     }
@@ -61,13 +61,13 @@ class MessagingTest extends PlayStationApiTestCase
     {
         $messages = $thread->messages(3);
 
-        $this->assertInternalType('array', $messages);
+        $this->assertIsArray($messages);
 
         $this->assertEquals(count($messages), 3);
 
         $message = $messages[0];
 
-        $this->assertInstanceOf('\PlayStation\Api\Message', $message);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\Messaging\Message', $message);
     }
 
     /**
@@ -76,8 +76,8 @@ class MessagingTest extends PlayStationApiTestCase
     public function testSetMessageThreadThumbnailImage(MessageThread $thread)
     {
         $pugImagePath = realpath(__DIR__ . '/files/pug.jpg');
-        $pugImage = file_get_contents($pugImagePath);
-        $this->assertTrue($thread->setThumbnail($pugImage));
+
+        $this->assertTrue($thread->setThumbnail(new \Tustin\PlayStation\Resource\Image($pugImagePath)));
     }
 
     /**
@@ -111,7 +111,7 @@ class MessagingTest extends PlayStationApiTestCase
     {
         $message = $thread->sendMessage('Hello @ ' . time());
 
-        $this->assertInstanceOf('\PlayStation\Api\Message', $message);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\Messaging\Message', $message);
 
         return $message;
     }
@@ -123,7 +123,7 @@ class MessagingTest extends PlayStationApiTestCase
     {
         $sender = $message->sender();
 
-        $this->assertInstanceOf('\PlayStation\Api\User', $sender);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\User', $sender);
 
         $this->assertEquals($sender->onlineId(), self::$loggedInUser->onlineId());
     }
@@ -133,6 +133,6 @@ class MessagingTest extends PlayStationApiTestCase
      */
     public function testDoesMessageContainTheActualContents(Message $message)
     {
-        $this->assertContains('Hello', $message->body());
+        $this->assertStringContainsString('Hello', $message->body());
     }
 }

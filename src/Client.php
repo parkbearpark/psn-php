@@ -118,7 +118,7 @@ class Client extends HttpClient
             'duid' => self::DUID,
             'client_id' => self::CLIENT_ID,
             'response_type' => 'code',
-            'scope' => implode(' ', self::SCOPE),
+            'scope' => implode(' ', self::SCOPES),
             'redirect_uri' => self::REDIRECT_URL
         ], [
             'Cookie' => 'npsso=' . $npsso
@@ -160,10 +160,10 @@ class Client extends HttpClient
             'app_context' => 'inapp_ios',
             'client_id' => self::CLIENT_ID,
             'client_secret' => self::CLIENT_SECRET,
-            'refresh_token' => $ticketUuidOrRefreshToken,
+            'refresh_token' => $refreshToken,
             'duid' => self::DUID,
             'grant_type' => 'refresh_token',
-            'scope' => self::SCOPE
+            'scope' => implode(' ', self::SCOPES)
         ]);
 
         $this->postLogin($response);

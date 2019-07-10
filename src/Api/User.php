@@ -11,6 +11,8 @@ use Tustin\PlayStation\Resource\Audio;
 use Tustin\PlayStation\Api\Session;
 use Tustin\PlayStation\Api\Game;
 
+use Tustin\PlayStation\Api\Community\Community;
+
 use Tustin\PlayStation\Api\Messaging\Message;
 use Tustin\PlayStation\Api\Messaging\MessageThread;
 
@@ -41,6 +43,110 @@ class User extends AbstractApi
         $this->onlineId = $onlineId;
         $this->onlineIdParameter = ($onlineId == '') ? 'me' : $onlineId;
         $this->isLoggedInUser = $this->onlineIdParameter == 'me';
+    }
+
+    /**
+     * Gets the user's online ID.
+     *
+     * @return string
+     */
+    public function onlineId() : string
+    {
+        return $this->info()->onlineId;
+    }
+
+    /**
+     * Gets the user's about me.
+     *
+     * @return string
+     */
+    public function aboutMe() : string
+    {
+        return $this->info()->aboutMe ?? "";
+    }
+    /**
+     * Checks if logged in user is following the current user.
+     *
+     * @return boolean
+     */
+    public function following() : bool
+    {
+        return $this->info()->following;
+    }
+    /**
+     * Gets the user's follower count.
+     *
+     * @return integer
+     */
+    public function followerCount() : int
+    {
+        return $this->info()->followerCount;
+    }
+    /**
+     * Checks if the user is verified or not.
+     *
+     * @return boolean
+     */
+    public function verified() : bool
+    {
+        return $this->info()->isOfficiallyVerified;
+    }
+    /**
+     * Gets the user's avatar URL.
+     *
+     * @return string
+     */
+    public function avatarUrl() : string
+    {
+        return $this->info()->avatarUrls[0]->avatarUrl;
+    }
+    /**
+     * Gets the user's account ID.
+     *
+     * @return string
+     */
+    public function accountId() : string
+    {
+        return $this->info()->accountId;
+    }
+    
+    /**
+     * Checks if logged in user is friends with the current user.
+     *
+     * @return boolean
+     */
+    public function friend() : bool
+    {
+        return ($this->info()->friendRelation !== 'no');
+    }
+    /**
+     * Checks if logged in user is close friends with the current user.
+     *
+     * @return boolean
+     */
+    public function closeFriend() : bool
+    {
+        return ($this->info()->personalDetailSharing !== 'no');
+    }
+    /**
+     * Gets the last online date and time for the user.
+     *
+     * @return \DateTime|null
+     */
+    public function lastOnlineDate() : ?\DateTime
+    {
+        $isOnline = $this->info()->presences[0]->onlineStatus == "online";
+        // They're online now, so just return the current DateTime.
+        if ($isOnline) return new \DateTime();
+        // If they don't have a DateTime, just return null.
+        // This can happen if the User object was created using the onlineId string and not the profile data.
+        // Sony only provides lastOnlineDate on the 'friends/profiles2' endpoint and not the individual userinfo endpoint.
+        // This can be a TODO if in the future Sony decides to make that property available for that endpoint.
+        // - Tustin 9/29/2018
+        if (!isset($this->info()->presences[0]->lastOnlineDate)) return null;
+        
+        // I guess it's possible for lastOnlineDate to not exist, but that seems very unlikely.
+        return new \DateTime($this->info()->presences[0]->lastOnlineDate);
     }
 
     /**

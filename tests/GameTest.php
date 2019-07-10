@@ -3,8 +3,9 @@
 namespace Tustin\PlayStation\Tests;
 
 use Tustin\PlayStation\Api\Game;
-use Tustin\PlayStation\Api\TrophyGroup;
-use Tustin\PlayStation\Api\Trophy;
+
+use Tustin\PlayStation\Api\Trophy\TrophyGroup;
+use Tustin\PlayStation\Api\Trophy\Trophy;
 
 class GameTest extends PlayStationApiTestCase
 {
@@ -12,14 +13,14 @@ class GameTest extends PlayStationApiTestCase
     {
         $games = self::$loggedInUser->games();
 
-        $this->assertInternalType('array', $games);
+        $this->assertIsArray($games);
 
         $this->assertEquals(count($games), 0);
     }
 
     public function testGetUsersPlayedGamesWithPrivacySettingsEnabled()
     {
-        $this->expectException('\PlayStation\Exception\AccessDeniedException');
+        $this->expectException('\Tustin\PlayStation\Exception\AccessDeniedException');
 
         self::$testUser->games();
     }
@@ -28,7 +29,7 @@ class GameTest extends PlayStationApiTestCase
     {
         $games = self::$tustinUser->games(50);
 
-        $this->assertInternalType('array', $games);
+        $this->assertIsArray($games);
 
         $this->assertEquals(count($games), 50);
 
@@ -42,7 +43,7 @@ class GameTest extends PlayStationApiTestCase
 
         $bo4 = $bo4Array[0];
 
-        $this->assertInstanceOf('\PlayStation\Api\Game', $bo4);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\Game', $bo4);
 
         return $bo4;
     }
@@ -50,7 +51,7 @@ class GameTest extends PlayStationApiTestCase
     /**
      * @depends testGetUsersPlayedGamesWithPrivacySettingsDisabled
      */
-    public function testGameShouldHaveTrophes(Game $game)
+    public function testGameShouldHaveTrophies(Game $game)
     {
         $this->assertTrue($game->hasTrophies());
     }
@@ -86,16 +87,16 @@ class GameTest extends PlayStationApiTestCase
     {
         $groups = $game->trophyGroups();
 
-        $this->assertInternalType('array', $groups);
+        $this->assertIsArray($groups);
 
         // There should be at least 4
         // Base game, Classified, Dead of the Night, Ancient Evil
         // This should only increase as time goes on and more DLC is released
-        $this->assertGreaterThanOrEqual(count($groups), 4);
+        $this->assertGreaterThanOrEqual(4, count($groups));
 
         $baseTrophyGroup = $groups[0];
 
-        $this->assertInstanceOf('\PlayStation\Api\TrophyGroup', $baseTrophyGroup);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\Trophy\TrophyGroup', $baseTrophyGroup);
 
         return $baseTrophyGroup;
     }
@@ -139,14 +140,14 @@ class GameTest extends PlayStationApiTestCase
     {
         $trophies = $group->trophies();
 
-        $this->assertInternalType('array', $trophies);
+        $this->assertIsArray($trophies);
 
         // Should be the same as the above test.
         $this->assertGreaterThanOrEqual(count($trophies), 53);
 
         $platinumTrophy = $trophies[0];
 
-        $this->assertInstanceOf('\PlayStation\Api\Trophy', $platinumTrophy);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\Trophy\Trophy', $platinumTrophy);
 
         $this->assertEquals($platinumTrophy->type(), 'platinum');
 

@@ -8,6 +8,7 @@ use Tustin\PlayStation\MessageType;
 use Tustin\PlayStation\Resource\Image;
 use Tustin\PlayStation\Resource\Audio;
 
+use Tustin\PlayStation\Api\AbstractApi;
 use Tustin\PlayStation\Api\User;
 
 class MessageThread extends AbstractApi 
@@ -228,7 +229,7 @@ class MessageThread extends AbstractApi
      */
     public function sendImage(Image $image) : ?Message
     {
-        if ($image->type() != IMAGETYPE_PNG) {
+        if ($image->type() != 'image/png') {
             throw new \InvalidArgumentException("Image file type can only be PNG.");
         }
     
@@ -356,7 +357,7 @@ class MessageThread extends AbstractApi
      */
     public function setThumbnail(Image $image) : bool
     {
-        if ($image->type() != IMAGETYPE_JPEG) {
+        if ($image->type() !== 'image/jpeg') {
             throw new \InvalidArgumentException("Image file type can only be JPEG.");
         }
 

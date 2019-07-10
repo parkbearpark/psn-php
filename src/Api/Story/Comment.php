@@ -4,6 +4,7 @@ namespace Tustin\PlayStation\Api\Story;
 
 use Tustin\PlayStation\Client;
 
+use Tustin\PlayStation\Api\AbstractApi;
 use Tustin\PlayStation\Api\User;
 use Tustin\PlayStation\Api\Story\Story;
 

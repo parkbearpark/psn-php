@@ -36,13 +36,13 @@ class PlayStationApiTestCase extends \PHPUnit\Framework\TestCase
      */
     protected static $tustinUser;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass() : void
     {
         self::$client = new Client(['verify' => false, 'proxy' => '127.0.0.1:8888']);
 
         $refreshToken = getenv('PSN_PHP_REFRESH_TOKEN');
 
-        self::$client->login($refreshToken);
+        self::$client->loginWithRefreshToken($refreshToken);
 
         self::$loggedInUser = self::$client->user();
 

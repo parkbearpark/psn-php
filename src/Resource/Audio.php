@@ -2,8 +2,10 @@
 
 namespace Tustin\PlayStation\Resource;
 
-class Audio extends ResourceTrait
+class Audio
 {
+    use ResourceTrait;
+
     // @NeedsTesting
     public function type() : string
     {

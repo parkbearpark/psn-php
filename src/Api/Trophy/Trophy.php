@@ -3,6 +3,8 @@
 namespace Tustin\PlayStation\Api\Trophy;
 
 use Tustin\PlayStation\Client;
+
+use Tustin\PlayStation\Api\AbstractApi;
 use Tustin\PlayStation\Api\User;
 
 class Trophy extends AbstractApi 

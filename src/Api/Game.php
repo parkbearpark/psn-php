@@ -5,7 +5,9 @@ namespace Tustin\PlayStation\Api;
 use Tustin\PlayStation\Client;
 
 use Tustin\PlayStation\Api\User;
-use Tustin\PlayStation\Api\Trophy;
+
+use Tustin\PlayStation\Api\Trophy\Trophy;
+use Tustin\PlayStation\Api\Trophy\TrophyGroup;
 
 class Game extends AbstractApi 
 {

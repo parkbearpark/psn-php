@@ -8,7 +8,7 @@ class UserTest extends PlayStationApiTestCase
     {
         $user = self::$client->user('something that should $$ never happen!!!');
 
-        $this->expectException('\PlayStation\Exception\NotFoundException');
+        $this->expectException('\Tustin\PlayStation\Exception\NotFoundException');
 
         $user->games();
     }
@@ -45,14 +45,14 @@ class UserTest extends PlayStationApiTestCase
 
     public function testIsMyAvatarTheDefaultAvatar()
     {
-        $this->assertContains('Defaultavatar', self::$loggedInUser->avatarUrl());
+        $this->assertStringContainsString('Defaultavatar', self::$loggedInUser->avatarUrl());
     }
 
     public function testGetMyFriends()
     {
         $friends = self::$loggedInUser->friends();
 
-        $this->assertInternalType('array', $friends);
+        $this->assertIsArray($friends);
 
         // This account is friends with my main account.
         $this->assertEquals(count($friends), 1);
@@ -60,7 +60,7 @@ class UserTest extends PlayStationApiTestCase
 
     public function testTryToGetUsersFriendsWithPrivacySettingsEnabled()
     {
-        $this->expectException('\PlayStation\Exception\AccessDeniedException');
+        $this->expectException('\Tustin\PlayStation\Exception\AccessDeniedException');
 
         self::$testUser->friends();
     }
@@ -69,19 +69,19 @@ class UserTest extends PlayStationApiTestCase
     {
         $friends = self::$tustinUser->friends();
 
-        $this->assertInternalType('array', $friends);
+        $this->assertIsArray($friends);
         $this->assertEquals(count($friends), 36);
 
         $friend = $friends[0];
 
-        $this->assertInstanceOf('\PlayStation\Api\User', $friend);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\User', $friend);
     }
 
     public function testGetMyGames()
     {
         $games = self::$loggedInUser->games();
 
-        $this->assertInternalType('array', $games);
+        $this->assertIsArray($games);
 
         // This user shouldn't have any games played.
         $this->assertEquals(count($games), 0);
@@ -89,7 +89,7 @@ class UserTest extends PlayStationApiTestCase
 
     public function testGetUsersGamesWithPrivacySettingsEnabled()
     {
-        $this->expectException('\PlayStation\Exception\AccessDeniedException');
+        $this->expectException('\Tustin\PlayStation\Exception\AccessDeniedException');
 
         self::$testUser->games();
     }
@@ -98,26 +98,26 @@ class UserTest extends PlayStationApiTestCase
     {
         $games = self::$tustinUser->games();
 
-        $this->assertInternalType('array', $games);
+        $this->assertIsArray($games);
         $this->assertEquals(count($games), 100);
 
         $game = $games[0];
 
-        $this->assertInstanceOf('\PlayStation\Api\Game', $game);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\Game', $game);
     }
 
-    public function testGetCommunitiesUserIsInWithPrivacySettingsEnabled()
-    {
-        $this->expectException('\PlayStation\Exception\AccessDeniedException');
+    // public function testGetCommunitiesUserIsInWithPrivacySettingsEnabled()
+    // {
+    //     $this->expectException('\Tustin\PlayStation\Exception\AccessDeniedException');
 
-        self::$testUser->communities();
-    }
+    //     self::$testUser->communities();
+    // }
 
     public function testTryToGetCommunitiesUserIsExpectNone()
     {
         $communities = self::$loggedInUser->communities();
 
-        $this->assertInternalType('array', $communities);
+        $this->assertIsArray($communities);
 
         $this->assertEmpty($communities);
     }
@@ -126,12 +126,12 @@ class UserTest extends PlayStationApiTestCase
     {
         $communities = self::$tustinUser->communities();
 
-        $this->assertInternalType('array', $communities);
+        $this->assertIsArray($communities);
 
         $this->assertNotEmpty($communities);
 
         $community = $communities[0];
 
-        $this->assertInstanceOf('\PlayStation\Api\Community', $community);
+        $this->assertInstanceOf('\Tustin\PlayStation\Api\Community\Community', $community);
     }
 }
