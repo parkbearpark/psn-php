@@ -7,6 +7,8 @@ use Tustin\PlayStation\Client;
 use Tustin\PlayStation\Api\AbstractApi;
 use Tustin\PlayStation\Api\User;
 
+use Tustin\PlayStation\Resource\Image;
+
 class Community extends AbstractApi 
 {
     const COMMUNITY_ENDPOINT    = 'https://communities.api.playstation.com/v1/';
@@ -24,14 +26,24 @@ class Community extends AbstractApi
         $this->communityId = $communityId;
     }
 
-    // public static function create(string $name, string $type = '', string $titleId = '')
-    // {
-    //     $response = $this->postJson(Community::COMMUNITY_ENDPOINT . 'communities?action=create', [
-    //         'name' => $communityIdOrName,
-    //         'type' => $type,
-    //         'titleId' => $titleId
-    //     ]);
-    // }
+    /**
+     * Create a community.
+     * 
+     * TEMP: Needs to be made static or something.
+     *
+     * @param string $name The name of the community (must be unique).
+     * @param string $type Who can join this community (open/closed)
+     * @param string $titleId The titleId of the associated game (leave empty for no association).
+     * @return \Tustin\PlayStation\Api\Community\Community
+     */
+    public function create(string $name, string $type = 'open', string $titleId = '')
+    {
+        $response = $this->postJson(Community::COMMUNITY_ENDPOINT . 'communities?action=create', [
+            'name' => $communityIdOrName,
+            'type' => $type,
+            'titleId' => $titleId
+        ]);
+    }
 
     /**
      * Gets all the information fields of the Community.
@@ -172,7 +184,7 @@ class Community extends AbstractApi
     }
 
     /**
-     * Set who can join the Community.
+     * Set who can join the community.
      *
      * @param string $status 'open' or 'closed'.
      * @return void
@@ -200,13 +212,21 @@ class Community extends AbstractApi
     }
 
     /**
-     * Get the Users in the Community.
+     * Get the users in the community.
+     * 
+     * TODO: This API call returns a `next` property, which is the endpoint you should use to get the next 100 users.
+     * I just need to find a good way to provide this property to support pagination. Maybe with some kind of callback function? I'm not too sure yet.
+     * - Tustin 10/10/2019
      *
-     * @param int $limit Amount of Users to return.
-     * @return array Array of Api\User.
+     * @param int $limit Amount of \Tustin\PlayStation\Api\User to return.
+     * @return array Array of \Tustin\PlayStation\Api\User.
      */
     public function members(int $limit = 100) : array
     {
+        if ($limit > 100) {
+            throw new \InvalidArgumentException('Limit can only have a maximum value of 100.');
+        }
+
         $returnMembers = [];
 
         $members = $this->get(sprintf(self::COMMUNITY_ENDPOINT . 'communities/%s/members', $this->id()), [
@@ -222,13 +242,27 @@ class Community extends AbstractApi
         return $returnMembers;
     }
 
+    /**
+     * Get all the threads for the community.
+     * 
+     * This should be used to find the id for the MOTD and Discussion threads. 
+     * Typically for each community, the 0th index item will be the MOTD thread and the 1st index will be the Discussion thread.
+     *
+     * @return array Array of \Tustin\PlayStation\Api\Community\Thread.
+     */
     public function threads() : \stdClass
     {
-        if ($this->threads === null) {
-            $this->threads = $this->get(sprintf(self::COMMUNITY_ENDPOINT . 'communities/%s/threads', $this->id()));
+        $returnThreads = [];
+
+        $threads = $this->get(sprintf(self::COMMUNITY_ENDPOINT . 'communities/%s/threads', $this->id()));
+
+        if (count($threads->threads) === 0) return $returnThreads;
+
+        foreach ($threads->threads as $thread) {
+            $returnThreads[] = new Thread($this->client, $thread, $this);
         }
 
-        return $this->threads;
+        return $returnThreads;
     }
 
     /**
@@ -247,12 +281,20 @@ class Community extends AbstractApi
      * Uploads an image to Sony's CDN and returns the URL.
      * 
      * Sony requires all images (profile images, community images, etc) to be set with this CDN URL.
+     * 
+     * Each image uploaded using this endpoint requires a pupose. Some documented purposes:
+     * communityProfileImage, communityBackgroundImage, communityWallImage
      *
-     * @param string $purpose
+     * @param string $purpose The purpose of the image (see above).
+     * @param \Tustin\PlayStation\Resource\Image $image The JPEG image.
      * @return string
      */
-    private function uploadImage(string $purpose, string $imageData) : string
+    private function uploadImage(string $purpose, Image $image) : string
     {
+        if ($image->type() !== 'image/jpeg') {
+            throw new \InvalidArgumentException("Image file type can only be JPEG.");
+        }
+
         $parameters = [
             [
                 'name' => 'purpose',
@@ -261,7 +303,7 @@ class Community extends AbstractApi
             [
                 'name' => 'file',
                 'filename' => 'dummy_file_name',
-                'contents' => $imageData,
+                'contents' => $image->data(),
                 'headers' => [
                     'Content-Type' => 'image/jpeg'
                 ]
