@@ -3,46 +3,43 @@
 namespace Tustin\PlayStation\Api;
 
 use Tustin\PlayStation\Client;
-use Tustin\PlayStation\SessionType;
 
-use Tustin\PlayStation\Resource\Image;
-use Tustin\PlayStation\Resource\Audio;
-
-use Tustin\PlayStation\Api\Session;
+use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Game;
 
-use Tustin\PlayStation\Api\Community\Community;
+use Tustin\PlayStation\Api\Session;
 
-use Tustin\PlayStation\Api\Messaging\Message;
-use Tustin\PlayStation\Api\Messaging\MessageThread;
+use Tustin\PlayStation\SessionType;
+
+use Tustin\PlayStation\Api\Model\User;
+use Tustin\PlayStation\Resource\Audio;
+
+use Tustin\PlayStation\Resource\Image;
 
 use Tustin\PlayStation\Api\Story\Story;
-
 use Tustin\PlayStation\Api\Trophy\Trophy;
+use Tustin\PlayStation\Api\Messaging\Message;
 use Tustin\PlayStation\Api\Trophy\TrophyGroup;
+use Tustin\PlayStation\Iterator\UsersIterator;
+use Tustin\PlayStation\Api\Community\Community;
+use Tustin\PlayStation\Api\Messaging\MessageThread;
 
-class User extends AbstractApi 
+class Users extends Api 
 {
-    const USERS_ENDPOINT = 'https://us-prof.np.community.playstation.net/userProfile/v1/users/%s/';
-
-    private $onlineId;
-    private $onlineIdParameter;
-    private $profile;
-    private $isLoggedInUser;
-
-    /**
-     * Constructs a new User.
-     *
-     * @param Client $client
-     * @param string $onlineId The online ID.
-     */
-    public function __construct(Client $client, string $onlineId = '')
+    public function search(string $query, int $limit = 50) : UsersIterator
     {
-        parent::__construct($client);
+        // @TODO: We need some iterator support so you can use $offset
+        return new UsersIterator($this->httpClient, $query, $limit);
+    }
 
-        $this->onlineId = $onlineId;
-        $this->onlineIdParameter = ($onlineId == '') ? 'me' : $onlineId;
-        $this->isLoggedInUser = $this->onlineIdParameter == 'me';
+    public function find(string $onlineId)
+    {
+        return new User($this->httpClient, $onlineId);
+    }
+
+    public function me()
+    {
+        return new User($this->httpClient, 'me');
     }
 
     /**
