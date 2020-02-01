@@ -5,16 +5,19 @@ use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Model\User;
 
-class UsersIterator extends Api implements \Iterator
+class FriendsIterator extends Api implements \Iterator
 {
     use ApiIterator;
 
-    protected string $query;
+    protected string $parameter;
     
-    public function __construct(Client $client, string $query, int $limit = 50)
+    protected string $sort;
+    
+    public function __construct(Client $client, string $parameter, string $sort, int $limit = 50)
     {
         parent::__construct($client);
-        $this->query = $query;
+        $this->parameter = $parameter;
+        $this->sort = $sort;
         $this->limit = $limit;
         $this->access(0);
     }
@@ -27,20 +30,17 @@ class UsersIterator extends Api implements \Iterator
      */
     public function access(int $offset)
     {
-        $results = $this->get('https://friendfinder.api.np.km.playstation.net/friend-finder/api/v1/users/me/search', [
+        $results = $this->get('https://us-prof.np.community.playstation.net/userProfile/v1/users/' . $this->parameter . '/friends/profiles2', [
             'fields' => 'onlineId',
-            'query' => $this->query,
-            'searchTarget' => 'all',
-            'searchFields' => 'onlineId',
             'limit' => $this->limit,
             'offset' => $offset,
-            'rounded' => true
+            'sort' => $this->sort,
         ]);
 
         // Just set this each time for brevity.
         $this->setTotalResults($results->totalResults);
 
-        $this->cache = $results->searchResults;
+        $this->cache = $results->profiles;
     }
 
     public function current()
