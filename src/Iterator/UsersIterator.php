@@ -58,7 +58,7 @@ class UsersIterator extends Api implements \Iterator
 
     public function valid()
     {
-        return !is_null($this->cache[$this->currentIndexer]);
+        return array_key_exists($this->currentIndexer, $this->cache);
     }
 
     public function next()
