@@ -10,12 +10,30 @@ class UsersIterator extends Api implements \Iterator
     use ApiIterator;
 
     protected string $query;
+
+    protected string $searchFields;
     
-    public function __construct(Client $client, string $query, int $limit)
+    public function __construct(Client $client, string $query, array $searchFields, int $limit)
     {
+        if (empty($query))
+        {
+            throw new \InvalidArgumentException('$query must contain a value.');
+        }
+
+        if (empty($searchFields))
+        {
+            throw new \InvalidArgumentException('$searchFields must contain at least one value.');
+        }
+
+        if ($limit <= 0)
+        {
+            throw new \InvalidArgumentException('$limit must be greater than zero.');
+        }
+
         parent::__construct($client);
         $this->query = $query;
         $this->limit = $limit;
+        $this->searchFields = implode(',', $searchFields);
         $this->access(0);
     }
 
@@ -25,7 +43,7 @@ class UsersIterator extends Api implements \Iterator
             'fields' => 'onlineId',
             'query' => $this->query,
             'searchTarget' => 'all',
-            'searchFields' => 'onlineId',
+            'searchFields' => $this->searchFields,
             'limit' => $this->limit,
             'offset' => $cursor,
             'rounded' => true

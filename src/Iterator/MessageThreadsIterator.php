@@ -13,6 +13,11 @@ class MessageThreadsIterator extends ApiIterator
     
     public function __construct(Client $client, int $limit = 20, ?Carbon $since = null)
     {
+        if ($limit <= 0)
+        {
+            throw new \InvalidArgumentException('$limit must be greater than zero.');
+        }
+        
         parent::__construct($client);
         $this->since = $since ?? Carbon::createFromTimestamp(0);
         $this->limit = $limit;

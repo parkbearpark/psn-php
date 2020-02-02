@@ -13,6 +13,21 @@ class FriendsIterator extends ApiIterator
     
     public function __construct(Client $client, string $parameter, string $sort, int $limit)
     {
+        if (empty($parameter))
+        {
+            throw new \InvalidArgumentException('$parameter must not be empty.');
+        }
+
+        if (empty($sort))
+        {
+            throw new \InvalidArgumentException('$sort must not be empty.');
+        }
+
+        if ($limit <= 0)
+        {
+            throw new \InvalidArgumentException('$limit must be greater than zero.');
+        }
+
         parent::__construct($client);
         $this->parameter = $parameter;
         $this->sort = $sort;

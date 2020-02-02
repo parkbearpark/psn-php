@@ -18,6 +18,16 @@ class MessagesIterator extends ApiIterator
         
     public function __construct(Client $client, string $threadId, int $limit = 20)
     {
+        if (empty($threadId))
+        {
+            throw new \InvalidArgumentException('$threadId must not be empty.');
+        }
+
+        if ($limit <= 0)
+        {
+            throw new \InvalidArgumentException('$limit must be greater than zero.');
+        }
+
         parent::__construct($client);
         $this->threadId = $threadId;
         $this->limit = $limit;
