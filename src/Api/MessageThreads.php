@@ -97,6 +97,11 @@ class MessageThreads extends Api
         return new MessageThread($this->httpClient, $response->threadId);
     }
 
+    /**
+     * Gets the latest message thread.
+     *
+     * @return MessageThread
+     */
     public function latest() : MessageThread
     {
         // Shouldn't need to rewind the iterator since it's creating a new iterator instance.

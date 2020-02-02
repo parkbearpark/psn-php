@@ -26,17 +26,36 @@ use Tustin\PlayStation\Api\Messaging\MessageThread;
 
 class Users extends Api 
 {
-    public function search(string $query, int $limit = 50) : UsersIterator
+    /**
+     * Search for a user.
+     *
+     * @param string $query
+     * @param integer $limit
+     * @param array $searchFields
+     * @return UsersIterator
+     */
+    public function search(string $query, array $searchFields = ['onlineId'], int $limit = 50) : UsersIterator
     {
-        return new UsersIterator($this->httpClient, $query, $limit);
+        return new UsersIterator($this->httpClient, $query, $searchFields, $limit);
     }
 
-    public function find(string $onlineId)
+    /**
+     * Find a specific user's profile by their onlineId.
+     *
+     * @param string $onlineId
+     * @return User
+     */
+    public function find(string $onlineId) : User
     {
         return new User($this->httpClient, $onlineId);
     }
 
-    public function me()
+    /**
+     * Get the logged in user's profile.
+     *
+     * @return User
+     */
+    public function me() : User
     {
         return new User($this->httpClient, 'me');
     }
