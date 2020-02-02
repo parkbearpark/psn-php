@@ -18,7 +18,14 @@ class User extends Model
         $this->onlineIdParameter = $onlineId;
     }
 
-    public function friends(string $sort = 'onlineStatus', int $limit = 36)
+    /**
+     * Gets all the user's friends.
+     *
+     * @param string $sort
+     * @param integer $limit
+     * @return FriendsIterator
+     */
+    public function friends(string $sort = 'onlineStatus', int $limit = 36) : FriendsIterator
     {
         return new FriendsIterator($this->httpClient, $this->onlineIdParameter, $sort, $limit);
     }

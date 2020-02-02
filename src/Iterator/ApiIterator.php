@@ -1,8 +1,9 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
+use Tustin\PlayStation\Api\Api;
 
-trait ApiIterator
+abstract class ApiIterator extends Api implements \Iterator
 {
     protected int $currentOffset = 0;
 
@@ -14,23 +15,32 @@ trait ApiIterator
 
     protected array $cache = [];
 
+    /**
+     * Access a specific cursor in the API.
+     * 
+     * @TODO: Update this with a union type when that gets added to PHP.
+     *
+     * @param mixed $cursor
+     * @return void
+     */
+    public abstract function access($cursor);
 
-    public function key() : int
+    public function key()
     {
-        return $this->currentOffset;
+        return $this->currentIndexer;
     }
 
-    public function getTotalResults() : int
+    public final function getTotalResults() : int
     {
         return $this->totalResults;
     }
 
-    private function setTotalResults(int $results) : void
+    protected final function setTotalResults(int $results) : void
     {
         $this->totalResults = $results;
     }
 
-    public function valid()
+    public final function valid()
     {
         return array_key_exists($this->currentIndexer, $this->cache);
     }

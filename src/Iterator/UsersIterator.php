@@ -11,7 +11,7 @@ class UsersIterator extends Api implements \Iterator
 
     protected string $query;
     
-    public function __construct(Client $client, string $query, int $limit = 50)
+    public function __construct(Client $client, string $query, int $limit)
     {
         parent::__construct($client);
         $this->query = $query;
@@ -19,13 +19,7 @@ class UsersIterator extends Api implements \Iterator
         $this->access(0);
     }
 
-    /**
-     * Accesses a new 'page' of search results.
-     *
-     * @param integer $offset
-     * @return void
-     */
-    public function access(int $offset)
+    public function access($cursor)
     {
         $results = $this->get('https://friendfinder.api.np.km.playstation.net/friend-finder/api/v1/users/me/search', [
             'fields' => 'onlineId',
@@ -33,7 +27,7 @@ class UsersIterator extends Api implements \Iterator
             'searchTarget' => 'all',
             'searchFields' => 'onlineId',
             'limit' => $this->limit,
-            'offset' => $offset,
+            'offset' => $cursor,
             'rounded' => true
         ]);
 

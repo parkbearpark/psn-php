@@ -15,6 +15,7 @@ use Tustin\Haste\Http\Middleware\AuthenticationMiddleware;
 
 class Client extends AbstractClient
 {
+    private const VERSION = 'dev-3.0.0';
     // The client id and client secret are for the iOS PlayStation app.
     // These cannot be generated at this time; therefore, we have to use their permissions scopes as well.
     private const CLIENT_ID     = 'ebee17ac-99fd-487c-9b1e-18ef50c39ab5';
@@ -48,9 +49,9 @@ class Client extends AbstractClient
     public function __construct(array $guzzleOptions = [])
     {
         // We can't really use a base_uri here because Sony sucks.
-
         $guzzleOptions['allow_redirects'] = false;
-
+        $guzzleOptions['headers']['User-Agent'] = 'psn-php/' . self::VERSION;
+ 
         parent::__construct($guzzleOptions);
     }
 
