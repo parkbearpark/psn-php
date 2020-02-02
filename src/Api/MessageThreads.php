@@ -3,6 +3,7 @@ namespace Tustin\PlayStation\Api;
 
 use Carbon\Carbon;
 use Tustin\PlayStation\Api\Api;
+use Tustin\PlayStation\Api\Users;
 use Tustin\Haste\Exception\NotFoundException;
 use Tustin\PlayStation\Api\Model\MessageThread;
 use Tustin\PlayStation\Iterator\MessageThreadsIterator;
@@ -24,9 +25,9 @@ class MessageThreads extends Api
     }
 
     /**
-     * Returns message threads that contain the specificed onlineId.
+     * Returns message threads that contain the specified $onlineId.
      *
-     * @param string $username
+     * @param string $onlineId
      * @return \Generator
      */
     public function with(string $onlineId) : \Generator
@@ -40,6 +41,12 @@ class MessageThreads extends Api
         }
     }
 
+    /**
+     * Finds a specific thread by it's id.
+     *
+     * @param string $threadId
+     * @return MessageThread
+     */
     public function find(string $threadId) : MessageThread
     {
         foreach ($this->all() as $thread)
@@ -51,6 +58,43 @@ class MessageThreads extends Api
         }
 
         throw new NotFoundException("No such thread with thread id $threadId found.");
+    }
+
+    /**
+     * Creates a new message thread.
+     * 
+     * Will return an existing message thread if a thread already exists containing the same users you pass to this method.
+     *
+     * @param string ...$onlineIds
+     * @return MessageThread
+     */
+    public function create(string ...$onlineIds) : MessageThread
+    {
+        // We need our onlineId when creating a new group.
+        $clientOnlineId = (new Users($this->httpClient))->me()->onlineId();
+
+        $membersToAdd[] = ['onlineId' => $clientOnlineId];
+
+        foreach ($onlineIds as $onlineId)
+        {
+            $membersToAdd[] = ['onlineId' => $onlineId];
+        }
+
+        $response = $this->postMultiPart('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/', [
+            [
+                'name' => 'threadDetail',
+                'contents' => json_encode([
+                    'threadDetail' => [
+                        'threadMembers' => $membersToAdd
+                    ]
+                ], JSON_PRETTY_PRINT),
+                'headers' => [
+                    'Content-Type' => 'application/json; charset=utf-8'
+                ]
+            ]
+        ]);
+
+        return new MessageThread($this->httpClient, $response->threadId);
     }
 
     public function latest() : MessageThread
