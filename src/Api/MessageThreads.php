@@ -34,7 +34,7 @@ class MessageThreads extends Api
     {
         foreach ($this->all() as $thread)
         {
-            if ($thread->members()->contains($username))
+            if ($thread->members()->contains($onlineId))
             {
                 yield $thread;
             }

@@ -4,8 +4,10 @@ namespace Tustin\PlayStation\Api\Model;
 
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Model\Model;
+use Tustin\PlayStation\Api\Model\Message;
 use Tustin\PlayStation\Iterator\MembersIterator;
 use Tustin\PlayStation\Iterator\MessagesIterator;
+use Tustin\PlayStation\Api\Message\AbstractMessage;
 
 class MessageThread extends Model
 {
@@ -33,6 +35,22 @@ class MessageThread extends Model
         return count(
             $this->members()
         );
+    }
+
+    /**
+     * Sends a message to the message thread.
+     *
+     * @param AbstractMessage $message
+     * @return Message
+     */
+    public function sendMessage(AbstractMessage $message) : Message
+    {
+        $response = $this->postMultiPart(
+            'https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId() . '/messages',
+            $message->build()
+        );
+
+        return $this->messages(1)->current();
     }
 
     public function messages(int $count = 20) : MessagesIterator

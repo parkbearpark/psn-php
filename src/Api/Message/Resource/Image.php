@@ -1,6 +1,5 @@
 <?php
-
-namespace Tustin\PlayStation\Resource;
+namespace Tustin\PlayStation\Api\Message\Resource;
 
 class Image
 {

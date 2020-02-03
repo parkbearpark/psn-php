@@ -2,13 +2,13 @@
 
 namespace Tustin\PlayStation\Resource;
 
-trait ResourceTrait
+abstract class MessageResource
 {
-    private $path;
+    private $info;
     
-    public function __construct(string $resourcePath)
+    public function __construct(string $info)
     {
-        $this->path = $resourcePath;
+        $this->info = $info;
     }
 
     public function path() : string

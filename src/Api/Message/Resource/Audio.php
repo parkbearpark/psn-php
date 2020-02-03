@@ -1,12 +1,10 @@
 <?php
-
-namespace Tustin\PlayStation\Resource;
+namespace Tustin\PlayStation\Api\Message\Resource;
 
 class Audio
 {
     use ResourceTrait;
 
-    // @NeedsTesting
     public function type() : string
     {
         $h = finfo_open(FILEINFO_MIME_TYPE);
