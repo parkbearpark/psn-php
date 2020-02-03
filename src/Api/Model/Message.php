@@ -43,7 +43,7 @@ class Message extends Model
     public function mediaUrl() : ?string
     {
         // @NeedsTesting
-        return $this->attachedMediaPath;
+        return $this->eventData->attachedMediaPath;
     }
 
     /**
