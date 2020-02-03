@@ -5,7 +5,9 @@ namespace Tustin\PlayStation\Api\Model;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Model\Model;
+use Tustin\PlayStation\Api\MessageThreads;
 use Tustin\PlayStation\Iterator\FriendsIterator;
+use Tustin\PlayStation\Api\Message\AbstractMessage;
 
 class User extends Model
 {
@@ -28,6 +30,19 @@ class User extends Model
     public function friends(string $sort = 'onlineStatus', int $limit = 36) : FriendsIterator
     {
         return new FriendsIterator($this->httpClient, $this->onlineIdParameter, $sort, $limit);
+    }
+
+    /**
+     * Sends a message to the user.
+     *
+     * @param AbstractMessage $message
+     * @return Message
+     */
+    public function sendMessage(AbstractMessage $message) : Message
+    {
+        return (new MessageThreads($this->httpClient))
+        ->withOnly($this->onlineId())
+        ->sendMessage($message);
     }
 
     /**

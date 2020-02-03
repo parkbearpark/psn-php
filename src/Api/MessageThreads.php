@@ -42,6 +42,27 @@ class MessageThreads extends Api
     }
 
     /**
+     * Returns the message thread that only consits of the client and $onlineId.
+     * 
+     * Will create the group if none exist.
+     *
+     * @param string $onlineId
+     * @return MessageThread
+     */
+    public function withOnly(string $onlineId) : MessageThread
+    {
+        foreach ($this->with($onlineId) as $thread)
+        {
+            if ($thread->memberCount() == 2)
+            {
+                return $thread;
+            }
+        }
+
+        return $this->create($onlineId);
+    }
+
+    /**
      * Finds a specific thread by it's id.
      *
      * @param string $threadId

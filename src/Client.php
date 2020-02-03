@@ -109,7 +109,7 @@ class Client extends AbstractClient
         $this->accessToken = $accessToken;
 
         $this->pushAuthenticationMiddleware(new AuthenticationMiddleware([
-            'Authorization' => 'Bearer ' . $this->getAccessToken(),
+            'Authorization' => 'Bearer ' . $this->accessToken(),
         ]));
     }
 
