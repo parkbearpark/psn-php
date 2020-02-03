@@ -7,8 +7,6 @@ abstract class AbstractMessage
 {
     private MessageType $type;
 
-    private array $messageData = [];
-
     protected function __construct(MessageType $type)
     {
         $this->type = $type;
@@ -16,6 +14,13 @@ abstract class AbstractMessage
 
     public abstract function build() : array;
 
+    /**
+     * Scaffolds the multi-part data needed for a message.
+     *
+     * @param array $messageDetail
+     * @param array ...$parts
+     * @return array
+     */
     public final function scaffold(array $messageDetail, array ...$parts) : array
     {
         $data = [
@@ -37,7 +42,7 @@ abstract class AbstractMessage
 
         if (isset($parts) && !empty($parts))
         {
-            array_push($primaryData, $parts);
+            $primaryData = array_merge_recursive($primaryData, $parts);
         }
 
         return $primaryData;
