@@ -23,6 +23,11 @@ class MessageThread extends Model
         $this->members = $members;
     }
 
+    /**
+     * Gets all the members in the message thread.
+     *
+     * @return MembersIterator
+     */
     public function members() : MembersIterator
     {
         return new MembersIterator(
@@ -30,6 +35,11 @@ class MessageThread extends Model
         );
     }
 
+    /**
+     * Gets the member count in the message thread.
+     *
+     * @return integer
+     */
     public function memberCount() : int
     {
         return count(
@@ -53,16 +63,33 @@ class MessageThread extends Model
         return $this->messages(1)->current();
     }
 
+    /**
+     * Gets all messages in the message thread.
+     *
+     * @param integer $count
+     * @return MessagesIterator
+     */
     public function messages(int $count = 20) : MessagesIterator
     {
         return new MessagesIterator($this->httpClient, $this->threadId(), $count);
     }
 
+    /**
+     * Gets the message thread ID.
+     *
+     * @return string
+     */
     public function threadId() : string
     {
         return $this->threadId;
     }
 
+    /**
+     * Gets the thread info from the PlayStation API.
+     *
+     * @param integer $count
+     * @return object
+     */
     public function info(int $count = 1) : object
     {
         return $this->cache ??= $this->get('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId(), [

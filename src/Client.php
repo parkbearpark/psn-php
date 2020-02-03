@@ -57,6 +57,8 @@ class Client extends AbstractClient
 
     /**
      * Login using a npsso token.
+     * 
+     * @see https://tusticles.com/psn-php/first_login.html
      *
      * @param string $npsso
      * @return void
@@ -75,6 +77,8 @@ class Client extends AbstractClient
 
     /**
      * Login using an existing refresh token.
+     * 
+     * @see https://tusticles.com/psn-php/future_logins.html
      *
      * @param string $refreshToken
      * @return void
@@ -93,20 +97,9 @@ class Client extends AbstractClient
     }
 
     /**
-     * Sets information from a login response.
-     *
-     * @param object $response
-     * @return void
-     */
-    private function postLogin(object $response) : void
-    {
-        $this->setAccessToken($response->access_token);
-        $this->refreshToken = $response->refresh_token;
-        $this->expiresAt = Carbon::now()->addSeconds($response->expires_in);
-    }
-
-    /**
      * Access the PlayStation API using an existing access token.
+     * 
+     * @see https://tusticles.com/psn-php/future_logins.html
      *
      * @param string $accessToken
      * @return void
@@ -119,22 +112,57 @@ class Client extends AbstractClient
             'Authorization' => 'Bearer ' . $this->getAccessToken(),
         ]));
     }
+
+    /**
+     * Sets information from a login response.
+     *
+     * @param object $response
+     * @return void
+     */
+    private function postLogin(object $response) : void
+    {
+        $this->setAccessToken($response->access_token);
+        $this->refreshToken = $response->refresh_token;
+        $this->expiresAt = Carbon::now()->addSeconds($response->expires_in);
+    }
     
-    public function getAccessToken() : string
+    /**
+     * Gets the current access token.
+     *
+     * @return string
+     */
+    public function accessToken() : string
     {
         return $this->accessToken;
     }
 
-    public function getRefreshToken() : string
+    /**
+     * Gets the current refresh token.
+     *
+     * @return string
+     */
+    public function refreshToken() : string
     {
         return $this->refreshToken;
     }
 
-    public function getExpireDate() : \Carbon
+    /**
+     * Gets the expiration date for the access token.
+     *
+     * @return Carbon
+     */
+    public function expireDate() : Carbon
     {
         return $this->expiresAt;
     }
 
+    /**
+     * Calls any API methods.
+     *
+     * @param string $method
+     * @param array $parameters
+     * @return object
+     */
     public function __call(string $method, array $parameters) : object
     {
         $class = "\\Tustin\\PlayStation\\Api\\" . ucwords($method);

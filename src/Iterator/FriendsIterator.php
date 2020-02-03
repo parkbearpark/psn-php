@@ -52,6 +52,9 @@ class FriendsIterator extends ApiIterator
 
     public function current()
     {
-        return new User($this->httpClient, $this->cache[$this->currentIndexer]->onlineId);
+        return new User(
+            $this->httpClient, 
+            $this->cache[$this->currentIndexer]->onlineId
+        );
     }
 }

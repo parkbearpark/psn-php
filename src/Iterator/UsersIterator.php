@@ -2,13 +2,11 @@
 namespace Tustin\PlayStation\Iterator;
 
 use GuzzleHttp\Client;
-use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Model\User;
+use Tustin\PlayStation\Iterator\ApiIterator;
 
-class UsersIterator extends Api implements \Iterator
+class UsersIterator extends ApiIterator
 {
-    use ApiIterator;
-
     protected string $query;
 
     protected string $searchFields;
@@ -57,6 +55,9 @@ class UsersIterator extends Api implements \Iterator
 
     public function current()
     {
-        return new User($this->httpClient, $this->cache[$this->currentIndexer]->onlineId);
+        return new User(
+            $this->httpClient, 
+            $this->cache[$this->currentIndexer]->onlineId
+        );
     }
 }

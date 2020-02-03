@@ -12,6 +12,11 @@ abstract class AbstractMessage
         $this->type = $type;
     }
 
+    /**
+     * Builds the entire multi-part data needed for a message. 
+     *
+     * @return array
+     */
     public abstract function build() : array;
 
     /**
