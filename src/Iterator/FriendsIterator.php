@@ -44,7 +44,6 @@ class FriendsIterator extends ApiIterator
             'sort' => $this->sort,
         ]);
 
-        // Just set this each time for brevity.
         $this->setTotalResults($results->totalResults);
 
         $this->cache = $results->profiles;

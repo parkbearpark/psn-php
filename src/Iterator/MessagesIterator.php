@@ -51,7 +51,10 @@ class MessagesIterator extends ApiIterator
             $params['maxEventIndex'] = $cursor;
         }
 
-        $results = $this->get('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId, $params);
+        $results = $this->get(
+            'https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId, 
+            $params
+        );
 
         $this->setTotalResults($results->resultsCount);
 

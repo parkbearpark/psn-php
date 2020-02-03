@@ -93,7 +93,15 @@ class MessageThread extends Model
     public function info(int $count = 1) : object
     {
         return $this->cache ??= $this->get('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId(), [
-            'fields' => 'threadMembers,threadNameDetail,threadThumbnailDetail,threadProperty,latestTakedownEventDetail,newArrivalEventDetail,threadEvents',
+            'fields' => implode(',', [
+                'threadMembers',
+                'threadNameDetail',
+                'threadThumbnailDetail',
+                'threadProperty',
+                'latestTakedownEventDetail',
+                'newArrivalEventDetail',
+                'threadEvents'
+            ]),
             'count' => $count,
         ]);
     }

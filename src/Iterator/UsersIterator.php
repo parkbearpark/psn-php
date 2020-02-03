@@ -47,7 +47,6 @@ class UsersIterator extends ApiIterator
             'rounded' => true
         ]);
 
-        // Just set this each time for brevity.
         $this->setTotalResults($results->totalResults);
 
         $this->cache = $results->searchResults;
