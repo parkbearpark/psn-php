@@ -1,7 +1,11 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-class MembersIterator implements \IteratorAggregate, \Countable
+use Countable;
+use ArrayIterator;
+use IteratorAggregate;
+
+class MembersIterator implements IteratorAggregate, Countable
 {
     private array $members = [];
 
@@ -20,7 +24,7 @@ class MembersIterator implements \IteratorAggregate, \Countable
 
     public function getIterator()
     {
-        return new \ArrayIterator($this);
+        return new ArrayIterator($this);
     }
 
     public function count()

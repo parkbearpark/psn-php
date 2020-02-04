@@ -1,8 +1,11 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
+use Iterator;
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\User;
+use Tustin\PlayStation\Filter\UserFilter;
 use Tustin\PlayStation\Iterator\ApiIterator;
 
 class UsersIterator extends ApiIterator
@@ -15,17 +18,17 @@ class UsersIterator extends ApiIterator
     {
         if (empty($query))
         {
-            throw new \InvalidArgumentException('$query must contain a value.');
+            throw new InvalidArgumentException('$query must contain a value.');
         }
 
         if (empty($searchFields))
         {
-            throw new \InvalidArgumentException('$searchFields must contain at least one value.');
+            throw new InvalidArgumentException('$searchFields must contain at least one value.');
         }
 
         if ($limit <= 0)
         {
-            throw new \InvalidArgumentException('$limit must be greater than zero.');
+            throw new InvalidArgumentException('$limit must be greater than zero.');
         }
 
         parent::__construct($client);
@@ -48,6 +51,17 @@ class UsersIterator extends ApiIterator
         ]);
 
         $this->update($results->totalResults, $results->searchResults);
+    }
+
+    /**
+     * Gets users whose onlineId contains the specified string.
+     *
+     * @param string $text
+     * @return Iterator
+     */
+    public function containing(string $text) : Iterator
+    {
+        yield from new UserFilter($this, $text);
     }
 
     public function current()

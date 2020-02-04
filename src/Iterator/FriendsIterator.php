@@ -1,7 +1,9 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
+use Iterator;
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Filter\UserFilter;
@@ -16,17 +18,17 @@ class FriendsIterator extends ApiIterator
     {
         if (empty($parameter))
         {
-            throw new \InvalidArgumentException('$parameter must not be empty.');
+            throw new InvalidArgumentException('$parameter must not be empty.');
         }
 
         if (empty($sort))
         {
-            throw new \InvalidArgumentException('$sort must not be empty.');
+            throw new InvalidArgumentException('$sort must not be empty.');
         }
 
         if ($limit <= 0)
         {
-            throw new \InvalidArgumentException('$limit must be greater than zero.');
+            throw new InvalidArgumentException('$limit must be greater than zero.');
         }
 
         parent::__construct($client);
@@ -48,7 +50,13 @@ class FriendsIterator extends ApiIterator
         $this->update($results->totalResults, $results->profiles);
     }
 
-    public function containing(string $text)
+    /**
+     * Gets friends whose onlineId contains the specified string.
+     *
+     * @param string $text
+     * @return Iterator
+     */
+    public function containing(string $text) : Iterator
     {
         yield from new UserFilter($this, $text);
     }

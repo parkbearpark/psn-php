@@ -49,6 +49,11 @@ class TrophyTitlesIterator extends ApiIterator
         $this->update($results->totalResults, $results->trophyTitles);
     }
 
+    public function containing(string $text)
+    {
+        
+    }
+
     public function current()
     {
         return new TrophyTitle(

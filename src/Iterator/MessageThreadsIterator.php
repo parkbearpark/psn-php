@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Api\Model\MessageThread;
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 
 class MessageThreadsIterator extends ApiIterator
 {
@@ -15,7 +16,7 @@ class MessageThreadsIterator extends ApiIterator
     {
         if ($limit <= 0)
         {
-            throw new \InvalidArgumentException('$limit must be greater than zero.');
+            throw new InvalidArgumentException('$limit must be greater than zero.');
         }
         
         parent::__construct($client);

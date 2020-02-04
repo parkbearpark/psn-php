@@ -3,6 +3,7 @@ namespace Tustin\PlayStation\Iterator;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use InvalidArgumentException;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Api\Model\Message;
@@ -20,12 +21,12 @@ class MessagesIterator extends ApiIterator
     {
         if (empty($threadId))
         {
-            throw new \InvalidArgumentException('$threadId must not be empty.');
+            throw new InvalidArgumentException('$threadId must not be empty.');
         }
 
         if ($limit <= 0)
         {
-            throw new \InvalidArgumentException('$limit must be greater than zero.');
+            throw new InvalidArgumentException('$limit must be greater than zero.');
         }
 
         parent::__construct($client);
@@ -45,7 +46,7 @@ class MessagesIterator extends ApiIterator
         {
             if (!is_string($cursor))
             {
-                throw new \InvalidArgumentException("$cursor must be a string.");
+                throw new InvalidArgumentException("$cursor must be a string.");
             }
        
             $params['maxEventIndex'] = $cursor;

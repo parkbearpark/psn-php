@@ -1,10 +1,12 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use GuzzleHttp\Client;
+use Iterator;
+use Countable;
+use InvalidArgumentException;
 use Tustin\PlayStation\Api\Api;
 
-abstract class ApiIterator extends Api implements \Iterator, \Countable
+abstract class ApiIterator extends Api implements Iterator, Countable
 {
     protected $currentOffset;
 
@@ -75,7 +77,7 @@ abstract class ApiIterator extends Api implements \Iterator, \Countable
     {
         if (!$this->offsetExists($offset))
         {
-            throw new \InvalidArgumentException("Offset $offset does not exist.");
+            throw new InvalidArgumentException("Offset $offset does not exist.");
         }
 
         if (!array_key_exists($offset, $this->cache))
