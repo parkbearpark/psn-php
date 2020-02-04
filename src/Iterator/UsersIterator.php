@@ -47,16 +47,15 @@ class UsersIterator extends ApiIterator
             'rounded' => true
         ]);
 
-        $this->setTotalResults($results->totalResults);
-
-        $this->cache = $results->searchResults;
+        $this->update($results->totalResults, $results->searchResults);
     }
 
     public function current()
     {
         return new User(
-            $this->httpClient, 
-            $this->cache[$this->currentIndexer]->onlineId
+            $this->httpClient,
+            $this->getFromOffset($this->currentOffset)->onlineId,
+            true
         );
     }
 }

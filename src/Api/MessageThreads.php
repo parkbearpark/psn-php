@@ -44,7 +44,7 @@ class MessageThreads extends Api
     /**
      * Returns the message thread that only consits of the client and $onlineId.
      * 
-     * Will create the group if none exist.
+     * Will create the thread if one doesn't already exist.
      *
      * @param string $onlineId
      * @return MessageThread

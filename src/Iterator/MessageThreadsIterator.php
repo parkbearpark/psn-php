@@ -33,17 +33,17 @@ class MessageThreadsIterator extends ApiIterator
             'sinceReceivedDate' => $this->since->toIso8601ZuluString()
         ]);
 
-        $this->setTotalResults($results->totalSize);
-
-        $this->cache = $results->threads;
+        $this->update($results->totalSize, $results->threads);
     }
 
     public function current()
     {
+        $it = $this->getFromOffset($this->currentOffset);
+        
         return new MessageThread(
             $this->httpClient,
-            $this->cache[$this->currentIndexer]->threadId,
-            $this->cache[$this->currentIndexer]->threadMembers
+            $it->threadId,
+            $it->threadMembers
         );
     }
 }

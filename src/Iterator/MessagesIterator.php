@@ -56,20 +56,17 @@ class MessagesIterator extends ApiIterator
             $params
         );
 
-        $this->setTotalResults($results->resultsCount);
-
         $this->maxEventIndexCursor = $results->maxEventIndexCursor;
 
-        $this->cache = $results->threadEvents;
+        $this->update($results->resultsCount, $results->threadEvents);
     }
 
     public function next()
     {
-        $this->currentIndexer++;
-        if (($this->currentIndexer % $this->limit) == 0)
+        $this->currentOffset++;
+        if (($this->currentOffset % $this->limit) == 0)
         {
             $this->access($this->maxEventIndexCursor);
-            $this->currentIndexer = 0;
         }
     }
 
@@ -77,7 +74,7 @@ class MessagesIterator extends ApiIterator
     {
         return new Message(
             $this->httpClient,
-            $this->cache[$this->currentIndexer]->messageEventDetail,
+            $this->getFromOffset($this->currentOffset)->messageEventDetail
         );
     }
 }

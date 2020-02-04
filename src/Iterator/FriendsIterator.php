@@ -4,6 +4,7 @@ namespace Tustin\PlayStation\Iterator;
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Model\User;
+use Tustin\PlayStation\Filter\UserFilter;
 
 class FriendsIterator extends ApiIterator
 {
@@ -44,16 +45,20 @@ class FriendsIterator extends ApiIterator
             'sort' => $this->sort,
         ]);
 
-        $this->setTotalResults($results->totalResults);
+        $this->update($results->totalResults, $results->profiles);
+    }
 
-        $this->cache = $results->profiles;
+    public function containing(string $text)
+    {
+        yield from new UserFilter($this, $text);
     }
 
     public function current()
     {
         return new User(
-            $this->httpClient, 
-            $this->cache[$this->currentIndexer]->onlineId
+            $this->httpClient,
+            $this->getFromOffset($this->currentOffset)->onlineId,
+            true
         );
     }
 }

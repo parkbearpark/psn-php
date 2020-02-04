@@ -12,12 +12,14 @@ use Tustin\PlayStation\Api\Message\AbstractMessage;
 class User extends Model
 {
     private string $onlineIdParameter;
+    private bool $exact;
 
-    public function __construct(Client $client, string $onlineId)
+    public function __construct(Client $client, string $onlineId, bool $exact = false)
     {
         parent::__construct($client);
 
         $this->onlineIdParameter = $onlineId;
+        $this->exact = $exact;
     }
 
     /**
@@ -46,6 +48,17 @@ class User extends Model
     }
 
     /**
+     * Gets all message threads containing the user.
+     *
+     * @return \Generator
+     */
+    public function messageThreads() : \Generator
+    {
+        yield from (new MessageThreads($this->httpClient))
+        ->with($this->onlineId());
+    }
+
+    /**
      * Gets the user's about me.
      *
      * @return string
@@ -56,7 +69,7 @@ class User extends Model
     }
 
     /**
-     * Gets the users account ID.
+     * Gets the user's account ID.
      *
      * @return string
      */
@@ -85,7 +98,7 @@ class User extends Model
     }
 
     /**
-     * Check if client is blocking this user.
+     * Check if client is blocking the user.
      *
      * @return boolean
      */
@@ -105,7 +118,7 @@ class User extends Model
     }
 
     /**
-     * Check if the client is following this user.
+     * Check if the client is following the user.
      *
      * @return boolean
      */
@@ -115,7 +128,7 @@ class User extends Model
     }
 
     /**
-     * Check if this user is verified.
+     * Check if the user is verified.
      *
      * @return boolean
      */
@@ -147,7 +160,7 @@ class User extends Model
     }
 
     /**
-     * Checks if the client has any mutual friends with this user. 
+     * Checks if the client has any mutual friends with the user. 
      *
      * @return boolean
      */
@@ -157,7 +170,7 @@ class User extends Model
     }
 
     /**
-     * Checks if the client is close friends with this user.
+     * Checks if the client is close friends with the user.
      *
      * @return boolean
      */
@@ -167,7 +180,7 @@ class User extends Model
     }
 
     /**
-     * Checks if the client has a pending friend request with this user.
+     * Checks if the client has a pending friend request with the user.
      * 
      * @TODO: Check if this works both ways.
      *
@@ -195,7 +208,7 @@ class User extends Model
      */
     public function onlineId() : string
     {
-        return $this->profile()->onlineId;
+        return $this->exact ? $this->onlineIdParameter : $this->profile()->onlineId;
     }
 
     /**
