@@ -26,11 +26,11 @@ class TrophyTitlesIterator extends ApiIterator
             throw new \InvalidArgumentException('$limit must be greater than zero.');
         }
 
-        parent::__construct($client, $collection);
+        parent::__construct($client);
         $this->limit = $limit;
         $this->language = $language;
         $this->platforms = implode(',', $platforms);
-        $this->getFromOffset(0);
+        $this->access(0);
     }
 
     public function access($cursor)

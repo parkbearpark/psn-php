@@ -12,7 +12,7 @@ abstract class ApiIterator extends Api implements Iterator, Countable
 
     protected int $limit;
 
-    protected int $totalResults;
+    protected int $totalResults = 0;
 
     protected array $cache = [];
 
