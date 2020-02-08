@@ -16,6 +16,6 @@ class TrophyHiddenFilter extends FilterIterator
    
     public function accept()
     {
-        return $this->current()->trophyHidden === $this->flag;
+        return $this->current()->hidden() === $this->flag;
     }
 }

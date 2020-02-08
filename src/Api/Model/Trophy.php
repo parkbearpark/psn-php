@@ -20,6 +20,11 @@ class Trophy extends Model
         return new TrophyType($this->info()->trophyType);
     }
 
+    public function earnedRate() : float
+    {
+        return $this->info()->trophyEarnedRate;
+    }
+
     public function hidden() : bool
     {
         return $this->info()->trophyHidden;

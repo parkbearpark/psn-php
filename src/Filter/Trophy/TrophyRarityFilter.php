@@ -19,7 +19,7 @@ class TrophyRarityFilter extends FilterIterator
     public function accept() : bool
     {
         return $this->lessThan ?
-        $this->current()->trophyEarnedRate <= $this->value :
-        $this->current()->trophyEarnedRate >= $this->value;
+        $this->current()->earnedRate() <= $this->value :
+        $this->current()->earnedRate() >= $this->value;
     }
 }

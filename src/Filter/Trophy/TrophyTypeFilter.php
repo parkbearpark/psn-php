@@ -18,7 +18,7 @@ class TrophyTypeFilter extends FilterIterator
     public function accept()
     {
         return in_array(
-            new TrophyType($this->current()->trophyType), 
+            $this->current()->type(),
             $this->types
         );
     }

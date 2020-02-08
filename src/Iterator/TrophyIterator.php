@@ -6,17 +6,25 @@ use Countable;
 use ArrayIterator;
 use IteratorAggregate;
 use Tustin\PlayStation\Enum\TrophyType;
+use Tustin\PlayStation\Api\Model\Trophy;
 use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyHiddenFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyRarityFilter;
 
 class TrophyIterator implements IteratorAggregate, Countable
 {
+    /**
+     * Internal iterator instance to allow for chaining and filtering.
+     *
+     * @var Iterator
+     */
     private $iterator;
 
-    public function __construct(array $items)
+    public function __construct(array $trophies)
     {
-        $this->iterator = new ArrayIterator($items);
+        $this->iterator = new ArrayIterator(array_map(function($trophy) {
+            return new Trophy($trophy);
+        }, $trophies));
     }
 
     /**
