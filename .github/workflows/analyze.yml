@@ -1,0 +1,21 @@
+name: psn-php static analysis
+
+on: [push, pull_request]
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Setup PHP
+      uses: shivammathur/setup-php@1.8.2
+      with:
+        php-version: '7.4'
+        extensions: ast
+    - name: Install dependencies
+      run: composer install --dev --prefer-dist --optimize-autoloader --no-progress
+      run: composer validate
+    - name: Static analysis
+      run: ./vendor/bin/phan
