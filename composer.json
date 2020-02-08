@@ -10,12 +10,6 @@
             "email": "tustin@tusticles.com"
         }
     ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../Haste"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Tustin\\PlayStation\\": "src/"
@@ -28,10 +22,10 @@
     },
     "require": {
         "php": "^7.4",
-        "tustin/haste": "dev-master",
         "nesbot/carbon": "^2.29",
         "myclabs/php-enum": "^1.7",
-        "wapmorgan/mp3info": "^0.0.5"
+        "wapmorgan/mp3info": "^0.0.5",
+        "tustin/haste": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.1",
