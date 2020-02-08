@@ -1,13 +1,9 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Iterator;
 use Countable;
-use Generator;
 use ArrayIterator;
-use MultipleIterator;
 use IteratorAggregate;
-use Tustin\PlayStation\Api\Model\Trophy;
 use Tustin\PlayStation\Api\Enum\TrophyType;
 use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyHiddenFilter;
