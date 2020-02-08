@@ -24,7 +24,7 @@ class MembersIterator implements IteratorAggregate, Countable
 
     public function getIterator()
     {
-        return new ArrayIterator($this);
+        return new ArrayIterator($this->members);
     }
 
     public function count()

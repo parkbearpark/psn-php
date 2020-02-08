@@ -75,7 +75,20 @@ class TrophyTitles extends Api
             }
         }
 
-        throw new NotFoundException("No such trophy titiel with name $name found.");
+        throw new NotFoundException("No such trophy title with name $name found.");
+    }
+
+    public function findById(string $id) : TrophyTitle
+    {
+        foreach ($this->all() as $title)
+        {
+            if ($title->npCommunicationId() === $id)
+            {
+                return $title;
+            }
+        }
+
+        throw new NotFoundException("No such trophy title with name $id found.");
     }
 
     /**

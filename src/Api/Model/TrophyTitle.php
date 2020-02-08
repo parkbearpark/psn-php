@@ -4,6 +4,7 @@ namespace Tustin\PlayStation\Api\Model;
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Enum\ConsoleType;
 use Tustin\PlayStation\Api\Enum\LanguageType;
+use Tustin\PlayStation\Iterator\TrophyGroupsIterator;
 
 class TrophyTitle extends Model
 {
@@ -16,6 +17,19 @@ class TrophyTitle extends Model
 
         $this->npCommunicationId = $npCommunicationId;
         $this->language = $language;
+    }
+
+    /**
+     * Gets all the trophy groups for the trophy title.
+     *
+     * @return \Generator
+     */
+    public function trophyGroups() : \Generator
+    {
+        foreach ($this->info()->trophyGroups as $group)
+        {
+            yield new TrophyGroup($this, $group->trophyGroupId);
+        }
     }
 
     /**
@@ -133,6 +147,16 @@ class TrophyTitle extends Model
     }
 
     /**
+     * Gets the language used for the trophy title.
+     *
+     * @return LanguageType
+     */
+    public function language() : LanguageType
+    {
+        return $this->language;
+    }
+
+    /**
      * Gets the raw trophy title info from the PlayStation API.
      * 
      * @return object
@@ -140,10 +164,13 @@ class TrophyTitle extends Model
     public function info() : object
     {
         return $this->cache ??= $this->get(
-            'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->npCommunicationId(),
+            'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->npCommunicationId() .'/trophyGroups',
             [
+                'fields' => implode(',', [
+                    '@default'
+                ]),
                 'npLanguage' => $this->language->getValue()
             ]
-        )->trophyTitles[0];
+        );
     }
 }
