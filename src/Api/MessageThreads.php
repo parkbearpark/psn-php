@@ -4,8 +4,8 @@ namespace Tustin\PlayStation\Api;
 use Carbon\Carbon;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Users;
-use Tustin\Haste\Exception\NotFoundException;
 use Tustin\PlayStation\Api\Model\MessageThread;
+use Tustin\PlayStation\Exception\NotFoundException;
 use Tustin\PlayStation\Iterator\MessageThreadsIterator;
 
 class MessageThreads extends Api
@@ -93,6 +93,8 @@ class MessageThreads extends Api
     {
         // We need our onlineId when creating a new group.
         $clientOnlineId = (new Users($this->httpClient))->me()->onlineId();
+
+        $membersToAdd = [];
 
         $membersToAdd[] = ['onlineId' => $clientOnlineId];
 

@@ -1,13 +1,9 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Carbon\Carbon;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
-use Tustin\PlayStation\Api\Api;
-use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Api\Model\Message;
-use Tustin\PlayStation\Api\Model\MessageThread;
 
 class MessagesIterator extends ApiIterator
 {

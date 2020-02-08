@@ -6,5 +6,5 @@ use Tustin\PlayStation\Api\Api;
 
 abstract class Model extends Api
 {
-    private ?object $cache = null;
+    protected ?object $cache = null;
 }

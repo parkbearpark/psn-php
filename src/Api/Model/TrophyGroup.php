@@ -1,8 +1,6 @@
 <?php
 namespace Tustin\PlayStation\Api\Model;
 
-use ArrayIterator;
-use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Enum\LanguageType;
 use Tustin\PlayStation\Iterator\TrophyIterator;
 
@@ -74,9 +72,9 @@ class TrophyGroup extends Model
     /**
      * Gets the raw trophy group info from the PlayStation API.
      *
-     * @return object
+     * @return ?object
      */
-    public function info() : object
+    public function info() : ?object
     {
         return $this->cache ??= $this->get(
             'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->npCommunicationId .'/trophyGroups/' . $this->groupId .'/trophies',

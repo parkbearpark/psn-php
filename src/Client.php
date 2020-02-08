@@ -6,11 +6,6 @@ use Carbon\Carbon;
 
 use Tustin\Haste\AbstractClient;
 
-use Tustin\PlayStation\Http\HttpClient;
-use Tustin\PlayStation\Api\MessageThread;
-use Tustin\PlayStation\Http\ResponseParser;
-use Tustin\PlayStation\Http\TokenMiddleware;
-use Tustin\PlayStation\Http\ResponseHandlerMiddleware;
 use Tustin\Haste\Http\Middleware\AuthenticationMiddleware;
 
 class Client extends AbstractClient

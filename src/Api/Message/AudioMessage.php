@@ -37,7 +37,7 @@ class AudioMessage extends AbstractMessage
     /**
      * Creates a new AudioMessage from an existing Mp3Info instance.
      *
-     * @param Mp3Info $file
+     * @param Mp3Info $info
      * @return AudioMessage
      */
     public static function fromMp3(Mp3Info $info) : AudioMessage

@@ -4,7 +4,6 @@ namespace Tustin\PlayStation\Iterator;
 use Iterator;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
-use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Filter\UserFilter;
 

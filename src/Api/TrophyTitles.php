@@ -45,8 +45,8 @@ class TrophyTitles extends Api
     /**
      * Gets trophy titles for only the specific console(s).
      *
+     * @param array $consoles
      * @param integer $limit
-     * @param ConsoleType ...$consoles
      * @return TrophyTitlesIterator
      */
     public function forConsole(array $consoles, int $limit = 128) : TrophyTitlesIterator

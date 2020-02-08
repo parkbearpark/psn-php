@@ -3,10 +3,8 @@ namespace Tustin\PlayStation\Iterator;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
-use Tustin\PlayStation\Api\Api;
-use Tustin\PlayStation\Api\Model\User;
+use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\MessageThread;
-use Doctrine\Instantiator\Exception\InvalidArgumentException;
 
 class MessageThreadsIterator extends ApiIterator
 {

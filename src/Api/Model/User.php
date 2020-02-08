@@ -2,7 +2,6 @@
 
 namespace Tustin\PlayStation\Api\Model;
 
-use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Model\Model;
 use Tustin\PlayStation\Api\MessageThreads;
@@ -226,9 +225,9 @@ class User extends Model
      * 
      * Will return from cache first if info has been requested in this instance.
      *
-     * @return object
+     * @return ?object
      */
-    public function profile() : object
+    public function profile() : ?object
     {
         return $this->cache ??= $this->get('https://us-prof.np.community.playstation.net/userProfile/v1/users/' . $this->onlineIdParameter . '/profile2', [
             'fields' => implode(',', [

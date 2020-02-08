@@ -4,7 +4,6 @@ namespace Tustin\PlayStation\Api\Model;
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Enum\ConsoleType;
 use Tustin\PlayStation\Api\Enum\LanguageType;
-use Tustin\PlayStation\Iterator\TrophyGroupsIterator;
 
 class TrophyTitle extends Model
 {
@@ -93,7 +92,7 @@ class TrophyTitle extends Model
      */
     public function hasTrophies() : bool
     {
-        return isset($this->definedTrophies) && !empty($this->definedTrophies);
+        return isset($this->info()->definedTrophies) && !empty($this->info()->definedTrophies);
     }
 
     /**
@@ -103,7 +102,7 @@ class TrophyTitle extends Model
      */
     public function hasPlatinum() : bool
     {
-        return $this->definedTrophies->platinum ?? false;
+        return $this->info()->definedTrophies->platinum ?? false;
     }
 
     /**
@@ -113,7 +112,7 @@ class TrophyTitle extends Model
      */
     public function bronzeTrophyCount() : int
     {
-        return $this->definedTrophies->bronze;
+        return $this->info()->definedTrophies->bronze;
     }
 
     /**
@@ -123,7 +122,7 @@ class TrophyTitle extends Model
      */
     public function silverTrophyCount() : int
     {
-        return $this->definedTrophies->silver;
+        return $this->info()->definedTrophies->silver;
     }
 
     /**
@@ -133,7 +132,7 @@ class TrophyTitle extends Model
      */
     public function goldTrophyCount() : int
     {
-        return $this->definedTrophies->gold;
+        return $this->info()->definedTrophies->gold;
     }
 
     /**
@@ -159,9 +158,9 @@ class TrophyTitle extends Model
     /**
      * Gets the raw trophy title info from the PlayStation API.
      * 
-     * @return object
+     * @return ?object
      */
-    public function info() : object
+    public function info() : ?object
     {
         return $this->cache ??= $this->get(
             'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->npCommunicationId() .'/trophyGroups',

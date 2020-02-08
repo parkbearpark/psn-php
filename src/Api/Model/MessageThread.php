@@ -88,9 +88,9 @@ class MessageThread extends Model
      * Gets the thread info from the PlayStation API.
      *
      * @param integer $count
-     * @return object
+     * @return ?object
      */
-    public function info(int $count = 1) : object
+    public function info(int $count = 1) : ?object
     {
         return $this->cache ??= $this->get('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId(), [
             'fields' => implode(',', [

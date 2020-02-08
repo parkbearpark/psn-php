@@ -1,7 +1,6 @@
 <?php
 namespace Tustin\PlayStation\Api\Model;
 
-use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Enum\TrophyType;
 
 class Trophy extends Model
@@ -26,7 +25,7 @@ class Trophy extends Model
         return $this->info()->trophyHidden;
     }
 
-    public function info() : object
+    public function info() : ?object
     {
         return $this->cache;
     }
