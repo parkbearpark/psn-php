@@ -16,6 +16,7 @@ jobs:
         extensions: ast
     - name: Install dependencies
       run: composer install --dev --prefer-dist --optimize-autoloader --no-progress
+    - name: Validate Composer
       run: composer validate
     - name: Static analysis
       run: ./vendor/bin/phan
