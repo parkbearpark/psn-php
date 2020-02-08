@@ -1,7 +1,7 @@
 <?php
 namespace Tustin\PlayStation\Api\Message;
 
-use Tustin\PlayStation\Api\Enum\MessageType;
+use Tustin\PlayStation\Enum\MessageType;
 
 abstract class AbstractMessage
 {

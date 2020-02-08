@@ -2,9 +2,9 @@
 namespace Tustin\PlayStation\Iterator;
 
 use GuzzleHttp\Client;
-use Tustin\PlayStation\Api\Enum\ConsoleType;
+use Tustin\PlayStation\Enum\ConsoleType;
+use Tustin\PlayStation\Enum\LanguageType;
 use Tustin\PlayStation\Iterator\ApiIterator;
-use Tustin\PlayStation\Api\Enum\LanguageType;
 use Tustin\PlayStation\Api\Model\TrophyTitle;
 
 class TrophyTitlesIterator extends ApiIterator

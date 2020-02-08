@@ -5,7 +5,7 @@ use Iterator;
 use Countable;
 use ArrayIterator;
 use IteratorAggregate;
-use Tustin\PlayStation\Api\Enum\TrophyType;
+use Tustin\PlayStation\Enum\TrophyType;
 use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyHiddenFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyRarityFilter;

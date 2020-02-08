@@ -3,7 +3,7 @@ namespace Tustin\PlayStation\Filter\Trophy;
 
 use Iterator;
 use FilterIterator;
-use Tustin\PlayStation\Api\Enum\TrophyType;
+use Tustin\PlayStation\Enum\TrophyType;
 
 class TrophyTypeFilter extends FilterIterator
 {

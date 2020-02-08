@@ -2,8 +2,8 @@
 namespace Tustin\PlayStation\Api\Model;
 
 use GuzzleHttp\Client;
-use Tustin\PlayStation\Api\Enum\ConsoleType;
-use Tustin\PlayStation\Api\Enum\LanguageType;
+use Tustin\PlayStation\Enum\ConsoleType;
+use Tustin\PlayStation\Enum\LanguageType;
 
 class TrophyTitle extends Model
 {

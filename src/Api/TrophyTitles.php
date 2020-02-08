@@ -3,8 +3,8 @@ namespace Tustin\PlayStation\Api;
 
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
-use Tustin\PlayStation\Api\Enum\ConsoleType;
-use Tustin\PlayStation\Api\Enum\LanguageType;
+use Tustin\PlayStation\Enum\ConsoleType;
+use Tustin\PlayStation\Enum\LanguageType;
 use Tustin\PlayStation\Api\Model\TrophyTitle;
 use Tustin\PlayStation\Exception\NotFoundException;
 use Tustin\PlayStation\Iterator\TrophyTitlesIterator;

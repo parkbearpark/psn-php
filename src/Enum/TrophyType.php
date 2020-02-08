@@ -1,5 +1,5 @@
 <?php
-namespace Tustin\PlayStation\Api\Enum;
+namespace Tustin\PlayStation\Enum;
 
 use MyCLabs\Enum\Enum;
 

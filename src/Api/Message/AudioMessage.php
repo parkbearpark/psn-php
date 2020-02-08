@@ -2,7 +2,7 @@
 namespace Tustin\PlayStation\Api\Message;
 
 use wapmorgan\Mp3Info\Mp3Info;
-use Tustin\PlayStation\Api\Enum\MessageType;
+use Tustin\PlayStation\Enum\MessageType;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 
 class AudioMessage extends AbstractMessage

@@ -3,7 +3,7 @@ namespace Tustin\PlayStation\Api\Model;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
-use Tustin\PlayStation\Api\Enum\MessageType;
+use Tustin\PlayStation\Enum\MessageType;
 
 class Message extends Model
 {

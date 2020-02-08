@@ -1,7 +1,7 @@
 <?php
 namespace Tustin\PlayStation\Api\Model;
 
-use Tustin\PlayStation\Api\Enum\LanguageType;
+use Tustin\PlayStation\Enum\LanguageType;
 use Tustin\PlayStation\Iterator\TrophyIterator;
 
 class TrophyGroup extends Model
