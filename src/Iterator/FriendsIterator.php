@@ -37,7 +37,7 @@ class FriendsIterator extends ApiIterator
         $this->access(0);
     }
 
-    public function access($cursor)
+    public function access($cursor) : void
     {
         $results = $this->get('https://us-prof.np.community.playstation.net/userProfile/v1/users/' . $this->parameter . '/friends/profiles2', [
             'fields' => 'onlineId',
@@ -60,7 +60,7 @@ class FriendsIterator extends ApiIterator
         yield from new UserFilter($this, $text);
     }
 
-    public function current()
+    public function current() : User
     {
         return new User(
             $this->httpClient,

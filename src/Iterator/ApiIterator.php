@@ -3,6 +3,7 @@ namespace Tustin\PlayStation\Iterator;
 
 use Iterator;
 use Countable;
+use RuntimeException;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Api;
 
@@ -13,6 +14,8 @@ abstract class ApiIterator extends Api implements Iterator, Countable
     protected int $limit;
 
     protected int $totalResults = 0;
+
+    protected bool $lastBlock = false;
 
     protected array $cache = [];
 
@@ -36,7 +39,7 @@ abstract class ApiIterator extends Api implements Iterator, Countable
         return $this->getTotalResults();
     }
 
-    public final function getTotalResults() : int
+    public function getTotalResults() : int
     {
         return $this->totalResults;
     }
@@ -90,7 +93,14 @@ abstract class ApiIterator extends Api implements Iterator, Countable
 
     public function offsetExists($offset) : bool
     {
-        return $offset >= 0 && $offset < $this->getTotalResults();
+        try
+        {
+            return $offset >= 0 && $offset < $this->getTotalResults();
+        }
+        catch (RuntimeException $e)
+        {
+            return !$this->lastBlock;
+        }
     }
 
     protected final function appendToCache(array $items)

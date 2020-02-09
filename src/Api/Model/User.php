@@ -5,6 +5,7 @@ namespace Tustin\PlayStation\Api\Model;
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Model\Model;
 use Tustin\PlayStation\Api\MessageThreads;
+use Tustin\PlayStation\Iterator\FeedIterator;
 use Tustin\PlayStation\Iterator\FriendsIterator;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 
@@ -55,6 +56,18 @@ class User extends Model
     {
         yield from (new MessageThreads($this->httpClient))
         ->with($this->onlineId());
+    }
+
+    /**
+     * Gets all the activity feed items for the user.
+     *
+     * @param boolean $includeComments
+     * @param integer $limit
+     * @return FeedIterator
+     */
+    public function feed(bool $includeComments = true, int $limit = 10) : FeedIterator
+    {
+        return new FeedIterator($this->httpClient, $this->onlineId(), $includeComments, $limit);
     }
 
     /**

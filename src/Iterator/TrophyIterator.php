@@ -1,30 +1,22 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Iterator;
 use Countable;
-use ArrayIterator;
 use IteratorAggregate;
 use Tustin\PlayStation\Enum\TrophyType;
 use Tustin\PlayStation\Api\Model\Trophy;
+use Tustin\PlayStation\Traits\Chainable;
 use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyHiddenFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyRarityFilter;
 
 class TrophyIterator implements IteratorAggregate, Countable
 {
-    /**
-     * Internal iterator instance to allow for chaining and filtering.
-     *
-     * @var Iterator
-     */
-    private $iterator;
+    use Chainable;
 
     public function __construct(array $trophies)
     {
-        $this->iterator = new ArrayIterator(array_map(function($trophy) {
-            return new Trophy($trophy);
-        }, $trophies));
+        $this->create($trophies, Trophy::class);
     }
 
     /**
@@ -35,9 +27,7 @@ class TrophyIterator implements IteratorAggregate, Countable
      */
     public function ofTypes(TrophyType ...$types) : TrophyIterator
     {
-        $this->iterator = new TrophyTypeFilter($this->iterator, ...$types);
-
-        return $this;
+        return $this->filter(TrophyTypeFilter::class, ...$types);
     }
 
     /**
@@ -48,9 +38,7 @@ class TrophyIterator implements IteratorAggregate, Countable
      */
     public function hidden(bool $toggle = true) : TrophyIterator
     {
-        $this->iterator = new TrophyHiddenFilter($this->iterator, $toggle);
-
-        return $this;
+        return $this->filter(TrophyHiddenFilter::class, $toggle);
     }
 
     /**
@@ -62,9 +50,7 @@ class TrophyIterator implements IteratorAggregate, Countable
      */
     public function earnedRate(float $value, bool $lessThan = true) : TrophyIterator
     {
-        $this->iterator = new TrophyRarityFilter($this->iterator, $value, $lessThan);
-
-        return $this;
+        return $this->filter(TrophyRarityFilter::class, $value, $lessThan);
     }
 
     /**
@@ -116,25 +102,5 @@ class TrophyIterator implements IteratorAggregate, Countable
     public function gold() : TrophyIterator
     {
         return $this->ofType(TrophyType::gold());
-    }
-
-    /**
-     * Gets the current iterator.
-     *
-     * @return Iterator
-     */
-    public function getIterator() : Iterator
-    {
-        yield from $this->iterator;
-    }
-
-    /**
-     * Gets the amount of items in the iterator.
-     *
-     * @return int
-     */
-    public function count() : int
-    {
-        return iterator_count($this->iterator);
     }
 }
