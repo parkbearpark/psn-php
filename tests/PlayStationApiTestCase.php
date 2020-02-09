@@ -9,21 +9,21 @@ class PlayStationApiTestCase extends \PHPUnit\Framework\TestCase
     /**
      * PlayStation Client
      *
-     * @var PlayStation\Client
+     * @var Tustin\PlayStation\Client
      */
     protected static $client;
 
     /**
      * The logged in user
      *
-     * @var PlayStation\Api\User
+     * @var Tustin\PlayStation\Api\User
      */
     protected static $loggedInUser;
 
     /**
      * Test User
      *
-     * @var PlayStation\Api\User
+     * @var Tustin\PlayStation\Api\User
      */
     protected static $testUser;
 
@@ -32,7 +32,7 @@ class PlayStationApiTestCase extends \PHPUnit\Framework\TestCase
      * 
      * My account shouldn't have any privacy settings enabled which should allow all API calls to succeed.
      *
-     * @var PlayStation\Api\User
+     * @var Tustin\PlayStation\Api\User
      */
     protected static $tustinUser;
 
@@ -40,14 +40,14 @@ class PlayStationApiTestCase extends \PHPUnit\Framework\TestCase
     {
         self::$client = new Client(['verify' => false, 'proxy' => '127.0.0.1:8888']);
 
-        $refreshToken = getenv('PSN_PHP_REFRESH_TOKEN');
+        $npsso = getenv('PSN_PHP_NPSSO');
 
-        self::$client->loginWithRefreshToken($refreshToken);
+        self::$client->loginWithNpsso($npsso);
 
-        self::$loggedInUser = self::$client->user();
+        self::$loggedInUser = self::$client->users()->me();
 
-        self::$testUser = self::$client->user('Test');
+        self::$testUser = self::$client->users()->find('Test');
 
-        self::$tustinUser = self::$client->user('tustin25');
+        self::$tustinUser = self::$client->users()->find('tustin25');
     }
 }

@@ -110,6 +110,19 @@ class User extends Model
     }
 
     /**
+     * Gets the avatar URL.
+     * 
+     * This should return the largest size available.
+     *
+     * @return string
+     */
+    public function avatarUrl() : string
+    {
+        $firstKey = array_key_first($this->avatarUrls());
+        return $this->avatarUrls()[$firstKey];
+    }
+
+    /**
      * Check if client is blocking the user.
      *
      * @return boolean

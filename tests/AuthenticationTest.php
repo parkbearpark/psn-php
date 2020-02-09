@@ -3,48 +3,58 @@
 namespace Tustin\PlayStation\Tests;
 
 use Tustin\PlayStation\Client;
+use Tustin\Haste\Exception\ApiException;
 
 class AuthenticationTest extends \PHPUnit\Framework\TestCase
 {
-    /**
-     * PlayStation Client
-     *
-     * @var PlayStation\Client;
-     */
-    protected $client;
-
-    protected function setUp() : void
-    {
-        $this->client = new Client();
-    }
-
-    public function testEnvironment()
+    public function testRefreshTokenEnvironment()
     {
         $refreshToken = getenv('PSN_PHP_REFRESH_TOKEN');
-        $this->assertNotEmpty($refreshToken, 'Missing refresh token for PSN API.');
+        $this->assertNotEmpty($refreshToken, 'Missing refresh token environment variable.');
+    }
+
+    public function testNpssoEnvironment()
+    {
+        $npsso = getenv('PSN_PHP_NPSSO');
+        $this->assertNotEmpty($npsso, 'Missing npsso environment variable.');
     }
 
     public function testInvalidRefreshToken()
     {
-        $this->expectException('\Tustin\PlayStation\Exception\PlayStationApiException');
-        $this->client->loginWithRefreshToken('deadbeef');
+        $this->expectException(ApiException::class);
+        (new Client)->loginWithRefreshToken('deadbeef');
     }
 
-    public function testInvalidTwoFactorLogin()
+    public function testInvalidNpssoLogin()
     {
-        $this->expectException('\Tustin\PlayStation\Exception\PlayStationApiException');
-        $this->client->login('abc', 6969);
+        $this->expectException(ApiException::class);
+        (new Client)->loginWithNpsso('some-fake-npsso-code');
     }
 
     /**
-     * @depends testEnvironment
+     * @depends testRefreshTokenEnvironment
      */
     public function testLoginWithRefreshToken()
     {
         $refreshToken = getenv('PSN_PHP_REFRESH_TOKEN');
         
-        $this->client->loginWithRefreshToken($refreshToken);
+        $client = new Client();
+        $client->loginWithRefreshToken($refreshToken);
 
-        $this->assertEquals($this->client->onlineId(), 'speedy424key');
+        $this->assertNotNull($client->accessToken());
+    }
+
+    /**
+     * @depends testNpssoEnvironment
+     */
+    public function testLoginWithNpssoToken()
+    {
+        $npsso = getenv('PSN_PHP_NPSSO');
+        
+        $client = new Client();
+
+        $client->loginWithNpsso($npsso);
+
+        $this->assertNotNull($client->accessToken());
     }
 }

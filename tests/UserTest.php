@@ -2,65 +2,110 @@
 
 namespace Tustin\PlayStation\Tests;
 
+use Tustin\PlayStation\Iterator\FriendsIterator;
+use Tustin\Haste\Exception\NotFoundHttpException;
+use Tustin\Haste\Exception\AccessDeniedHttpException;
+
 class UserTest extends PlayStationApiTestCase
 {
-    public function testInvalidOnlineId()
+    public function testTryToFindUserByInvalidOnlineId()
     {
-        $user = self::$client->user('something that should $$ never happen!!!');
+        $this->expectException(NotFoundHttpException::class);
 
-        $this->expectException('\Tustin\PlayStation\Exception\NotFoundException');
+        $user = self::$client->users()->find('something that should $$ never happen!!!');
 
-        $user->games();
+        $user->onlineId();
     }
 
-    public function testValidOnlineId()
+    public function testIsTestUserOnlineIdValid()
     {
         $this->assertEquals(self::$testUser->onlineId(), 'test');
     }
 
-    public function testAreTestAndIFriends()
+    public function testIsTheLoggedInUserFollowingTestUser()
     {
-        $this->assertFalse(self::$testUser->friend());
+        $this->assertFalse(self::$testUser->isFollowing());
     }
 
-    public function testAreTestAndICloseFriends()
+    public function testIsLoggedInUserVerified()
     {
-        $this->assertFalse(self::$testUser->closeFriend());
+        $this->assertFalse(self::$loggedInUser->isVerified());
     }
 
-    public function testAmIFollowingTest()
+    public function testIsLoggedInUserBlockingTustinUser()
     {
-        $this->assertFalse(self::$testUser->following());
+        $this->assertFalse(self::$tustinUser->isBlocking());
     }
 
-    public function testAmIVerified()
+    public function testEnsureTustinFollowerCountIsGreaterThanZero()
     {
-        $this->assertFalse(self::$loggedInUser->verified());
+        $this->assertGreaterThan(0, self::$tustinUser->followerCount());
     }
 
-    public function testGetMyAboutMe()
+    public function testEnsureLanguagesIsAnArray()
+    {
+        $this->assertIsArray(self::$tustinUser->languages());
+    }
+
+    public function testEnsureLoggedInUserHasNegativeOneMutualFriends()
+    {
+        $this->assertEquals(-1, self::$loggedInUser->mutualFriendCount());
+    }
+
+    public function testEnsureLoggedInUserHasNoMutualFriendsWithTestUser()
+    {
+        $this->assertFalse(self::$testUser->hasMutualFriends());
+    }
+
+    public function testEnsureLoggedInUserIsNotCloseFriendsWithTestUser()
+    {
+        $this->assertFalse(self::$testUser->isCloseFriend());
+    }
+
+    public function testEnsureLoggedInUserHasNotFriendRequestedTestUser()
+    {
+        $this->assertFalse(self::$testUser->hasFriendRequested());
+    }
+
+    public function testEnsureLoggedInUserIsNotOnline()
+    {
+        $this->assertFalse(self::$loggedInUser->isOnline());
+    }
+
+    public function testEnsureLoggedInUserDoesNotHavePlus()
+    {
+        $this->assertFalse(self::$loggedInUser->hasPlus());
+    }
+
+    public function testValidateLoggedInUserAboutMe()
     {
         $this->assertEquals(self::$loggedInUser->aboutMe(), 'Hello psn-php!');
     }
 
-    public function testIsMyAvatarTheDefaultAvatar()
+    public function testEnsureLoggedInUserHasDefaultAvatar()
     {
-        $this->assertStringContainsString('Defaultavatar', self::$loggedInUser->avatarUrl());
+        $this->assertStringContainsString('default', self::$loggedInUser->avatarUrl());
+    }
+    
+    public function testEnsureTustinAccountHasAnAvatar()
+    {
+        // This might change
+        $this->assertStringContainsString('psn-rsc', self::$tustinUser->avatarUrl());
     }
 
-    public function testGetMyFriends()
+    public function testEnsureLoggedInUserHasOneFriend()
     {
         $friends = self::$loggedInUser->friends();
 
-        $this->assertIsArray($friends);
+        $this->assertInstanceOf(FriendsIterator::class, $friends);
 
         // This account is friends with my main account.
-        $this->assertEquals(count($friends), 1);
+        $this->assertEquals($friends->getTotalResults(), 1);
     }
 
     public function testTryToGetUsersFriendsWithPrivacySettingsEnabled()
     {
-        $this->expectException('\Tustin\PlayStation\Exception\AccessDeniedException');
+        $this->expectException(AccessDeniedHttpException::class);
 
         self::$testUser->friends();
     }
@@ -69,69 +114,6 @@ class UserTest extends PlayStationApiTestCase
     {
         $friends = self::$tustinUser->friends();
 
-        $this->assertIsArray($friends);
-        $this->assertEquals(count($friends), 36);
-
-        $friend = $friends[0];
-
-        $this->assertInstanceOf('\Tustin\PlayStation\Api\User', $friend);
-    }
-
-    public function testGetMyGames()
-    {
-        $games = self::$loggedInUser->games();
-
-        $this->assertIsArray($games);
-
-        // This user shouldn't have any games played.
-        $this->assertEquals(count($games), 0);
-    }
-
-    public function testGetUsersGamesWithPrivacySettingsEnabled()
-    {
-        $this->expectException('\Tustin\PlayStation\Exception\AccessDeniedException');
-
-        self::$testUser->games();
-    }
-
-    public function testGetUsersGamesWithPrivacySettingsDisabled()
-    {
-        $games = self::$tustinUser->games();
-
-        $this->assertIsArray($games);
-        $this->assertEquals(count($games), 100);
-
-        $game = $games[0];
-
-        $this->assertInstanceOf('\Tustin\PlayStation\Api\Game', $game);
-    }
-
-    // public function testGetCommunitiesUserIsInWithPrivacySettingsEnabled()
-    // {
-    //     $this->expectException('\Tustin\PlayStation\Exception\AccessDeniedException');
-
-    //     self::$testUser->communities();
-    // }
-
-    public function testTryToGetCommunitiesUserIsExpectNone()
-    {
-        $communities = self::$loggedInUser->communities();
-
-        $this->assertIsArray($communities);
-
-        $this->assertEmpty($communities);
-    }
-
-    public function testGetCommunitiesUserIsInExpectMultiple()
-    {
-        $communities = self::$tustinUser->communities();
-
-        $this->assertIsArray($communities);
-
-        $this->assertNotEmpty($communities);
-
-        $community = $communities[0];
-
-        $this->assertInstanceOf('\Tustin\PlayStation\Api\Community\Community', $community);
+        $this->assertInstanceOf(FriendsIterator::class, $friends);
     }
 }

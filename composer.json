@@ -33,6 +33,7 @@
     },
     "scripts": {
         "dev" : "@php ./tests/test.php",
+        "test" : "phpunit",
         "analyze": "phan"
     }
 }
