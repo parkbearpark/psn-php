@@ -11,7 +11,7 @@ interface Filterable
      *
      * @param string $filterClass
      * @param mixed ...$args
-     * @return Iterator
+     * @return mixed
      */
     function filter(string $filterClass, ...$args);
 
@@ -19,7 +19,7 @@ interface Filterable
      * Filters items based on the condition set in the callback.
      *
      * @param callable $callback
-     * @return Iterator
+     * @return mixed
      */
     function where(callable $callback);
 }

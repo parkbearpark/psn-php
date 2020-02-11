@@ -3,18 +3,17 @@ namespace Tustin\PlayStation\Iterator;
 
 use Tustin\PlayStation\Enum\TrophyType;
 use Tustin\PlayStation\Api\Model\Trophy;
-use Tustin\PlayStation\Traits\Filterable;
 use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyHiddenFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyRarityFilter;
 
 class TrophyIterator extends AbstractInternalIterator
 {
-    use Filterable;
-    
     public function __construct(array $trophies)
     {
-        $this->create($trophies, Trophy::class);
+        $this->create(function ($trophy) {
+            return new Trophy($trophy);
+        }, $trophies);
     }
 
     /**

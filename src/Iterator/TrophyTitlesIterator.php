@@ -6,13 +6,10 @@ use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Enum\ConsoleType;
 use Tustin\PlayStation\Enum\LanguageType;
-use Tustin\PlayStation\Traits\Filterable;
 use Tustin\PlayStation\Api\Model\TrophyTitle;
 
 class TrophyTitlesIterator extends AbstractApiIterator
 {
-    use Filterable;
-    
     private string $platforms;
     private LanguageType $language;
 

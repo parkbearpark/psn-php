@@ -37,14 +37,14 @@ abstract class AbstractInternalIterator implements IteratorAggregate, Countable,
         return iterator_count($this->iterator);
     }
 
-    public function where(callable $callback)
+    public function where(callable $callback) : self
     {
         $this->iterator = new CallbackFilterIterator($this->iterator, $callback);
 
         return $this;
     }
 
-    public function filter(string $filterClass, ...$args)
+    public function filter(string $filterClass, ...$args) : self
     {
         $this->iterator = new $filterClass($this->iterator, ...$args);
 

@@ -36,14 +36,31 @@ trait Model
             throw new InvalidArgumentException('Failed to populate cache for model [' . get_class($this) . ']');
         }
 
-        // @TODO: Convert multidimensional array string. (e.g. avatarUrls.0)
-        
-        if (array_key_exists($property, $this->cache))
+        $pieces = explode('.', $property);
+
+        $root = $pieces[0];
+
+        if (!array_key_exists($root, $this->cache))
         {
-            return $this->cache[$property];
+            throw new InvalidArgumentException("[$root] is not a valid property for model [" . get_class($this) . "]");
         }
-        
-        throw new InvalidArgumentException("[$property] is not a valid property for model [" . get_class($this) . "]");
+
+        $value = $this->cache[$root];
+
+        array_shift($pieces);
+
+        foreach ($pieces as $piece)
+        {
+            if (!is_array($value))
+            {
+                throw new RuntimeException("Value [$value] passed to pluck is not an array, but tried accessing a key from it.");
+            }
+            
+            $value = $value[$piece];
+        }
+
+        return $value;
+
     }
 
     protected function hasCached() : bool
@@ -55,6 +72,11 @@ trait Model
     {
         foreach ((array)$data as $key => $item)
         {
+            if (is_object($item))
+            {
+                $item = (array)$item;
+            }
+            
             $this->cache[$key] = $item;
         }
     }

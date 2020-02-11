@@ -186,7 +186,7 @@ abstract class AbstractApiIterator extends Api implements Iterator, Countable, F
         return $this->current();
     }
 
-    public function filter(string $filterClass, ...$args)
+    public function filter(string $filterClass, ...$args) : Iterator
     {
         return new $filterClass($this, ...$args);
     }
