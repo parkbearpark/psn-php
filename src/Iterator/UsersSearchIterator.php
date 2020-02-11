@@ -6,10 +6,12 @@ use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Filter\UserFilter;
-use Tustin\PlayStation\Iterator\ApiIterator;
+use Tustin\PlayStation\Traits\Filterable;
 
-class UsersIterator extends ApiIterator
+class UsersSearchIterator extends AbstractApiIterator
 {
+    use Filterable;
+    
     protected string $query;
 
     protected string $searchFields;
@@ -38,7 +40,7 @@ class UsersIterator extends ApiIterator
         $this->access(0);
     }
 
-    public function access($cursor)
+    public function access($cursor) : void
     {
         $results = $this->get('https://friendfinder.api.np.km.playstation.net/friend-finder/api/v1/users/me/search', [
             'fields' => 'onlineId',
@@ -62,6 +64,18 @@ class UsersIterator extends ApiIterator
     public function containing(string $text) : Iterator
     {
         yield from new UserFilter($this, $text);
+    }
+
+    /**
+     * Gets the users who have PlayStation Plus.
+     *
+     * @return Iterator
+     */
+    public function hasPlus() : Iterator
+    {
+        return $this->where(function ($user) {
+            return $user->hasPlus();
+        });
     }
 
     public function current()

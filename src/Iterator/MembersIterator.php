@@ -1,34 +1,26 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Countable;
-use ArrayIterator;
-use IteratorAggregate;
+use Iterator;
+use GuzzleHttp\Client;
+use Tustin\PlayStation\Api\Model\User;
+use Tustin\PlayStation\Filter\UserFilter;
+use Tustin\PlayStation\Iterator\AbstractInternalIterator;
 
-class MembersIterator implements IteratorAggregate, Countable
+class MembersIterator extends AbstractInternalIterator
 {
-    private array $members = [];
-
-    public function __construct(array $members = [])
+    public function __construct(Client $client, array $members = [])
     {
-        $this->members = $members;
+        $this->create(function ($member) use ($client) {
+            return new User($client, $member->onlineId, true);
+        }, $members);
     }
 
-    public function contains(string $member)
+    public function contains(string $onlineId) : bool
     {
-        foreach ($this->members as $value)
+        foreach ($this as $member)
         {
-            return $value->onlineId === $member;
+            return strcasecmp($member->onlineId(), $onlineId) === 0;
         }
-    }
-
-    public function getIterator()
-    {
-        return new ArrayIterator($this->members);
-    }
-
-    public function count()
-    {
-        return count($this->members);
     }
 }

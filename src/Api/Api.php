@@ -1,12 +1,11 @@
 <?php
-
 namespace Tustin\PlayStation\Api;
 
 use GuzzleHttp\Client;
 
-use Tustin\Haste\AbstractClient;
+use Tustin\Haste\Http\HttpClient;
 
-abstract class Api extends AbstractClient
+abstract class Api extends HttpClient
 {
     public function __construct(Client $client)
     {

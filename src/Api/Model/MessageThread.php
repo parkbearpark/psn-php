@@ -3,14 +3,18 @@
 namespace Tustin\PlayStation\Api\Model;
 
 use GuzzleHttp\Client;
-use Tustin\PlayStation\Api\Model\Model;
+use Tustin\PlayStation\Api\Api;
+use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Api\Model\Message;
+use Tustin\PlayStation\Contract\Fetchable;
 use Tustin\PlayStation\Iterator\MembersIterator;
 use Tustin\PlayStation\Iterator\MessagesIterator;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 
-class MessageThread extends Model
+class MessageThread extends Api implements Fetchable
 {
+    use Model;
+    
     private string $threadId;
 
     private array $members;
@@ -30,8 +34,8 @@ class MessageThread extends Model
      */
     public function members() : MembersIterator
     {
-        return new MembersIterator(
-            !empty($this->members) ? $this->members : $this->info()->threadMembers
+        return new MembersIterator($this->httpClient,
+            !empty($this->members) ? $this->members : $this->pluck('threadMembers')
         );
     }
 
@@ -90,9 +94,9 @@ class MessageThread extends Model
      * @param integer $count
      * @return ?object
      */
-    public function info(int $count = 1) : ?object
+    public function fetch(int $count = 1) : object
     {
-        return $this->cache ??= $this->get('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId(), [
+        return $this->get('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId(), [
             'fields' => implode(',', [
                 'threadMembers',
                 'threadNameDetail',

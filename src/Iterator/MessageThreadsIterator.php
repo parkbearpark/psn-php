@@ -3,10 +3,12 @@ namespace Tustin\PlayStation\Iterator;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use RecursiveArrayIterator;
 use InvalidArgumentException;
+use RecursiveIteratorIterator;
 use Tustin\PlayStation\Api\Model\MessageThread;
 
-class MessageThreadsIterator extends ApiIterator
+class MessageThreadsIterator extends AbstractApiIterator
 {
     protected Carbon $since;
     
@@ -23,7 +25,7 @@ class MessageThreadsIterator extends ApiIterator
         $this->access(0);
     }
 
-    public function access($cursor)
+    public function access($cursor) : void
     {
         $results = $this->get('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/', [
             'fields' => 'threadMembers',
@@ -33,6 +35,13 @@ class MessageThreadsIterator extends ApiIterator
         ]);
 
         $this->update($results->totalSize, $results->threads);
+    }
+
+    public function with(string $onlineId)
+    {
+        return $this->where(function($thread) use ($onlineId) {
+            return $thread->members()->contains($onlineId);
+        });
     }
 
     public function current()

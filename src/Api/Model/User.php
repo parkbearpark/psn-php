@@ -3,14 +3,17 @@
 namespace Tustin\PlayStation\Api\Model;
 
 use GuzzleHttp\Client;
-use Tustin\PlayStation\Api\Model\Model;
+use Tustin\PlayStation\Api\Api;
+use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Api\MessageThreads;
 use Tustin\PlayStation\Iterator\FeedIterator;
 use Tustin\PlayStation\Iterator\FriendsIterator;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 
-class User extends Model
+class User extends Api
 {
+    use Model;
+    
     private string $onlineIdParameter;
     private bool $exact;
 
@@ -77,7 +80,7 @@ class User extends Model
      */
     public function aboutMe() : string
     {
-        return $this->profile()->aboutMe;
+        return $this->pluck('aboutMe');
     }
 
     /**
@@ -87,7 +90,7 @@ class User extends Model
      */
     public function accountId() : string
     {
-        return $this->profile()->accountId;
+        return $this->pluck('accountId');
     }
 
     /**
@@ -101,7 +104,7 @@ class User extends Model
     {
         $urls = [];
 
-        foreach ($this->profile()->avatarUrls as $url)
+        foreach ($this->pluck('avatarUrls') as $url)
         {
             $urls[$url->size] = $url->avatarUrl;
         }
@@ -129,7 +132,7 @@ class User extends Model
      */
     public function isBlocking() : bool
     {
-        return $this->profile()->blocking;
+        return $this->pluck('blocking');
     }
 
     /**
@@ -139,7 +142,7 @@ class User extends Model
      */
     public function followerCount() : int
     {
-        return $this->profile()->followerCount;
+        return $this->pluck('followerCount');
     }
 
     /**
@@ -149,7 +152,7 @@ class User extends Model
      */
     public function isFollowing() : bool
     {
-        return $this->profile()->following;
+        return $this->pluck('following');
     }
 
     /**
@@ -159,7 +162,7 @@ class User extends Model
      */
     public function isVerified() : bool
     {
-        return $this->profile()->isOfficiallyVerified;
+        return $this->pluck('isOfficiallyVerified');
     }
 
     /**
@@ -169,7 +172,7 @@ class User extends Model
      */
     public function languages() : array
     {
-        return $this->profile()->languagesUsed;
+        return $this->pluck('languagesUsed');
     }
 
     /**
@@ -181,7 +184,7 @@ class User extends Model
      */
     public function mutualFriendCount() : int
     {
-        return $this->profile()->mutualFriendsCount;
+        return $this->pluck('mutualFriendsCount');
     }
 
     /**
@@ -201,7 +204,7 @@ class User extends Model
      */
     public function isCloseFriend() : bool
     {
-        return ($this->profile()->personalDetailSharing !== 'no');
+        return $this->pluck('personalDetailSharing') !== 'no';
     }
 
     /**
@@ -213,7 +216,7 @@ class User extends Model
      */
     public function hasFriendRequested() : bool
     {
-        return ($this->profile()->friendRelation == 'requesting');
+        return $this->pluck('friendRelation') === 'requesting';
     }
 
     /**
@@ -223,7 +226,7 @@ class User extends Model
      */
     public function isOnline() : bool
     {
-        return $this->profile()->presences[0]->onlineStatus == "online";
+        return $this->pluck('presences.0.onlineStatus') === 'online';
     }
 
     /**
@@ -233,7 +236,7 @@ class User extends Model
      */
     public function onlineId() : string
     {
-        return $this->exact ? $this->onlineIdParameter : $this->profile()->onlineId;
+        return $this->exact ? $this->onlineIdParameter : $this->pluck('onlineId');
     }
 
     /**
@@ -243,7 +246,7 @@ class User extends Model
      */
     public function hasPlus() : bool
     {
-        return $this->profile()->plus;
+        return $this->pluck('plus');
     }
 
     /**

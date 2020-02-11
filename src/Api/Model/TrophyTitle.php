@@ -2,33 +2,40 @@
 namespace Tustin\PlayStation\Api\Model;
 
 use GuzzleHttp\Client;
+use Tustin\PlayStation\Api\Api;
+use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Enum\ConsoleType;
 use Tustin\PlayStation\Enum\LanguageType;
+use Tustin\PlayStation\Contract\Fetchable;
+use Tustin\PlayStation\Iterator\TrophyGroupIterator;
 
-class TrophyTitle extends Model
+class TrophyTitle extends Api implements Fetchable
 {
-    private string $npCommunicationId;
-    private LanguageType $language;
+    use Model;
 
-    public function __construct(Client $client, string $npCommunicationId, LanguageType $language)
+    private $language;
+
+    public function __construct(Client $client, object $data, LanguageType $language = null)
     {
         parent::__construct($client);
+        $this->setCache($data);
 
-        $this->npCommunicationId = $npCommunicationId;
+        if (is_null($language))
+        {
+            $language = LanguageType::english();
+        }
+
         $this->language = $language;
     }
 
     /**
      * Gets all the trophy groups for the trophy title.
      *
-     * @return \Generator
+     * @return TrophyGroupIterator
      */
-    public function trophyGroups() : \Generator
+    public function trophyGroups() : TrophyGroupIterator
     {
-        foreach ($this->info()->trophyGroups as $group)
-        {
-            yield new TrophyGroup($this, $group->trophyGroupId);
-        }
+        return new TrophyGroupIterator($this, $this->pluck('trophyGroups', true));
     }
 
     /**
@@ -40,7 +47,7 @@ class TrophyTitle extends Model
      */
     public function hasTrophyGroups() : bool
     {
-        return $this->info()->hasTrophyGroups;
+        return $this->pluck('hasTrophyGroups');
     }
 
     /**
@@ -50,7 +57,7 @@ class TrophyTitle extends Model
      */
     public function name() : string
     {
-        return $this->info()->trophyTitleName;
+        return $this->pluck('trophyTitleName');
     }
 
     /**
@@ -60,7 +67,7 @@ class TrophyTitle extends Model
      */
     public function detail() : string
     {
-        return $this->info()->trophyTitleDetail;
+        return $this->pluck('trophyTitleDetail');
     }
 
     /**
@@ -70,7 +77,7 @@ class TrophyTitle extends Model
      */
     public function iconUrl() : string
     {
-        return $this->info()->trophyTitleIconUrl;
+        return $this->pluck('trophyTitleIconUrl');
     }
 
     /**
@@ -82,7 +89,8 @@ class TrophyTitle extends Model
      */
     public function platform() : ConsoleType
     {
-        return new ConsoleType($this->info()->trophyTitleIconUrl);
+        // @CheckMe
+        return new ConsoleType($this->pluck('trophyTitlePlatform'));
     }
 
     /**
@@ -92,7 +100,9 @@ class TrophyTitle extends Model
      */
     public function hasTrophies() : bool
     {
-        return isset($this->info()->definedTrophies) && !empty($this->info()->definedTrophies);
+        $value = $this->pluck('definedTrophies');
+        
+        return isset($value) && !empty($value);
     }
 
     /**
@@ -102,7 +112,24 @@ class TrophyTitle extends Model
      */
     public function hasPlatinum() : bool
     {
-        return $this->info()->definedTrophies->platinum ?? false;
+        return $this->pluck('definedTrophies.platinum') ?? false;
+    }
+
+    /**
+     * Gets the total trophy count for this title.
+     *
+     * @return integer
+     */
+    public function trophyCount() : int
+    {
+        $count = ($this->bronzeTrophyCount() + $this->silverTrophyCount() + $this->goldTrophyCount());
+        
+        if ($this->hasPlatinum())
+        {
+            $count++;
+        }
+
+        return $count;
     }
 
     /**
@@ -112,7 +139,7 @@ class TrophyTitle extends Model
      */
     public function bronzeTrophyCount() : int
     {
-        return $this->info()->definedTrophies->bronze;
+        return $this->pluck('definedTrophies.bronze');
     }
 
     /**
@@ -122,7 +149,7 @@ class TrophyTitle extends Model
      */
     public function silverTrophyCount() : int
     {
-        return $this->info()->definedTrophies->silver;
+        return $this->pluck('definedTrophies.silver');
     }
 
     /**
@@ -132,7 +159,7 @@ class TrophyTitle extends Model
      */
     public function goldTrophyCount() : int
     {
-        return $this->info()->definedTrophies->gold;
+        return $this->pluck('definedTrophies.gold');
     }
 
     /**
@@ -142,7 +169,7 @@ class TrophyTitle extends Model
      */
     public function npCommunicationId() : string
     {
-        return $this->npCommunicationId;
+        return $this->pluck('npCommunicationId');
     }
 
     /**
@@ -155,14 +182,9 @@ class TrophyTitle extends Model
         return $this->language;
     }
 
-    /**
-     * Gets the raw trophy title info from the PlayStation API.
-     * 
-     * @return ?object
-     */
-    public function info() : ?object
+    public function fetch() : object
     {
-        return $this->cache ??= $this->get(
+        return $this->get(
             'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->npCommunicationId() .'/trophyGroups',
             [
                 'fields' => implode(',', [

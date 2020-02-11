@@ -1,19 +1,17 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Countable;
-use IteratorAggregate;
 use Tustin\PlayStation\Enum\TrophyType;
 use Tustin\PlayStation\Api\Model\Trophy;
-use Tustin\PlayStation\Traits\Chainable;
+use Tustin\PlayStation\Traits\Filterable;
 use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyHiddenFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyRarityFilter;
 
-class TrophyIterator implements IteratorAggregate, Countable
+class TrophyIterator extends AbstractInternalIterator
 {
-    use Chainable;
-
+    use Filterable;
+    
     public function __construct(array $trophies)
     {
         $this->create($trophies, Trophy::class);
@@ -27,7 +25,9 @@ class TrophyIterator implements IteratorAggregate, Countable
      */
     public function ofTypes(TrophyType ...$types) : TrophyIterator
     {
-        return $this->filter(TrophyTypeFilter::class, ...$types);
+        $this->iterator = $this->filter(TrophyTypeFilter::class, ...$types);
+
+        return $this;
     }
 
     /**
@@ -38,7 +38,9 @@ class TrophyIterator implements IteratorAggregate, Countable
      */
     public function hidden(bool $toggle = true) : TrophyIterator
     {
-        return $this->filter(TrophyHiddenFilter::class, $toggle);
+        $this->iterator = $this->filter(TrophyHiddenFilter::class, $toggle);
+
+        return $this;
     }
 
     /**
@@ -50,7 +52,9 @@ class TrophyIterator implements IteratorAggregate, Countable
      */
     public function earnedRate(float $value, bool $lessThan = true) : TrophyIterator
     {
-        return $this->filter(TrophyRarityFilter::class, $value, $lessThan);
+        $this->iterator =  $this->filter(TrophyRarityFilter::class, $value, $lessThan);
+
+        return $this;
     }
 
     /**

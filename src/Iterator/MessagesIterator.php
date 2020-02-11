@@ -5,7 +5,7 @@ use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\Message;
 
-class MessagesIterator extends ApiIterator
+class MessagesIterator extends AbstractApiIterator
 {
     protected string $threadId;
 

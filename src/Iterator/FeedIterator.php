@@ -7,9 +7,8 @@ use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\Story;
 use Tustin\PlayStation\Filter\UserFilter;
-use Tustin\PlayStation\Iterator\ApiIterator;
 
-class FeedIterator extends ApiIterator
+class FeedIterator extends AbstractApiIterator
 {
     protected bool $includeComments;
 

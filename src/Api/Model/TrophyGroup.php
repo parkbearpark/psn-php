@@ -1,24 +1,30 @@
 <?php
 namespace Tustin\PlayStation\Api\Model;
 
-use Tustin\PlayStation\Enum\LanguageType;
+use Tustin\PlayStation\Api\Api;
+use Tustin\PlayStation\Traits\Model;
+use Tustin\PlayStation\Contract\Fetchable;
 use Tustin\PlayStation\Iterator\TrophyIterator;
 
-class TrophyGroup extends Model
+class TrophyGroup extends Api implements Fetchable
 {
-    private string $npCommunicationId;
-    private LanguageType $language;
-    private string $groupId;
+    use Model;
 
-    public function __construct(TrophyTitle $title, string $groupId)
+    private $trophyTitle;
+
+    public function __construct(object $data, TrophyTitle $title)
     {
         parent::__construct($title->httpClient);
 
-        $this->npCommunicationId = $title->npCommunicationId();
-        $this->language = $title->language();
-        $this->groupId = $groupId;
+        $this->setCache($data);
+        $this->trophyTitle = $title;
     }
 
+    public function title() : TrophyTitle
+    {
+        return $this->trophyTitle;
+    }
+    
     /**
      * Gets all the trophies in the trophy group.
      *
@@ -26,7 +32,7 @@ class TrophyGroup extends Model
      */
     public function trophies() : TrophyIterator
     {
-        return new TrophyIterator($this->info()->trophies);
+        return new TrophyIterator($this->pluck('trophies', true));
     }
 
     /**
@@ -36,7 +42,7 @@ class TrophyGroup extends Model
      */
     public function name() : string
     {
-        return $this->info()->trophyGroupName;
+        return $this->pluck('trophyGroupName');
     }
 
     /**
@@ -46,7 +52,7 @@ class TrophyGroup extends Model
      */
     public function detail() : string
     {
-        return $this->info()->trophyGroupDetail;
+        return $this->pluck('trophyGroupDetail');
     }
 
     /**
@@ -56,7 +62,7 @@ class TrophyGroup extends Model
      */
     public function id() : string
     {
-        return $this->info()->trophyGroupId;
+        return $this->pluck('trophyGroupId');
     }
 
     /**
@@ -66,18 +72,13 @@ class TrophyGroup extends Model
      */
     public function iconUrl() : string
     {
-        return $this->info()->trophyGroupIconUrl;
+        return $this->pluck('trophyGroupIconUrl');
     }
     
-    /**
-     * Gets the raw trophy group info from the PlayStation API.
-     *
-     * @return ?object
-     */
-    public function info() : ?object
+    public function fetch() : object
     {
-        return $this->cache ??= $this->get(
-            'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->npCommunicationId .'/trophyGroups/' . $this->groupId .'/trophies',
+        return $this->get(
+            'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->title()->npCommunicationId() .'/trophyGroups/' . $this->id() .'/trophies',
             [
                 'fields' => implode(',', [
                     '@default',
@@ -88,7 +89,7 @@ class TrophyGroup extends Model
                 ]),
                 'iconSize' => 'm',
                 'visibleType' => 1, // ???,
-                'npLanguage' => $this->language->getValue()
+                'npLanguage' => $this->title()->language()->getValue()
             ]
         );
     }

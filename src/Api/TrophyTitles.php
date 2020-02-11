@@ -6,7 +6,6 @@ use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Enum\ConsoleType;
 use Tustin\PlayStation\Enum\LanguageType;
 use Tustin\PlayStation\Api\Model\TrophyTitle;
-use Tustin\PlayStation\Exception\NotFoundException;
 use Tustin\PlayStation\Iterator\TrophyTitlesIterator;
 
 class TrophyTitles extends Api
@@ -27,29 +26,13 @@ class TrophyTitles extends Api
     }
 
     /**
-     * Gets all the trophy titles.
+     * Creates a new title iterator for the supplied consoles.
      *
      * @param integer $limit
-     * @return TrophyTitlesIterator
+     * @param ConsoleType ...$consoles
+     * @return void
      */
-    public function all(int $limit = 128) : TrophyTitlesIterator
-    {
-        return new TrophyTitlesIterator(
-            $this->httpClient, 
-            $this->language, 
-            [ ConsoleType::ps4(), ConsoleType::ps3(), ConsoleType::vita() ],
-            $limit
-        );
-    }
-
-    /**
-     * Gets trophy titles for only the specific console(s).
-     *
-     * @param array $consoles
-     * @param integer $limit
-     * @return TrophyTitlesIterator
-     */
-    public function forConsole(array $consoles, int $limit = 128) : TrophyTitlesIterator
+    private function create(int $limit, ConsoleType ...$consoles) : TrophyTitlesIterator
     {
         return new TrophyTitlesIterator(
             $this->httpClient, 
@@ -58,37 +41,35 @@ class TrophyTitles extends Api
             $limit
         );
     }
-    
-    /**
-     * Finds a trophy title by the game name.
-     *
-     * @param string $name
-     * @return TrophyTitle
-     */
-    public function findByName(string $name) : TrophyTitle
-    {
-        foreach ($this->all() as $title)
-        {
-            if ($title->name() === $name)
-            {
-                return $title;
-            }
-        }
 
-        throw new NotFoundException("No such trophy title with name $name found.");
+    /**
+     * Gets all the trophy titles.
+     *
+     * @param integer $limit
+     * @return TrophyTitlesIterator
+     */
+    public function all(int $limit = 128) : TrophyTitlesIterator
+    {
+        return $this->create($limit,  ConsoleType::ps4(), ConsoleType::ps3(), ConsoleType::vita());
     }
 
-    public function findById(string $id) : TrophyTitle
+    /**
+     * Gets trophy titles for only the specific console(s).
+     *
+     * @param integer $limit
+     * @param ConsoleType $consoles
+     * @return TrophyTitlesIterator
+     */
+    public function forConsole(int $limit = 128, ConsoleType ...$consoles) : TrophyTitlesIterator
     {
-        foreach ($this->all() as $title)
-        {
-            if ($title->npCommunicationId() === $id)
-            {
-                return $title;
-            }
-        }
+        return $this->create($limit, ...$consoles);
+    }
 
-        throw new NotFoundException("No such trophy title with name $id found.");
+    public function findById(string $id, int $limit = 128) : TrophyTitle
+    {
+        return $this->all($limit)
+        ->withId($id)
+        ->first();
     }
 
     /**

@@ -22,6 +22,6 @@ class UserFilter extends FilterIterator
 
         return $this->regex ?
         preg_match($this->onlineId, $user->onlineId()) === 1 :
-        stripos($user->onlineId(), $this->onlineId) !== false;
+        strcasecmp($user->onlineId(), $this->onlineId) === 0;
     }
 }

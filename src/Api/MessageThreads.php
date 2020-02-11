@@ -1,7 +1,10 @@
 <?php
 namespace Tustin\PlayStation\Api;
 
+use Iterator;
 use Carbon\Carbon;
+use IteratorIterator;
+use RecursiveIteratorIterator;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Users;
 use Tustin\PlayStation\Api\Model\MessageThread;
@@ -30,15 +33,9 @@ class MessageThreads extends Api
      * @param string $onlineId
      * @return \Generator
      */
-    public function with(string $onlineId) : \Generator
+    public function with(string $onlineId) : Iterator
     {
-        foreach ($this->all() as $thread)
-        {
-            if ($thread->members()->contains($onlineId))
-            {
-                yield $thread;
-            }
-        }
+        return new IteratorIterator($this->all()->with($onlineId));
     }
 
     /**

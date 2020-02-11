@@ -1,16 +1,17 @@
 <?php
 namespace Tustin\PlayStation\Api\Model;
 
+use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Enum\TrophyType;
 
-class Trophy extends Model
+class Trophy
 {
-    public function __construct(object $trophy)
+    use Model;
+    
+    public function __construct(object $data)
     {
-        // Since there is no endpoint to get an invidival trophy's detail, this model should just receive the raw object from the API. 
-        $this->cache = $trophy;
+        $this->setCache($data);
     }
-
     /**
      * Gets the trophy name.
      *
@@ -18,7 +19,7 @@ class Trophy extends Model
      */
     public function name() : string
     {
-        return $this->info()->trophyName;
+        return $this->pluck('trophyName');
     }
 
     /**
@@ -28,7 +29,7 @@ class Trophy extends Model
      */
     public function detail() : string
     {
-        return $this->info()->trophyDetail;
+        return $this->pluck('trophyDetail');
     }
 
     /**
@@ -38,7 +39,7 @@ class Trophy extends Model
      */
     public function type() : TrophyType
     {
-        return new TrophyType($this->info()->trophyType);
+        return new TrophyType($this->pluck('trophyType'));
     }
 
     /**
@@ -48,7 +49,7 @@ class Trophy extends Model
      */
     public function earnedRate() : float
     {
-        return $this->info()->trophyEarnedRate;
+        return $this->pluck('trophyEarnedRate');
     }
 
     /**
@@ -58,16 +59,6 @@ class Trophy extends Model
      */
     public function hidden() : bool
     {
-        return $this->info()->trophyHidden;
-    }
-
-    /**
-     * Gets the raw trophy data from the PlayStation API.
-     *
-     * @return object|null
-     */
-    public function info() : ?object
-    {
-        return $this->cache;
+        return $this->pluck('trophyHidden');
     }
 }
