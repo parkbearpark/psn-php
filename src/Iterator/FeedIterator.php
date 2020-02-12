@@ -35,7 +35,7 @@ class FeedIterator extends AbstractApiIterator
         $this->access(0);
     }
 
-    public function access($cursor)
+    public function access($cursor) : void
     {
         // I don't think the API actually cares what page is set. It seems to just use the offset either way.
         $results = $this->get('https://activity.api.np.km.playstation.net/activity/api/v2/users/' . $this->onlineId . '/feed/1', [
@@ -44,11 +44,8 @@ class FeedIterator extends AbstractApiIterator
             'blockSize' => $this->limit
         ]);
 
-        if ($results->lastBlock)
-        {
-            $this->lastBlock = true;
-        }
-        
+        $this->lastBlock = $results->lastBlock;
+
         // Because why would you include the total amount of items Sony???
         $this->update(-1, $results->feed);
     }
@@ -56,6 +53,11 @@ class FeedIterator extends AbstractApiIterator
     public function getTotalResults() : int
     {
         throw new RuntimeException("getTotalResults is not supported by the feed API.");
+    }
+
+    public function offsetExists($offset) : bool
+    {
+        return !$this->lastBlock;
     }
 
     /**

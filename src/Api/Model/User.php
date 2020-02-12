@@ -6,11 +6,12 @@ use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Api\MessageThreads;
+use Tustin\PlayStation\Contract\Fetchable;
 use Tustin\PlayStation\Iterator\FeedIterator;
 use Tustin\PlayStation\Iterator\FriendsIterator;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 
-class User extends Api
+class User extends Api implements Fetchable
 {
     use Model;
     
@@ -251,14 +252,12 @@ class User extends Api
 
     /**
      * Gets the user's profile info from the PlayStation API.
-     * 
-     * Will return from cache first if info has been requested in this instance.
      *
-     * @return ?object
+     * @return object
      */
-    public function profile() : ?object
+    public function fetch() : object
     {
-        return $this->cache ??= $this->get('https://us-prof.np.community.playstation.net/userProfile/v1/users/' . $this->onlineIdParameter . '/profile2', [
+        return $this->get('https://us-prof.np.community.playstation.net/userProfile/v1/users/' . $this->onlineIdParameter . '/profile2', [
             'fields' => implode(',', [
                 'aboutMe',
                 'accountId',

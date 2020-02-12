@@ -10,8 +10,6 @@ use Tustin\PlayStation\Traits\Filterable;
 
 class UsersSearchIterator extends AbstractApiIterator
 {
-    use Filterable;
-    
     protected string $query;
 
     protected string $searchFields;

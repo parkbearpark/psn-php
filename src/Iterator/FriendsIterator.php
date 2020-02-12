@@ -6,12 +6,9 @@ use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Filter\UserFilter;
-use Tustin\PlayStation\Traits\Filterable;
 
 class FriendsIterator extends AbstractApiIterator
 {
-    use Filterable;
-    
     protected string $parameter;
     
     protected string $sort;
@@ -60,7 +57,14 @@ class FriendsIterator extends AbstractApiIterator
      */
     public function containing(string $text) : Iterator
     {
-        yield from new UserFilter($this, $text);
+        return $this->filter(UserFilter::class, $text);
+    }
+
+    public function exact(string $onlineId) : User
+    {
+        return $this->where(function($user) use ($onlineId) {
+            return strcasecmp($user->onlineId(), $onlineId) === 0;
+        })->first();
     }
 
     public function current() : User

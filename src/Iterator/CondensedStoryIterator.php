@@ -9,17 +9,15 @@ use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 
 class CondensedStoryIterator extends AbstractInternalIterator
 {
-    use Filterable;
-
     public function __construct(array $stories = [])
     {
-        $this->create($stories, Story::class);
+        $this->create(function ($story) {
+            return new Story($story);
+        }, $stories);
     }
 
     public function ofTypes(StoryType ...$types) : CondensedStoryIterator
     {
-        $this->iterator = $this->filter(TrophyTypeFilter::class, ...$types);
-
-        return $this;
+        return $this->filter(TrophyTypeFilter::class, ...$types);
     }
 }

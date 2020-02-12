@@ -2,16 +2,18 @@
 namespace Tustin\PlayStation\Api\Model;
 
 use Carbon\Carbon;
+use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Enum\StoryType;
 use Tustin\PlayStation\Iterator\CondensedStoryIterator;
 
-class Story extends Model
+class Story
 {
+    use Model;
+    
     public function __construct(object $story)
     {
-        $this->cache = $story;
+        $this->setCache($story);
     }
-
 
     /**
      * Gets all the condensed stories for this story.
@@ -23,7 +25,7 @@ class Story extends Model
      */
     public function condensedStories() : CondensedStoryIterator
     {
-        return new CondensedStoryIterator($this->info()->condensedStories);
+        return new CondensedStoryIterator($this->pluck('condensedStories'));
     }
 
     /**
@@ -36,7 +38,7 @@ class Story extends Model
     public function captionComponents() : array
     {
         // TODO: Make this a list of proper classes to make it easier to decipher what components this story has.
-        return $this->info()->captionComponents;
+        return $this->pluck('captionComponents');
     }
 
     /**
@@ -48,7 +50,7 @@ class Story extends Model
      */
     public function captionTemplate() : string
     {
-        return $this->info()->captionTemplate;
+        return $this->pluck('captionTemplate');
     }
 
     /**
@@ -58,8 +60,7 @@ class Story extends Model
      */
     public function commentable() : bool
     {
-        // @TODO: What else can this value be?? Why is it not just true/false?
-        return $this->info()->commentable === 'commentable';
+        return $this->pluck('commentable') !== null;
     }
 
     /**
@@ -69,7 +70,7 @@ class Story extends Model
      */
     public function commentCount() : int
     {
-        return $this->info()->commentCount;
+        return $this->pluck('commentCount');
     }
 
     /**
@@ -80,7 +81,7 @@ class Story extends Model
     public function date() : Carbon
     {
         // @NeedsTesting
-        return Carbon::parse($this->info()->date)->setTimezone('UTC');
+        return Carbon::parse($this->pluck('date'))->setTimezone('UTC');
     }
 
     /**
@@ -90,7 +91,7 @@ class Story extends Model
      */
     public function imageUrl() : ?string
     {
-        return $this->info()->largeImageUrl;
+        return $this->pluck('largeImageUrl');
     }
 
     /**
@@ -100,7 +101,7 @@ class Story extends Model
      */
     public function hasLiked() : bool
     {
-        return $this->info()->liked;
+        return $this->pluck('liked');
     }
 
     /**
@@ -110,7 +111,7 @@ class Story extends Model
      */
     public function likeCount() : int
     {
-        return $this->info()->likeCount;
+        return $this->pluck('likeCount');
     }
 
     /**
@@ -120,7 +121,7 @@ class Story extends Model
      */
     public function type() : StoryType
     {
-        return new StoryType($this->info()->storyType);
+        return new StoryType($this->pluck('storyType'));
     }
 
     /**
@@ -132,7 +133,7 @@ class Story extends Model
      */
     public function targets() : array
     {
-        return $this->info()->targets;
+        return $this->pluck('targets');
     }
 
     /**
@@ -144,7 +145,7 @@ class Story extends Model
     {
         // @TODO: This should probably return a Game model once I get that finished.
         // Also, can this ever be null? I'm not sure if there can be a story for something that isn't a game.
-        return $this->info()->titleId;
+        return $this->pluck('titleId');
     }
 
     /**
@@ -154,16 +155,7 @@ class Story extends Model
      */
     public function id() : string
     {
-        return $this->info()->storyId;
+        return $this->pluck('storyId');
     }
 
-    /**
-     * Gets the raw info from the PlayStation API.
-     *
-     * @return object|null
-     */
-    public function info() : ?object
-    {
-        return $this->cache;
-    }
 }

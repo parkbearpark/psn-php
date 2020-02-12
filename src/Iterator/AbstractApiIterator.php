@@ -181,8 +181,10 @@ abstract class AbstractApiIterator extends Api implements Iterator, Countable, F
         $this->cache = array_merge($this->cache, $items);
     }
 
-    public final function first()
+    public function first()
     {
+        $this->rewind();
+        
         return $this->current();
     }
 

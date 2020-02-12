@@ -50,4 +50,11 @@ abstract class AbstractInternalIterator implements IteratorAggregate, Countable,
 
         return $this;
     }
+
+    public function first() : self
+    {
+        $this->rewind();
+
+        return $this;
+    }
 }

@@ -22,4 +22,11 @@ interface Filterable
      * @return mixed
      */
     function where(callable $callback);
+
+    /**
+     * Returns the first item in the terator.
+     *
+     * @return mixed
+     */
+    function first();
 }
