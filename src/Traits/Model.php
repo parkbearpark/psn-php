@@ -22,15 +22,14 @@ trait Model
     {
         if (!$this->hasCached() || $ignoreCache)
         {
-            if ((new ReflectionClass($this))->implementsInterface(Fetchable::class))
+            if (!(new ReflectionClass($this))->implementsInterface(Fetchable::class))
             {
-                $this->setCache($this->fetch());
-                $this->pluck($property);
+                throw new RuntimeException('Model [' . get_class($this) . '] has not been cached, 
+                but doesn\'t implement Fetchable to make requests.');
             }
 
-            throw new RuntimeException('Model [' . get_class($this) . '] has not been cached, 
-            but doesn\'t implement Fetchable to make requests.');
-
+            $this->setCache($this->fetch());
+            $this->pluck($property);
         }
         
         if (empty($this->cache))
