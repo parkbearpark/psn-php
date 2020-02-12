@@ -60,7 +60,6 @@ trait Model
         }
 
         return $value;
-
     }
 
     protected function hasCached() : bool
@@ -70,14 +69,7 @@ trait Model
 
     protected function setCache($data)
     {
-        foreach ((array)$data as $key => $item)
-        {
-            if (is_object($item))
-            {
-                $item = (array)$item;
-            }
-            
-            $this->cache[$key] = $item;
-        }
+        // So this is bad and probably slow, but it's less annoying than some recursive method.
+        $this->cache = json_decode(json_encode($data, JSON_FORCE_OBJECT), true);
     }
 }
