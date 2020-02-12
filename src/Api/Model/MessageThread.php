@@ -92,7 +92,7 @@ class MessageThread extends Api implements Fetchable
      * Gets the thread info from the PlayStation API.
      *
      * @param integer $count
-     * @return ?object
+     * @return object
      */
     public function fetch(int $count = 1) : object
     {

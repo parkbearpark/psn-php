@@ -13,11 +13,10 @@ abstract class AbstractInternalIterator implements IteratorAggregate, Countable,
     private $iterator;
 
     /**
-     * Creates a new instance of an iterator for the internal iterator.
+     * Creates a new instance of an iterator.
      *
+     * @param callable $callback
      * @param array $items
-     * @param string $class
-     * @param mixed ...$args
      * @return void
      */
     protected final function create(callable $callback, array $items) : void
@@ -51,10 +50,10 @@ abstract class AbstractInternalIterator implements IteratorAggregate, Countable,
         return $this;
     }
 
-    public function first() : self
+    public function first()
     {
-        $this->rewind();
+        $this->iterator->rewind();
 
-        return $this;
+        return $this->iterator->current();
     }
 }

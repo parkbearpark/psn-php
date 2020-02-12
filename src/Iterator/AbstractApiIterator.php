@@ -29,7 +29,7 @@ abstract class AbstractApiIterator extends Api implements Iterator, Countable, F
     /**
      * Access a specific cursor in the API.
      * 
-     * @param integer|string $cursor
+     * @param mixed $cursor
      * @return void
      */
     public abstract function access($cursor) : void;
@@ -78,9 +78,9 @@ abstract class AbstractApiIterator extends Api implements Iterator, Countable, F
     /**
      * Checks if the current offset exists in the cache.
      *
-     * @return void
+     * @return bool
      */
-    public final function valid()
+    public final function valid() : bool
     {
         return array_key_exists($this->currentOffset, $this->cache);
     }

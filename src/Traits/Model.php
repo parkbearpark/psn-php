@@ -13,6 +13,7 @@ trait Model
     /**
      * Plucks an API property from the cache. Will populare cache if necessary
      *
+     * @suppress PhanUndeclaredMethod
      * @param string $property
      * @param bool $ignoreCache
      * @return mixed
@@ -21,14 +22,15 @@ trait Model
     {
         if (!$this->hasCached() || $ignoreCache)
         {
-            if (!(new ReflectionClass($this))->implementsInterface(Fetchable::class))
+            if ((new ReflectionClass($this))->implementsInterface(Fetchable::class))
             {
-                throw new RuntimeException('Model [' . get_class($this) . '] has not been cached, 
-                but doesn\'t implement Fetchable to make requests.');
+                $this->setCache($this->fetch());
+                $this->pluck($property);
             }
-            
-            $this->setCache($this->fetch());
-            $this->pluck($property);
+
+            throw new RuntimeException('Model [' . get_class($this) . '] has not been cached, 
+            but doesn\'t implement Fetchable to make requests.');
+
         }
         
         if (empty($this->cache))

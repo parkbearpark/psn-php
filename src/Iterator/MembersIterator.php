@@ -1,10 +1,8 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Iterator;
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Model\User;
-use Tustin\PlayStation\Filter\UserFilter;
 use Tustin\PlayStation\Iterator\AbstractInternalIterator;
 
 class MembersIterator extends AbstractInternalIterator

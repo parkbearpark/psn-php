@@ -30,7 +30,7 @@ class TrophyTitles extends Api
      *
      * @param integer $limit
      * @param ConsoleType ...$consoles
-     * @return void
+     * @return TrophyTitlesIterator
      */
     private function create(int $limit, ConsoleType ...$consoles) : TrophyTitlesIterator
     {
@@ -68,8 +68,7 @@ class TrophyTitles extends Api
     public function findById(string $id, int $limit = 128) : TrophyTitle
     {
         return $this->all($limit)
-        ->withId($id)
-        ->first();
+        ->withId($id);
     }
 
     /**

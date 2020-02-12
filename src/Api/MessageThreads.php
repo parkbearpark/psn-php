@@ -4,7 +4,6 @@ namespace Tustin\PlayStation\Api;
 use Iterator;
 use Carbon\Carbon;
 use IteratorIterator;
-use RecursiveIteratorIterator;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Users;
 use Tustin\PlayStation\Api\Model\MessageThread;
@@ -31,7 +30,7 @@ class MessageThreads extends Api
      * Returns message threads that contain the specified $onlineId.
      *
      * @param string $onlineId
-     * @return \Generator
+     * @return Iterator
      */
     public function with(string $onlineId) : Iterator
     {

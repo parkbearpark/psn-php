@@ -3,9 +3,7 @@ namespace Tustin\PlayStation\Iterator;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
-use RecursiveArrayIterator;
 use InvalidArgumentException;
-use RecursiveIteratorIterator;
 use Tustin\PlayStation\Api\Model\MessageThread;
 
 class MessageThreadsIterator extends AbstractApiIterator

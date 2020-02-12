@@ -31,7 +31,7 @@ class MessagesIterator extends AbstractApiIterator
         $this->access(null);
     }
 
-    public function access($cursor)
+    public function access($cursor) : void
     {
         $params = [
             'fields' => 'threadEvents',
@@ -58,7 +58,7 @@ class MessagesIterator extends AbstractApiIterator
         $this->update($results->resultsCount, $results->threadEvents);
     }
 
-    public function next()
+    public function next() : void
     {
         $this->currentOffset++;
         if (($this->currentOffset % $this->limit) == 0)

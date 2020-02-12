@@ -1,10 +1,8 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use CallbackFilterIterator;
 use Tustin\PlayStation\Enum\StoryType;
 use Tustin\PlayStation\Api\Model\Story;
-use Tustin\PlayStation\Traits\Filterable;
 use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 
 class CondensedStoryIterator extends AbstractInternalIterator

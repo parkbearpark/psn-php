@@ -24,9 +24,7 @@ class TrophyIterator extends AbstractInternalIterator
      */
     public function ofTypes(TrophyType ...$types) : TrophyIterator
     {
-        $this->iterator = $this->filter(TrophyTypeFilter::class, ...$types);
-
-        return $this;
+        return $this->filter(TrophyTypeFilter::class, ...$types);
     }
 
     /**
@@ -37,9 +35,7 @@ class TrophyIterator extends AbstractInternalIterator
      */
     public function hidden(bool $toggle = true) : TrophyIterator
     {
-        $this->iterator = $this->filter(TrophyHiddenFilter::class, $toggle);
-
-        return $this;
+        return $this->filter(TrophyHiddenFilter::class, $toggle);
     }
 
     /**
@@ -51,9 +47,7 @@ class TrophyIterator extends AbstractInternalIterator
      */
     public function earnedRate(float $value, bool $lessThan = true) : TrophyIterator
     {
-        $this->iterator =  $this->filter(TrophyRarityFilter::class, $value, $lessThan);
-
-        return $this;
+        return $this->filter(TrophyRarityFilter::class, $value, $lessThan);
     }
 
     /**

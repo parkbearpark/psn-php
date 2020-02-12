@@ -62,9 +62,11 @@ class FriendsIterator extends AbstractApiIterator
 
     public function exact(string $onlineId) : User
     {
-        return $this->where(function($user) use ($onlineId) {
+        $this->where(function($user) use ($onlineId) {
             return strcasecmp($user->onlineId(), $onlineId) === 0;
-        })->first();
+        });
+
+        return $this->first();
     }
 
     public function current() : User

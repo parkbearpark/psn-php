@@ -3,17 +3,19 @@ namespace Tustin\PlayStation\Api\Model;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use Tustin\PlayStation\Api\Api;
+use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Enum\MessageType;
 
-class Message extends Model
+class Message extends Api
 {
-    private object $eventData;
-
+    use Model;
+    
     public function __construct(Client $client, object $eventData)
     {
         parent::__construct($client);
 
-        $this->eventData = $eventData;
+        $this->setCache($eventData);
     }
 
     /**
@@ -27,7 +29,7 @@ class Message extends Model
     {
         try
         {
-            return new MessageType($this->eventData->eventCategoryCode);
+            return new MessageType($this->pluck('eventCategoryCode'));
         }
         catch (\UnexpectedValueException $e)
         {
@@ -43,7 +45,7 @@ class Message extends Model
     public function mediaUrl() : ?string
     {
         // @NeedsTesting
-        return $this->eventData->attachedMediaPath;
+        return $this->pluck('attachedMediaPath');
     }
 
     /**
@@ -53,7 +55,7 @@ class Message extends Model
      */
     public function body() : string
     {
-        return $this->eventData->messageDetail->body;
+        return $this->pluck('messageDetail.body');
     }
 
     /**
@@ -65,7 +67,7 @@ class Message extends Model
      */
     public function eventIndex() : string
     {
-        return $this->eventData->eventIndex;
+        return $this->pluck('eventIndex');
     }
 
     /**
@@ -76,7 +78,7 @@ class Message extends Model
     public function date() : Carbon
     {
         // @NeedsTesting
-        return Carbon::parse($this->eventData->postDate)->setTimezone('UTC');
+        return Carbon::parse($this->pluck('postDate'))->setTimezone('UTC');
     }
 
     /**
@@ -88,7 +90,7 @@ class Message extends Model
     {
         return new User(
             $this->httpClient, 
-            $this->eventData->sender->onlineId
+            $this->pluck('sender.onlineId')
         );
     }
 }

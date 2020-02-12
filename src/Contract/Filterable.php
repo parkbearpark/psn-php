@@ -1,9 +1,6 @@
 <?php
 namespace Tustin\PlayStation\Contract;
 
-use Iterator;
-use CallbackFilterIterator;
-
 interface Filterable
 {
     /**

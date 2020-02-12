@@ -79,13 +79,15 @@ class TrophyTitlesIterator extends AbstractApiIterator
      * Filter title by the exact NP communication ID. (NPWR_xxx)
      *
      * @param string $id
-     * @return Iterator
+     * @return TrophyTitle
      */
-    public function withId(string $id) : Iterator
+    public function withId(string $id) : TrophyTitle
     {
-        return $this->where(function($trophy) use ($id) {
+        $this->where(function($trophy) use ($id) {
             return $trophy->npCommuncationId() === $id;
         });
+        
+        return $this->first();
     }
 
     /**
