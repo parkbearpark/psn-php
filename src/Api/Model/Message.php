@@ -2,7 +2,6 @@
 namespace Tustin\PlayStation\Api\Model;
 
 use Carbon\Carbon;
-use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Enum\MessageType;
@@ -10,12 +9,19 @@ use Tustin\PlayStation\Enum\MessageType;
 class Message extends Api
 {
     use Model;
-    
-    public function __construct(Client $client, object $eventData)
-    {
-        parent::__construct($client);
 
-        $this->setCache($eventData);
+    /**
+     * The message thread this message is in.
+     *
+     * @var MessageThread
+     */
+    private $thread;
+    
+    public function __construct(MessageThread $thread, object $messageData)
+    {
+        $this->setCache($messageData);
+
+        $this->thread = $thread;
     }
 
     /**
@@ -82,6 +88,16 @@ class Message extends Api
     }
 
     /**
+     * Returns the message thread that this message is in.
+     *
+     * @return MessageThread
+     */
+    public function messageThread() : MessageThread
+    {
+        return $this->thread;
+    }
+
+    /**
      * Gets the message sender.
      *
      * @return User
@@ -89,7 +105,7 @@ class Message extends Api
     public function sender() : User
     {
         return new User(
-            $this->httpClient, 
+            $this->messageThread()->httpClient, 
             $this->pluck('sender.onlineId')
         );
     }

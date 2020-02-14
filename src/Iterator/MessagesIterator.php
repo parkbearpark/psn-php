@@ -1,32 +1,32 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\Message;
+use Tustin\PlayStation\Api\Model\MessageThread;
 
 class MessagesIterator extends AbstractApiIterator
 {
-    protected string $threadId;
+    /**
+     * The message thread that these messages are in.
+     *
+     * @var MessageThread $thread
+     */
+    protected $thread;
 
     protected int $limit;
 
     protected string $maxEventIndexCursor;
         
-    public function __construct(Client $client, string $threadId, int $limit = 20)
+    public function __construct(MessageThread $thread, int $limit = 20)
     {
-        if (empty($threadId))
-        {
-            throw new InvalidArgumentException('$threadId must not be empty.');
-        }
-
         if ($limit <= 0)
         {
             throw new InvalidArgumentException('$limit must be greater than zero.');
         }
 
-        parent::__construct($client);
-        $this->threadId = $threadId;
+        parent::__construct($thread->httpClient);
+        $this->thread = $thread;
         $this->limit = $limit;
         $this->access(null);
     }
@@ -49,7 +49,7 @@ class MessagesIterator extends AbstractApiIterator
         }
 
         $results = $this->get(
-            'https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId, 
+            'https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->thread->id(), 
             $params
         );
 
@@ -70,7 +70,7 @@ class MessagesIterator extends AbstractApiIterator
     public function current()
     {
         return new Message(
-            $this->httpClient,
+            $this->thread,
             $this->getFromOffset($this->currentOffset)->messageEventDetail
         );
     }

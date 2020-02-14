@@ -1,35 +1,28 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Iterator;
 use RuntimeException;
-use GuzzleHttp\Client;
 use InvalidArgumentException;
+use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Api\Model\Story;
-use Tustin\PlayStation\Filter\UserFilter;
 
 class FeedIterator extends AbstractApiIterator
 {
-    protected bool $includeComments;
+    protected bool $includeComments = false;
 
-    protected int $limit;
+    protected int $limit = 10;
     
-    protected string $onlineId;
+    protected User $user;
     
-    public function __construct(Client $client, string $onlineId, bool $includeComments, int $limit)
+    public function __construct(User $user, bool $includeComments, int $limit = 10)
     {
-        if (empty($onlineId))
-        {
-            throw new InvalidArgumentException('$onlineId must contain a value.');
-        }
-
         if ($limit <= 0)
         {
             throw new InvalidArgumentException('$limit must be greater than zero.');
         }
 
-        parent::__construct($client);
-        $this->onlineId = $onlineId;
+        parent::__construct($user->httpClient);
+        $this->user = $user;
         $this->includeComments = $includeComments;
         $this->limit = $limit;
         $this->access(0);
@@ -38,7 +31,7 @@ class FeedIterator extends AbstractApiIterator
     public function access($cursor) : void
     {
         // I don't think the API actually cares what page is set. It seems to just use the offset either way.
-        $results = $this->get('https://activity.api.np.km.playstation.net/activity/api/v2/users/' . $this->onlineId . '/feed/1', [
+        $results = $this->get('https://activity.api.np.km.playstation.net/activity/api/v2/users/' . $this->user->onlineId() . '/feed/1', [
             'includeComments' => $this->includeComments,
             'offset' => $cursor,
             'blockSize' => $this->limit
@@ -50,6 +43,14 @@ class FeedIterator extends AbstractApiIterator
         $this->update(-1, $results->feed);
     }
 
+    /**
+     * Do not use. Total results is not possible in the FeedIterator.
+     * 
+     * Will always throw RuntimeException.
+     *
+     * @return integer
+     * @throws RuntimeException
+     */
     public function getTotalResults() : int
     {
         throw new RuntimeException("getTotalResults is not supported by the feed API.");
@@ -58,17 +59,6 @@ class FeedIterator extends AbstractApiIterator
     public function offsetExists($offset) : bool
     {
         return !$this->lastBlock;
-    }
-
-    /**
-     * Gets users whose onlineId contains the specified string.
-     *
-     * @param string $text
-     * @return Iterator
-     */
-    public function containing(string $text) : Iterator
-    {
-        yield from new UserFilter($this, $text);
     }
 
     public function current()

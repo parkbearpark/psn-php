@@ -3,7 +3,6 @@ namespace Tustin\PlayStation\Iterator;
 
 use Tustin\PlayStation\Enum\StoryType;
 use Tustin\PlayStation\Api\Model\Story;
-use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 
 class CondensedStoryIterator extends AbstractInternalIterator
 {
@@ -14,8 +13,8 @@ class CondensedStoryIterator extends AbstractInternalIterator
         }, $stories);
     }
 
-    public function ofTypes(StoryType ...$types) : CondensedStoryIterator
+    public function ofTypes(StoryType ...$types) : void
     {
-        return $this->filter(TrophyTypeFilter::class, ...$types);
+        // 
     }
 }

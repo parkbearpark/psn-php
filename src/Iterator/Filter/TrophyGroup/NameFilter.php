@@ -6,16 +6,16 @@ use FilterIterator;
 
 class NameFilter extends FilterIterator
 {
-    private string $name;
+    private string $groupName;
    
-    public function __construct(Iterator $iterator, string $name)
+    public function __construct(Iterator $iterator, string $groupName)
     {
         parent::__construct($iterator);
-        $this->name = $name;
+        $this->groupName = $groupName;
     }
    
     public function accept()
     {
-        return stripos($this->current()->name(), $this->name) !== false;
+        return stripos($this->current()->name(), $this->groupName) !== false;
     }
 }

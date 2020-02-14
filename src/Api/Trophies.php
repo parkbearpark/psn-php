@@ -2,19 +2,10 @@
 namespace Tustin\PlayStation\Api;
 
 use Iterator;
-use GuzzleHttp\Client;
 use IteratorAggregate;
 use Tustin\PlayStation\Api\Api;
-use Tustin\PlayStation\Enum\ConsoleType;
-use Tustin\PlayStation\Enum\LanguageType;
 use Tustin\PlayStation\Api\Model\TrophyGroup;
-use Tustin\PlayStation\Api\Model\TrophyTitle;
 use Tustin\PlayStation\Iterator\TrophyIterator;
-use Tustin\PlayStation\Iterator\TrophyGroupIterator;
-use Tustin\PlayStation\Iterator\TrophyGroupsIterator;
-use Tustin\PlayStation\Iterator\TrophyTitlesIterator;
-use Tustin\PlayStation\Iterator\Filter\TrophyTitle\TrophyTitleNameFilter;
-use Tustin\PlayStation\Iterator\Filter\TrophyTitle\TrophyTitleHasGroupsFilter;
 
 class Trophies extends Api implements IteratorAggregate
 {

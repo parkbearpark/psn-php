@@ -6,16 +6,16 @@ use FilterIterator;
 
 class TrophyTitleNameFilter extends FilterIterator
 {
-    private string $name;
+    private string $titleName;
    
-    public function __construct(Iterator $iterator, string $name)
+    public function __construct(Iterator $iterator, string $titleName)
     {
         parent::__construct($iterator);
-        $this->name = $name;
+        $this->titleName = $titleName;
     }
    
     public function accept()
     {
-        return stripos($this->current()->name(), $this->name) !== false;
+        return stripos($this->current()->name(), $this->titleName) !== false;
     }
 }

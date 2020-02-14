@@ -7,7 +7,6 @@ use Carbon\Carbon;
 use Tustin\Haste\AbstractClient;
 
 use Tustin\PlayStation\Api\Users;
-use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Api\TrophyTitles;
 use Tustin\PlayStation\Enum\LanguageType;
 use Tustin\PlayStation\Api\MessageThreads;

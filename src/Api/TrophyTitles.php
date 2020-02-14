@@ -39,9 +39,9 @@ class TrophyTitles extends Api implements IteratorAggregate
      * Filters trophy titles only for the supplied platform(s).
      *
      * @param ConsoleType ...$platforms
-     * @return void
+     * @return TrophyTitles
      */
-    public function forPlatform(ConsoleType ...$platforms)
+    public function forPlatform(ConsoleType ...$platforms) : TrophyTitles
     {
         $this->platforms = $platforms;
 
@@ -52,9 +52,9 @@ class TrophyTitles extends Api implements IteratorAggregate
      * Filters trophy titles that either have trophy groups or no trophy groups.
      *
      * @param boolean $value
-     * @return boolean
+     * @return TrophyTitles
      */
-    public function hasTrophyGroups(bool $value = true)
+    public function hasTrophyGroups(bool $value = true) : TrophyTitles
     {
         $this->hasTrophyGroups = $value;
 
@@ -65,9 +65,9 @@ class TrophyTitles extends Api implements IteratorAggregate
      * Filters trophy titles to only get titles containing the supplied name.
      *
      * @param string $name
-     * @return void
+     * @return TrophyTitles
      */
-    public function withName(string $name)
+    public function withName(string $name) : TrophyTitles
     {
         $this->withName = $name;
         

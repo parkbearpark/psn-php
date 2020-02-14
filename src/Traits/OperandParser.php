@@ -5,19 +5,33 @@ use RuntimeException;
 
 trait OperandParser
 {
-    protected function parse($lhs, $rhs)
+    /**
+     * The operator being used.
+     *
+     * @var string
+     */
+    protected $operator;
+    /**
+     * Parses a custom operator value.
+     *
+     * @param mixed $lhs
+     * @param mixed $rhs
+     * @return bool
+     * @throws RuntimeException
+     */
+    protected function parse($lhs, $rhs) : bool
     {
-        if (!$this->operand)
+        if (!$this->operator)
         {
-            throw new RuntimeException('No such property [operand] exists on class [' . get_class($this) . '], which uses OperandParser.');
+            throw new RuntimeException('No such property [operator] exists on class [' . get_class($this) . '], which uses OperandParser.');
         }
 
-        if (!is_string($this->operand))
+        if (!is_string($this->operator))
         {
-            throw new RuntimeException('Operand value is not a string.');
+            throw new RuntimeException("Operator value [$this->operator] is not a string.");
         }
 
-        switch ($this->operand)
+        switch ($this->operator)
         {
             case '=':
             case '==':
@@ -36,7 +50,7 @@ trait OperandParser
             case '<>':
             return $lhs !== $rhs;
             default:
-            throw new RuntimeException("Operand value [$this->operand] is not supported.");
+            throw new RuntimeException("operator value [$this->operator] is not supported.");
         }
 
     }

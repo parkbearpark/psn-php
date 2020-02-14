@@ -4,10 +4,10 @@ namespace Tustin\PlayStation\Api\Model;
 
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
+use Tustin\PlayStation\Api\Feed;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Api\MessageThreads;
 use Tustin\PlayStation\Contract\Fetchable;
-use Tustin\PlayStation\Iterator\FeedIterator;
 use Tustin\PlayStation\Iterator\FriendsIterator;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 
@@ -24,6 +24,21 @@ class User extends Api implements Fetchable
 
         $this->onlineIdParameter = $onlineId;
         $this->exact = $exact;
+    }
+
+    /**
+     * Create a new instance of User using existing API data.
+     *
+     * @param Client $client
+     * @param object $data
+     * @return User
+     */
+    public static function fromObject(Client $client, object $data) : User
+    {
+        $instance = new static($client, $data->profile->onlineId ?? $data->onlineId,  true);
+        $instance->setCache($data);
+
+        return $instance;
     }
 
     /**
@@ -67,13 +82,11 @@ class User extends Api implements Fetchable
     /**
      * Gets all the activity feed items for the user.
      *
-     * @param boolean $includeComments
-     * @param integer $limit
-     * @return FeedIterator
+     * @return Feed
      */
-    public function feed(bool $includeComments = true, int $limit = 10) : FeedIterator
+    public function feed() : Feed
     {
-        return new FeedIterator($this->httpClient, $this->onlineId(), $includeComments, $limit);
+        return new Feed($this->httpClient, $this);
     }
 
     /**

@@ -1,11 +1,9 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Iterator;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\User;
-use Tustin\PlayStation\Filter\UserFilter;
 
 class UsersSearchIterator extends AbstractApiIterator
 {
@@ -50,29 +48,6 @@ class UsersSearchIterator extends AbstractApiIterator
         ]);
 
         $this->update($results->totalResults, $results->searchResults);
-    }
-
-    /**
-     * Gets users whose onlineId contains the specified string.
-     *
-     * @param string $text
-     * @return Iterator
-     */
-    public function containing(string $text) : Iterator
-    {
-        yield from new UserFilter($this, $text);
-    }
-
-    /**
-     * Gets the users who have PlayStation Plus.
-     *
-     * @return Iterator
-     */
-    public function hasPlus() : Iterator
-    {
-        return $this->where(function ($user) {
-            return $user->hasPlus();
-        });
     }
 
     public function current()

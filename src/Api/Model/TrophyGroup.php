@@ -2,12 +2,9 @@
 namespace Tustin\PlayStation\Api\Model;
 
 use InvalidArgumentException;
-use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Trophies;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Enum\TrophyType;
-use Tustin\PlayStation\Contract\Fetchable;
-use Tustin\PlayStation\Iterator\TrophyIterator;
 
 class TrophyGroup
 {

@@ -4,11 +4,11 @@ namespace Tustin\PlayStation\Api\Model;
 
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
+use Tustin\PlayStation\Api\Messages;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Api\Model\Message;
 use Tustin\PlayStation\Contract\Fetchable;
 use Tustin\PlayStation\Iterator\MembersIterator;
-use Tustin\PlayStation\Iterator\MessagesIterator;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 
 class MessageThread extends Api implements Fetchable
@@ -59,23 +59,22 @@ class MessageThread extends Api implements Fetchable
      */
     public function sendMessage(AbstractMessage $message) : Message
     {
-        $response = $this->postMultiPart(
-            'https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId() . '/messages',
+        $this->postMultiPart(
+            'https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->id() . '/messages',
             $message->build()
         );
 
-        return $this->messages(1)->current();
+        return $this->messages()->first();
     }
 
     /**
      * Gets all messages in the message thread.
      *
-     * @param integer $count
-     * @return MessagesIterator
+     * @return Messages
      */
-    public function messages(int $count = 20) : MessagesIterator
+    public function messages() : Messages
     {
-        return new MessagesIterator($this->httpClient, $this->threadId(), $count);
+        return new Messages($this);
     }
 
     /**
@@ -83,7 +82,7 @@ class MessageThread extends Api implements Fetchable
      *
      * @return string
      */
-    public function threadId() : string
+    public function id() : string
     {
         return $this->threadId;
     }
@@ -96,7 +95,7 @@ class MessageThread extends Api implements Fetchable
      */
     public function fetch(int $count = 1) : object
     {
-        return $this->get('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->threadId(), [
+        return $this->get('https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->id(), [
             'fields' => implode(',', [
                 'threadMembers',
                 'threadNameDetail',

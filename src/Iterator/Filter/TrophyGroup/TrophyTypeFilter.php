@@ -11,14 +11,13 @@ class TrophyTypeFilter extends FilterIterator
     use OperandParser;
     
     private TrophyType $trophyType;
-    private string $operand;
     private int $count;
    
-    public function __construct(Iterator $iterator, TrophyType $trophyType, string $operand, int $count)
+    public function __construct(Iterator $iterator, TrophyType $trophyType, string $operator, int $count)
     {
         parent::__construct($iterator);
         $this->trophyType = $trophyType;
-        $this->operand = $operand;
+        $this->operator = $operator;
         $this->count = $count;
     }
    

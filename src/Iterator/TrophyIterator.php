@@ -1,12 +1,8 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Tustin\PlayStation\Enum\TrophyType;
 use Tustin\PlayStation\Api\Model\Trophy;
 use Tustin\PlayStation\Api\Model\TrophyGroup;
-use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
-use Tustin\PlayStation\Filter\Trophy\TrophyHiddenFilter;
-use Tustin\PlayStation\Filter\Trophy\TrophyRarityFilter;
 
 class TrophyIterator extends AbstractApiIterator
 {
@@ -26,9 +22,9 @@ class TrophyIterator extends AbstractApiIterator
         $this->access(0);
     }
 
-    public function fetch() : object
+    public function access($cursor) : void
     {
-        return $this->get(
+        $results = $this->get(
             'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->group->title()->npCommunicationId() .'/trophyGroups/' . $this->group->id() .'/trophies',
             [
                 'fields' => implode(',', [
@@ -43,6 +39,8 @@ class TrophyIterator extends AbstractApiIterator
                 'npLanguage' => $this->group->title()->language()->getValue()
             ]
         );
+
+        $this->update(count($results->trophyGroups), $results->trophyGroups);
     }
 
     public function current()

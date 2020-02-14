@@ -1,7 +1,6 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Iterator;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Enum\ConsoleType;

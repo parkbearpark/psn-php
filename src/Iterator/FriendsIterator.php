@@ -1,11 +1,9 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Iterator;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\User;
-use Tustin\PlayStation\Filter\UserFilter;
 
 class FriendsIterator extends AbstractApiIterator
 {
@@ -47,26 +45,6 @@ class FriendsIterator extends AbstractApiIterator
         ]);
 
         $this->update($results->totalResults, $results->profiles);
-    }
-
-    /**
-     * Gets friends whose onlineId contains the specified string.
-     *
-     * @param string $text
-     * @return Iterator
-     */
-    public function containing(string $text) : Iterator
-    {
-        return $this->filter(UserFilter::class, $text);
-    }
-
-    public function exact(string $onlineId) : User
-    {
-        $this->where(function($user) use ($onlineId) {
-            return strcasecmp($user->onlineId(), $onlineId) === 0;
-        });
-
-        return $this->first();
     }
 
     public function current() : User
