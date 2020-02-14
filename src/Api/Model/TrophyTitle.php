@@ -7,8 +7,6 @@ use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Api\TrophyGroups;
 use Tustin\PlayStation\Enum\ConsoleType;
 use Tustin\PlayStation\Enum\LanguageType;
-use Tustin\PlayStation\Contract\Fetchable;
-use Tustin\PlayStation\Iterator\TrophyGroupIterator;
 
 class TrophyTitle extends Api
 {
@@ -38,7 +36,6 @@ class TrophyTitle extends Api
     public function trophyGroups() : TrophyGroups
     {
         return new TrophyGroups($this);
-        // return new TrophyGroupIterator($this, $this->pluck('trophyGroups', true));
     }
 
     /**
