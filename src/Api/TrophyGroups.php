@@ -3,11 +3,13 @@ namespace Tustin\PlayStation\Api;
 
 use Iterator;
 use IteratorAggregate;
+use Tustin\PlayStation\Enum\TrophyType;
 use Tustin\PlayStation\Api\Model\TrophyGroup;
 use Tustin\PlayStation\Api\Model\TrophyTitle;
 use Tustin\PlayStation\Iterator\TrophyGroupsIterator;
-use Tustin\PlayStation\Iterator\Filter\TrophyGroup\TrophyGroupNameFilter;
-use Tustin\PlayStation\Iterator\Filter\TrophyGroup\TrophyGroupDetailFilter;
+use Tustin\PlayStation\Iterator\Filter\TrophyGroup\NameFilter;
+use Tustin\PlayStation\Iterator\Filter\TrophyGroup\DetailFilter;
+use Tustin\PlayStation\Iterator\Filter\TrophyGroup\TrophyTypeFilter;
 
 class TrophyGroups implements IteratorAggregate
 {
@@ -20,6 +22,8 @@ class TrophyGroups implements IteratorAggregate
 
     private string $withName = '';
     private string $withDetail = '';
+
+    private array $certainTrophyTypeFilter = [];
 
     public function __construct(TrophyTitle $title)
     {
@@ -40,12 +44,14 @@ class TrophyGroups implements IteratorAggregate
         return $this;
     }
 
-    public function withCertainTrophyCount(string $trophyName, int $count)
+    public function withTrophyCount(TrophyType $trophy, string $operand, int $count)
     {
-        // 
+        $this->certainTrophyTypeFilter[] = [$trophy, $operand, $count];
+
+        return $this;
     }
 
-    public function withTotalTrophyCount(int $count)
+    public function withTotalTrophyCount(string $operand, int $count)
     {
         // 
     }
@@ -61,12 +67,20 @@ class TrophyGroups implements IteratorAggregate
 
         if ($this->withName)
         {
-            $iterator = new TrophyGroupNameFilter($iterator, $this->withName);
+            $iterator = new NameFilter($iterator, $this->withName);
         }
 
         if ($this->withDetail)
         {
-            $iterator = new TrophyGroupDetailFilter($iterator, $this->withDetail);
+            $iterator = new DetailFilter($iterator, $this->withDetail);
+        }
+
+        if ($this->certainTrophyTypeFilter)
+        {
+            foreach ($this->certainTrophyTypeFilter as $filter)
+            {
+                $iterator = new TrophyTypeFilter($iterator, ...$filter);
+            }
         }
 
         return $iterator;

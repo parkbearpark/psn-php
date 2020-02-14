@@ -1,9 +1,11 @@
 <?php
 namespace Tustin\PlayStation\Api\Model;
 
+use InvalidArgumentException;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Trophies;
 use Tustin\PlayStation\Traits\Model;
+use Tustin\PlayStation\Enum\TrophyType;
 use Tustin\PlayStation\Contract\Fetchable;
 use Tustin\PlayStation\Iterator\TrophyIterator;
 
@@ -72,5 +74,54 @@ class TrophyGroup
     public function iconUrl() : string
     {
         return $this->pluck('trophyGroupIconUrl');
+    }
+
+    public function definedTrophies() : array
+    {
+        return $this->pluck('definedTrophies');
+    }
+
+    public function bronzeTrophyCount() : int
+    {
+        return $this->pluck('definedTrophies.bronze');
+    }
+
+    public function silverTrophyCount() : int
+    {
+        return $this->pluck('definedTrophies.silver');
+    }
+
+    public function goldTrophyCount() : int
+    {
+        return $this->pluck('definedTrophies.gold');
+    }
+
+    public function hasPlatinum() : bool
+    {
+        return $this->pluck('definedTrophies.platinum') == 1;
+    }
+
+    public function trophyCount(TrophyType $trophyType) : int
+    {
+        switch ($trophyType)
+        {
+            case TrophyType::bronze():
+            return $this->bronzeTrophyCount();
+            case TrophyType::silver():
+            return $this->silverTrophyCount();
+            case TrophyType::gold():
+            return $this->goldTrophyCount();
+            case TrophyType::platinum():
+            return (int)$this->hasPlatinum();
+            default:
+            throw new InvalidArgumentException("Trophy type [$trophyType] does not contain a count method.");
+        }
+    }
+
+    public function totalTrophyCount() : int
+    {
+        $count = $this->bronzeTrophyCount() + $this->silverTrophyCount() + $this->goldTrophyCount();
+
+        return $this->hasPlatinum() ? ++$count : $count;
     }
 }

@@ -4,7 +4,7 @@ namespace Tustin\PlayStation\Iterator\Filter\TrophyGroup;
 use Iterator;
 use FilterIterator;
 
-class TrophyGroupNameFilter extends FilterIterator
+class NameFilter extends FilterIterator
 {
     private string $name;
    
