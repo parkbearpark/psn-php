@@ -4,12 +4,13 @@ namespace Tustin\PlayStation\Api\Model;
 use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Traits\Model;
+use Tustin\PlayStation\Api\TrophyGroups;
 use Tustin\PlayStation\Enum\ConsoleType;
 use Tustin\PlayStation\Enum\LanguageType;
 use Tustin\PlayStation\Contract\Fetchable;
 use Tustin\PlayStation\Iterator\TrophyGroupIterator;
 
-class TrophyTitle extends Api implements Fetchable
+class TrophyTitle extends Api
 {
     use Model;
 
@@ -18,6 +19,7 @@ class TrophyTitle extends Api implements Fetchable
     public function __construct(Client $client, object $data, LanguageType $language = null)
     {
         parent::__construct($client);
+        
         $this->setCache($data);
 
         if (is_null($language))
@@ -31,11 +33,12 @@ class TrophyTitle extends Api implements Fetchable
     /**
      * Gets all the trophy groups for the trophy title.
      *
-     * @return TrophyGroupIterator
+     * @return TrophyGroups
      */
-    public function trophyGroups() : TrophyGroupIterator
+    public function trophyGroups() : TrophyGroups
     {
-        return new TrophyGroupIterator($this, $this->pluck('trophyGroups', true));
+        return new TrophyGroups($this);
+        // return new TrophyGroupIterator($this, $this->pluck('trophyGroups', true));
     }
 
     /**
@@ -180,18 +183,5 @@ class TrophyTitle extends Api implements Fetchable
     public function language() : LanguageType
     {
         return $this->language;
-    }
-
-    public function fetch() : object
-    {
-        return $this->get(
-            'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->npCommunicationId() .'/trophyGroups',
-            [
-                'fields' => implode(',', [
-                    '@default'
-                ]),
-                'npLanguage' => $this->language->getValue()
-            ]
-        );
     }
 }

@@ -75,6 +75,11 @@ class MessageThreads extends Api implements IteratorAggregate
         return $iterator;
     }
 
+    /**
+     * Gets the first message thread in the collection.
+     *
+     * @return MessageThread
+     */
     public function first() : MessageThread
     {
         return $this->getIterator()->current();

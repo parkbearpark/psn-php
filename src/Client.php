@@ -6,6 +6,11 @@ use Carbon\Carbon;
 
 use Tustin\Haste\AbstractClient;
 
+use Tustin\PlayStation\Api\Users;
+use Tustin\PlayStation\Api\Model\User;
+use Tustin\PlayStation\Api\TrophyTitles;
+use Tustin\PlayStation\Enum\LanguageType;
+use Tustin\PlayStation\Api\MessageThreads;
 use Tustin\Haste\Http\Middleware\AuthenticationMiddleware;
 
 class Client extends AbstractClient
@@ -149,6 +154,21 @@ class Client extends AbstractClient
     public function expireDate() : Carbon
     {
         return $this->expiresAt;
+    }
+
+    public function users() : Users
+    {
+        return new Users($this->httpClient);
+    }
+
+    public function trophyTitles(LanguageType $language = null) : TrophyTitles
+    {
+        return new TrophyTitles($this->httpClient, $language);
+    }
+
+    public function messageThreads() : MessageThreads
+    {
+        return new MessageThreads($this->httpClient);
     }
 
     /**

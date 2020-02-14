@@ -3,101 +3,53 @@ namespace Tustin\PlayStation\Iterator;
 
 use Tustin\PlayStation\Enum\TrophyType;
 use Tustin\PlayStation\Api\Model\Trophy;
+use Tustin\PlayStation\Api\Model\TrophyGroup;
 use Tustin\PlayStation\Filter\Trophy\TrophyTypeFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyHiddenFilter;
 use Tustin\PlayStation\Filter\Trophy\TrophyRarityFilter;
 
-class TrophyIterator extends AbstractInternalIterator
+class TrophyIterator extends AbstractApiIterator
 {
-    public function __construct(array $trophies)
-    {
-        $this->create(function ($trophy) {
-            return new Trophy($trophy);
-        }, $trophies);
-    }
-
     /**
-     * Filters trophies by multiple types of trophy.
+     * Current trophy title.
      *
-     * @param TrophyType ...$types
-     * @return TrophyIterator
+     * @var TrophyGroup
      */
-    public function ofTypes(TrophyType ...$types) : TrophyIterator
-    {
-        return $this->filter(TrophyTypeFilter::class, ...$types);
-    }
-
-    /**
-     * Filters trophies by whether they are hidden or not.
-     *
-     * @param boolean $toggle
-     * @return TrophyIterator
-     */
-    public function hidden(bool $toggle = true) : TrophyIterator
-    {
-        return $this->filter(TrophyHiddenFilter::class, $toggle);
-    }
-
-    /**
-     * Filters trophies by their earned rate.
-     *
-     * @param float $value
-     * @param bool $lessThan
-     * @return TrophyIterator
-     */
-    public function earnedRate(float $value, bool $lessThan = true) : TrophyIterator
-    {
-        return $this->filter(TrophyRarityFilter::class, $value, $lessThan);
-    }
-
-    /**
-     * Filters trophies by the single type of trophy.
-     *
-     * @param TrophyType $type
-     * @return TrophyIterator
-     */
-    public function ofType(TrophyType $type) : TrophyIterator
-    {
-        return $this->ofTypes($type);
-    }
-
-    /**
-     * Gets the platinum trophy.
-     *
-     * @return TrophyIterator
-     */
-    public function platinum() : TrophyIterator
-    {
-        return $this->ofType(TrophyType::platinum());
-    }
+    private $group;
     
-    /**
-     * Gets the bronze trophies.
-     *
-     * @return TrophyIterator
-     */
-    public function bronze() : TrophyIterator
+    public function __construct(TrophyGroup $group)
     {
-        return $this->ofType(TrophyType::bronze());
+        parent::__construct($group->title()->httpClient);
+
+        $this->group = $group;
+
+        $this->access(0);
     }
 
-    /**
-     * Gets the silver trophies.
-     *
-     * @return TrophyIterator
-     */
-    public function silver() : TrophyIterator
+    public function fetch() : object
     {
-        return $this->ofType(TrophyType::silver());
+        return $this->get(
+            'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->group->title()->npCommunicationId() .'/trophyGroups/' . $this->group->id() .'/trophies',
+            [
+                'fields' => implode(',', [
+                    '@default',
+                    'trophyRare',
+                    'trophyEarnedRate',
+                    'hasTrophyGroups',
+                    'trophySmallIconUrl',
+                ]),
+                'iconSize' => 'm',
+                'visibleType' => 1, // ???,
+                'npLanguage' => $this->group->title()->language()->getValue()
+            ]
+        );
     }
 
-    /**
-     * Gets the gold trophies.
-     *
-     * @return TrophyIterator
-     */
-    public function gold() : TrophyIterator
+    public function current()
     {
-        return $this->ofType(TrophyType::gold());
+        return new Trophy(
+            $this->group,
+            $this->getFromOffset($this->currentOffset),
+        );
     }
 }

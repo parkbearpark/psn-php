@@ -2,20 +2,19 @@
 namespace Tustin\PlayStation\Api\Model;
 
 use Tustin\PlayStation\Api\Api;
+use Tustin\PlayStation\Api\Trophies;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Contract\Fetchable;
 use Tustin\PlayStation\Iterator\TrophyIterator;
 
-class TrophyGroup extends Api implements Fetchable
+class TrophyGroup
 {
     use Model;
 
     private $trophyTitle;
 
-    public function __construct(object $data, TrophyTitle $title)
+    public function __construct(TrophyTitle $title, object $data)
     {
-        parent::__construct($title->httpClient);
-
         $this->setCache($data);
         $this->trophyTitle = $title;
     }
@@ -28,11 +27,11 @@ class TrophyGroup extends Api implements Fetchable
     /**
      * Gets all the trophies in the trophy group.
      *
-     * @return TrophyIterator
+     * @return Trophies
      */
-    public function trophies() : TrophyIterator
+    public function trophies() : Trophies
     {
-        return new TrophyIterator($this->pluck('trophies', true));
+        return new Trophies($this);
     }
 
     /**
@@ -73,24 +72,5 @@ class TrophyGroup extends Api implements Fetchable
     public function iconUrl() : string
     {
         return $this->pluck('trophyGroupIconUrl');
-    }
-    
-    public function fetch() : object
-    {
-        return $this->get(
-            'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->title()->npCommunicationId() .'/trophyGroups/' . $this->id() .'/trophies',
-            [
-                'fields' => implode(',', [
-                    '@default',
-                    'trophyRare',
-                    'trophyEarnedRate',
-                    'hasTrophyGroups',
-                    'trophySmallIconUrl',
-                ]),
-                'iconSize' => 'm',
-                'visibleType' => 1, // ???,
-                'npLanguage' => $this->title()->language()->getValue()
-            ]
-        );
     }
 }

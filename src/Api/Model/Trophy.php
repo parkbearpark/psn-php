@@ -7,10 +7,19 @@ use Tustin\PlayStation\Enum\TrophyType;
 class Trophy
 {
     use Model;
+
+    /**
+     * The trophy group this trophy is in.
+     *
+     * @var TrophyGroup
+     */
+    private $trophyGroup;
     
-    public function __construct(object $data)
+    public function __construct(TrophyGroup $group, object $data)
     {
         $this->setCache($data);
+        
+        $this->trophyGroup = $group;
     }
     /**
      * Gets the trophy name.
