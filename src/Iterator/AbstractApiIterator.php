@@ -4,12 +4,10 @@ namespace Tustin\PlayStation\Iterator;
 use Iterator;
 use Countable;
 use RuntimeException;
-use CallbackFilterIterator;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Api;
-use Tustin\PlayStation\Contract\Filterable;
 
-abstract class AbstractApiIterator extends Api implements Iterator, Countable, Filterable
+abstract class AbstractApiIterator extends Api implements Iterator, Countable
 {
     protected $currentOffset = 0;
 
@@ -33,7 +31,7 @@ abstract class AbstractApiIterator extends Api implements Iterator, Countable, F
      * @return void
      */
     public abstract function access($cursor) : void;
-
+    
     /**
      * Currents the current offset.
      *
@@ -186,15 +184,5 @@ abstract class AbstractApiIterator extends Api implements Iterator, Countable, F
         $this->rewind();
         
         return $this->current();
-    }
-
-    public function filter(string $filterClass, ...$args) : Iterator
-    {
-        return new $filterClass($this, ...$args);
-    }
-
-    public function where(callable $callback) : Iterator
-    {
-        return new CallbackFilterIterator($this, $callback);
     }
 }

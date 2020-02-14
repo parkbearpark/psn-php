@@ -47,7 +47,9 @@ class User extends Api implements Fetchable
     public function sendMessage(AbstractMessage $message) : Message
     {
         return (new MessageThreads($this->httpClient))
-        ->withOnly($this->onlineId())
+        ->with($this->onlineId())
+        ->only()
+        ->first()
         ->sendMessage($message);
     }
 

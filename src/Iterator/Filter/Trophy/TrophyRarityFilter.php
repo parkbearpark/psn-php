@@ -1,5 +1,5 @@
 <?php
-namespace Tustin\PlayStation\Filter\Trophy;
+namespace Tustin\PlayStation\Iterator\Filter\Trophy;
 
 use Iterator;
 use FilterIterator;

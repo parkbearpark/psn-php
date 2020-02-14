@@ -3,78 +3,81 @@ namespace Tustin\PlayStation\Api;
 
 use Iterator;
 use Carbon\Carbon;
-use IteratorIterator;
+use IteratorAggregate;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Users;
 use Tustin\PlayStation\Api\Model\MessageThread;
-use Tustin\PlayStation\Exception\NotFoundException;
 use Tustin\PlayStation\Iterator\MessageThreadsIterator;
+use Tustin\PlayStation\Iterator\Filter\ThreadMembersFilter;
 
-class MessageThreads extends Api
+class MessageThreads extends Api implements IteratorAggregate
 {
+    private $with = [];
+    private $only = false;
+    private ?Carbon $since = null;
+
     /**
-     * Returns all message threads.
+     * Filters threads that contains the user(s).
+     * 
+     * Chain this with MessageThreads::only to ensure you only get threads with these exact users.
      *
-     * @param integer $limit
-     * @param Carbon|null $since
-     * @return MessageThreadsIterator
+     * @param string ...$onlineIds
+     * @return MessageThreads
      */
-    public function all(int $limit = 20, ?Carbon $since = null) : MessageThreadsIterator
+    public function with(string ...$onlineIds) : MessageThreads
     {
-        // @TODO: Maybe we should be saving this iterator instead of creating a new one each call??
-        // - Tustin 2/1/2020
-        return new MessageThreadsIterator($this->httpClient, $limit, $since);
+        $this->with = array_merge($this->with, $onlineIds);
+
+        return $this;
     }
 
     /**
-     * Returns message threads that contain the specified $onlineId.
+     * Should be used with the MessageThreads::with method.
+     * 
+     * Will return threads that contain ONLY the users passed to MessageThreads::with.
      *
-     * @param string $onlineId
+     * @return MessageThreads
+     */
+    public function only() : MessageThreads
+    {
+        $this->only = true;
+
+        return $this;
+    }
+
+    /**
+     * Returns message threads that have only been active since the given date.
+     *
+     * @param Carbon $date
+     * @return MessageThreads
+     */
+    public function since(Carbon $date) : MessageThreads
+    {
+        $this->since = $date;
+
+        return $this;
+    }
+
+    /**
+     * Gets the iterator and applies any filters.
+     *
      * @return Iterator
      */
-    public function with(string $onlineId) : Iterator
+    public function getIterator(): Iterator
     {
-        return new IteratorIterator($this->all()->with($onlineId));
-    }
+        $iterator = new MessageThreadsIterator($this->httpClient, $this->since);
 
-    /**
-     * Returns the message thread that only consits of the client and $onlineId.
-     * 
-     * Will create the thread if one doesn't already exist.
-     *
-     * @param string $onlineId
-     * @return MessageThread
-     */
-    public function withOnly(string $onlineId) : MessageThread
-    {
-        foreach ($this->with($onlineId) as $thread)
+        if ($this->with)
         {
-            if ($thread->memberCount() == 2)
-            {
-                return $thread;
-            }
+            $iterator = new ThreadMembersFilter($iterator, $this->with, $this->only);
         }
 
-        return $this->create($onlineId);
+        return $iterator;
     }
 
-    /**
-     * Finds a specific thread by it's id.
-     *
-     * @param string $threadId
-     * @return MessageThread
-     */
-    public function find(string $threadId) : MessageThread
+    public function first() : MessageThread
     {
-        foreach ($this->all() as $thread)
-        {
-            if ($thread->threadId() === $threadId)
-            {
-                return $thread;
-            }
-        }
-
-        throw new NotFoundException("No such thread with thread id $threadId found.");
+        return $this->getIterator()->current();
     }
 
     /**
@@ -114,17 +117,5 @@ class MessageThreads extends Api
         ]);
 
         return new MessageThread($this->httpClient, $response->threadId);
-    }
-
-    /**
-     * Gets the latest message thread.
-     *
-     * @return MessageThread
-     */
-    public function latest() : MessageThread
-    {
-        // Shouldn't need to rewind the iterator since it's creating a new iterator instance.
-        // Might need to change this in the future if we stick with a static iterator.
-        return $this->all()->current();
     }
 }

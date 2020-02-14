@@ -21,4 +21,9 @@ class MembersIterator extends AbstractInternalIterator
             return strcasecmp($member->onlineId(), $onlineId) === 0;
         }
     }
+
+    public function containsOnly(string $onlineId) : bool
+    {
+        return $this->contains($onlineId) && count($this) === 2;
+    }
 }

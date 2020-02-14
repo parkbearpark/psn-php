@@ -1,16 +1,26 @@
 <?php
 namespace Tustin\PlayStation\Api;
 
+use Iterator;
 use GuzzleHttp\Client;
+use IteratorAggregate;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Enum\ConsoleType;
 use Tustin\PlayStation\Enum\LanguageType;
-use Tustin\PlayStation\Api\Model\TrophyTitle;
 use Tustin\PlayStation\Iterator\TrophyTitlesIterator;
+use Tustin\PlayStation\Iterator\Filter\TrophyTitle\TrophyTitleNameFilter;
+use Tustin\PlayStation\Iterator\Filter\TrophyTitle\TrophyTitleHasGroupsFilter;
 
-class TrophyTitles extends Api
+class TrophyTitles extends Api implements IteratorAggregate
 {
     private LanguageType $language;
+
+    private array $platforms = [];
+
+    private string $withName = '';
+
+    private ?bool $hasTrophyGroups = null;
+
     
     public function __construct(Client $client, LanguageType $language = null)
     {
@@ -25,61 +35,41 @@ class TrophyTitles extends Api
         $this->language = $language;
     }
 
-    /**
-     * Creates a new title iterator for the supplied consoles.
-     *
-     * @param integer $limit
-     * @param ConsoleType ...$consoles
-     * @return TrophyTitlesIterator
-     */
-    private function create(int $limit, ConsoleType ...$consoles) : TrophyTitlesIterator
+    public function platform(ConsoleType ...$platforms)
     {
-        return new TrophyTitlesIterator(
-            $this->httpClient, 
-            $this->language, 
-            $consoles,
-            $limit
-        );
+        $this->platforms = $platforms;
+
+        return $this;
     }
 
-    /**
-     * Gets all the trophy titles.
-     *
-     * @param integer $limit
-     * @return TrophyTitlesIterator
-     */
-    public function all(int $limit = 128) : TrophyTitlesIterator
+    public function hasTrophyGroups(bool $value = true)
     {
-        return $this->create($limit,  ConsoleType::ps4(), ConsoleType::ps3(), ConsoleType::vita());
+        $this->hasTrophyGroups = $value;
+
+        return $this;
     }
 
-    /**
-     * Gets trophy titles for only the specific console(s).
-     *
-     * @param integer $limit
-     * @param ConsoleType $consoles
-     * @return TrophyTitlesIterator
-     */
-    public function forConsole(int $limit = 128, ConsoleType ...$consoles) : TrophyTitlesIterator
+    public function withName(string $name)
     {
-        return $this->create($limit, ...$consoles);
+        $this->withName = $name;
+        
+        return $this;
     }
 
-    public function findById(string $id, int $limit = 128) : TrophyTitle
+    public function getIterator(): Iterator
     {
-        return $this->all($limit)
-        ->withId($id);
-    }
+        $iterator = new TrophyTitlesIterator($this->httpClient, $this->language, $this->platforms);
 
-    /**
-     * Gets the latest trophy title.
-     *
-     * @return TrophyTitle
-     */
-    public function latest() : TrophyTitle
-    {
-        // Shouldn't need to rewind the iterator since it's creating a new iterator instance.
-        // Might need to change this in the future if we stick with a static iterator.
-        return $this->all()->current();
+        if ($this->withName)
+        {
+            $iterator = new TrophyTitleNameFilter($iterator, $this->withName);
+        }
+
+        if (!is_null($this->hasTrophyGroups))
+        {
+            $iterator = new TrophyTitleHasGroupsFilter($iterator, $this->hasTrophyGroups);
+        }
+
+        return $iterator;
     }
 }

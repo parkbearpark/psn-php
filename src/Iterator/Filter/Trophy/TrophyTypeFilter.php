@@ -1,15 +1,15 @@
 <?php
-namespace Tustin\PlayStation\Filter\Story;
+namespace Tustin\PlayStation\Iterator\Filter\Trophy;
 
 use Iterator;
 use FilterIterator;
-use Tustin\PlayStation\Enum\StoryType;
+use Tustin\PlayStation\Enum\TrophyType;
 
-class StoryTypeFilter extends FilterIterator
+class TrophyTypeFilter extends FilterIterator
 {
     private array $types;
    
-    public function __construct(Iterator $iterator, StoryType ...$types)
+    public function __construct(Iterator $iterator, TrophyType ...$types)
     {
         parent::__construct($iterator);
         $this->types = $types;

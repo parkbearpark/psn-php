@@ -10,7 +10,7 @@ class MessageThreadsIterator extends AbstractApiIterator
 {
     protected Carbon $since;
     
-    public function __construct(Client $client, int $limit = 20, ?Carbon $since = null)
+    public function __construct(Client $client, ?Carbon $since = null, int $limit = 20)
     {
         if ($limit <= 0)
         {
@@ -33,13 +33,6 @@ class MessageThreadsIterator extends AbstractApiIterator
         ]);
 
         $this->update($results->totalSize, $results->threads);
-    }
-
-    public function with(string $onlineId)
-    {
-        return $this->where(function($thread) use ($onlineId) {
-            return $thread->members()->contains($onlineId);
-        });
     }
 
     public function current()
