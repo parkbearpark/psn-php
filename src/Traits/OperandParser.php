@@ -20,6 +20,8 @@ trait OperandParser
         switch ($this->operand)
         {
             case '=':
+            case '==':
+            case '===':
             return $lhs === $rhs;
             case '>':
             return $lhs > $rhs;
@@ -30,6 +32,8 @@ trait OperandParser
             case '<=':
             return $lhs <= $rhs;
             case '!=':
+            case '!=':
+            case '<>':
             return $lhs !== $rhs;
             default:
             throw new RuntimeException("Operand value [$this->operand] is not supported.");
