@@ -4,15 +4,42 @@ namespace Tustin\PlayStation\Api\Model;
 use Carbon\Carbon;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Enum\StoryType;
+use Tustin\PlayStation\Api\FeedRepository;
 use Tustin\PlayStation\Iterator\CondensedStoryIterator;
 
 class Story
 {
     use Model;
+
+    /**
+     * The story's feed.
+     *
+     * @var FeedRepository
+     */
+    private $feedRepository;
     
-    public function __construct(object $story)
+    public function __construct(FeedRepository $feedRepository, object $story)
     {
         $this->setCache($story);
+
+        $this->feedRepository = $feedRepository;
+    }
+
+    public static function fromObject(FeedRepository $feedRepository, object $story)
+    {
+        $instance = new static($feedRepository, $story);
+
+        return $instance;
+    }
+
+    /**
+     * Gets the feed this story is in.
+     *
+     * @return FeedRepository
+     */
+    public function feed() : FeedRepository
+    {
+        return $this->feedRepository;
     }
 
     /**
@@ -157,5 +184,4 @@ class Story
     {
         return $this->pluck('storyId');
     }
-
 }

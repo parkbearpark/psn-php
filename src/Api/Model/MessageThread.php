@@ -2,14 +2,14 @@
 
 namespace Tustin\PlayStation\Api\Model;
 
-use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
-use Tustin\PlayStation\Api\Messages;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Api\Model\Message;
 use Tustin\PlayStation\Contract\Fetchable;
+use Tustin\PlayStation\Api\MessagesRepository;
 use Tustin\PlayStation\Iterator\MembersIterator;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
+use Tustin\PlayStation\Api\MessageThreadsRepository;
 
 class MessageThread extends Api implements Fetchable
 {
@@ -19,12 +19,19 @@ class MessageThread extends Api implements Fetchable
 
     private array $members;
 
-    public function __construct(Client $client, string $threadId, array $members = [])
+    public function __construct(MessageThreadsRepository $messageThreadsRepository, string $threadId, array $members = [])
     {
-        parent::__construct($client);
+        parent::__construct($messageThreadsRepository->httpClient);
 
         $this->threadId = $threadId;
         $this->members = $members;
+    }
+
+    public static function fromObject(MessageThreadsRepository $messageThreadsRepository, object $data)
+    {
+        $instance = new static($messageThreadsRepository, $data->threadId, $data->threadMembers);
+        $instance->setCache($data);
+        return $instance;
     }
 
     /**
@@ -70,11 +77,11 @@ class MessageThread extends Api implements Fetchable
     /**
      * Gets all messages in the message thread.
      *
-     * @return Messages
+     * @return MessagesRepository
      */
-    public function messages() : Messages
+    public function messages() : MessagesRepository
     {
-        return new Messages($this);
+        return new MessagesRepository($this);
     }
 
     /**

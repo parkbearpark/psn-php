@@ -5,8 +5,9 @@ namespace Tustin\PlayStation\Api;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Iterator\UsersSearchIterator;
+use Tustin\PlayStation\Interfaces\RepositoryInterface;
 
-class Users extends Api 
+class UsersRepository extends Api implements RepositoryInterface
 {
     /**
      * Searches for a user.

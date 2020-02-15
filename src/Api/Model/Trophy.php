@@ -15,11 +15,16 @@ class Trophy
      */
     private $trophyGroup;
     
-    public function __construct(TrophyGroup $group, object $data)
+    public function __construct(TrophyGroup $trophyGroup, object $data)
     {
         $this->setCache($data);
         
-        $this->trophyGroup = $group;
+        $this->trophyGroup = $trophyGroup;
+    }
+
+    public static function fromObject(TrophyGroup $trophyGroup, object $data) : Trophy
+    {
+        return new static($trophyGroup, $data);
     }
     /**
      * Gets the trophy name.

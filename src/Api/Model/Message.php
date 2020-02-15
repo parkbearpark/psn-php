@@ -24,6 +24,13 @@ class Message extends Api
         $this->thread = $thread;
     }
 
+    public function fromObject(MessageThread $thread, object $messageData)
+    {
+        $instance = new static($thread, $messageData);
+
+        return $instance;
+    }
+
     /**
      * Gets the type of message.
      * 

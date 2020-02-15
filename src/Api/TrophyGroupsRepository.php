@@ -11,7 +11,7 @@ use Tustin\PlayStation\Iterator\Filter\TrophyGroup\NameFilter;
 use Tustin\PlayStation\Iterator\Filter\TrophyGroup\DetailFilter;
 use Tustin\PlayStation\Iterator\Filter\TrophyGroup\TrophyTypeFilter;
 
-class TrophyGroups implements IteratorAggregate
+class TrophyGroupsRepository implements IteratorAggregate
 {
     /**
      * The trophy groups' title.

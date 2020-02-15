@@ -2,25 +2,27 @@
 
 namespace Tustin\PlayStation\Api\Model;
 
-use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
-use Tustin\PlayStation\Api\Feed;
 use Tustin\PlayStation\Traits\Model;
-use Tustin\PlayStation\Api\MessageThreads;
+use Tustin\PlayStation\Api\FeedRepository;
 use Tustin\PlayStation\Contract\Fetchable;
+use Tustin\PlayStation\Api\UsersRepository;
 use Tustin\PlayStation\Iterator\FriendsIterator;
+use Tustin\PlayStation\Api\TrophyTitlesRepository;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
+use Tustin\PlayStation\Api\MessageThreadsRepository;
+use Tustin\PlayStation\Interfaces\RepositoryInterface;
 
-class User extends Api implements Fetchable
+class User extends Api implements RepositoryInterface, Fetchable
 {
     use Model;
     
     private string $onlineIdParameter;
     private bool $exact;
 
-    public function __construct(Client $client, string $onlineId, bool $exact = false)
+    public function __construct(UsersRepository $usersRepository, string $onlineId, bool $exact = false)
     {
-        parent::__construct($client);
+        parent::__construct($usersRepository->httpClient);
 
         $this->onlineIdParameter = $onlineId;
         $this->exact = $exact;
@@ -28,14 +30,13 @@ class User extends Api implements Fetchable
 
     /**
      * Create a new instance of User using existing API data.
-     *
-     * @param Client $client
+     * @param UsersRepository $usersRepository
      * @param object $data
      * @return User
      */
-    public static function fromObject(Client $client, object $data) : User
+    public static function fromObject(UsersRepository $usersRepository, object $data) : User
     {
-        $instance = new static($client, $data->profile->onlineId ?? $data->onlineId,  true);
+        $instance = new static($usersRepository, $data->profile->onlineId ?? $data->onlineId,  true);
         $instance->setCache($data);
 
         return $instance;
@@ -54,6 +55,17 @@ class User extends Api implements Fetchable
     }
 
     /**
+     * Gets the user's trophy titles.
+     *
+     * @return TrophyTitlesRepository
+     */
+    public function trophyTitles() : TrophyTitlesRepository
+    {
+        return (new TrophyTitlesRepository($this->httpClient))
+        ->forUser($this);
+    }
+
+    /**
      * Sends a message to the user.
      *
      * @param AbstractMessage $message
@@ -61,7 +73,7 @@ class User extends Api implements Fetchable
      */
     public function sendMessage(AbstractMessage $message) : Message
     {
-        return (new MessageThreads($this->httpClient))
+        return (new MessageThreadsRepository($this->httpClient))
         ->with($this->onlineId())
         ->only()
         ->first()
@@ -71,22 +83,23 @@ class User extends Api implements Fetchable
     /**
      * Gets all message threads containing the user.
      *
-     * @return \Generator
+     * @return MessageThreadsRepository
      */
-    public function messageThreads() : \Generator
+    public function messageThreads() : MessageThreadsRepository
     {
-        yield from (new MessageThreads($this->httpClient))
+        return (new MessageThreadsRepository($this->httpClient))
         ->with($this->onlineId());
     }
 
     /**
-     * Gets all the activity feed items for the user.
+     * Gets the activity feed for the current user.
      *
-     * @return Feed
+     * @return FeedRepository
      */
-    public function feed() : Feed
+    public function feed() : FeedRepository
     {
-        return new Feed($this->httpClient, $this);
+        return (new FeedRepository($this->httpClient))
+        ->forUser($this);
     }
 
     /**

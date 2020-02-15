@@ -5,10 +5,13 @@ use ReflectionClass;
 use RuntimeException;
 use InvalidArgumentException;
 use Tustin\PlayStation\Contract\Fetchable;
+use Tustin\PlayStation\Interfaces\RepositoryInterface;
 
 trait Model
 {
     private array $cache = [];
+
+    public static abstract function fromObject(RepositoryInterface $repository, object $data);
 
     /**
      * Plucks an API property from the cache. Will populare cache if necessary

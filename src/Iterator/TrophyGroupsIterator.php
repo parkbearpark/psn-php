@@ -30,7 +30,7 @@ class TrophyGroupsIterator extends AbstractApiIterator
                 'fields' => implode(',', [
                     '@default'
                 ]),
-                'npLanguage' => $this->title->language()->getValue()
+                'npLanguage' => $this->title->getLanguage()->getValue()
             ]
         );
 

@@ -1,41 +1,46 @@
 <?php
 namespace Tustin\PlayStation\Api\Model;
 
-use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Traits\Model;
-use Tustin\PlayStation\Api\TrophyGroups;
 use Tustin\PlayStation\Enum\ConsoleType;
 use Tustin\PlayStation\Enum\LanguageType;
+use Tustin\PlayStation\Api\TrophyGroupsRepository;
+use Tustin\PlayStation\Api\TrophyTitlesRepository;
 
 class TrophyTitle extends Api
 {
     use Model;
 
-    private $language;
+    /**
+     * The trophy titles repository.
+     *
+     * @var TrophyTitlesRepository
+     */
+    private $trophyTitlesRepository;
 
-    public function __construct(Client $client, object $data, LanguageType $language = null)
+    public function __construct(TrophyTitlesRepository $trophyTitlesRepository, object $data)
     {
-        parent::__construct($client);
+        parent::__construct($trophyTitlesRepository->httpClient);
+
+        $this->trophyTitlesRepository = $trophyTitlesRepository;
         
         $this->setCache($data);
+    }
 
-        if (is_null($language))
-        {
-            $language = LanguageType::english();
-        }
-
-        $this->language = $language;
+    public static function fromObject(TrophyTitlesRepository $trophyTitlesRepository, object $data)
+    {
+        return new static($trophyTitlesRepository, $data);
     }
 
     /**
      * Gets all the trophy groups for the trophy title.
      *
-     * @return TrophyGroups
+     * @return TrophyGroupsRepository
      */
-    public function trophyGroups() : TrophyGroups
+    public function trophyGroups() : TrophyGroupsRepository
     {
-        return new TrophyGroups($this);
+        return new TrophyGroupsRepository($this);
     }
 
     /**
@@ -177,8 +182,8 @@ class TrophyTitle extends Api
      *
      * @return LanguageType
      */
-    public function language() : LanguageType
+    public function getLanguage() : LanguageType
     {
-        return $this->language;
+        return $this->trophyTitlesRepository->getLanguage();
     }
 }

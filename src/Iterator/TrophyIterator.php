@@ -36,7 +36,7 @@ class TrophyIterator extends AbstractApiIterator
                 ]),
                 'iconSize' => 'm',
                 'visibleType' => 1, // ???,
-                'npLanguage' => $this->group->title()->language()->getValue()
+                'npLanguage' => $this->group->title()->getLanguage()->getValue()
             ]
         );
 

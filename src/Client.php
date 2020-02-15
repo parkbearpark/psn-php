@@ -6,10 +6,9 @@ use Carbon\Carbon;
 
 use Tustin\Haste\AbstractClient;
 
-use Tustin\PlayStation\Api\Users;
-use Tustin\PlayStation\Api\TrophyTitles;
-use Tustin\PlayStation\Enum\LanguageType;
-use Tustin\PlayStation\Api\MessageThreads;
+use Tustin\PlayStation\Api\UsersRepository;
+use Tustin\PlayStation\Api\TrophyTitlesRepository;
+use Tustin\PlayStation\Api\MessageThreadsRepository;
 use Tustin\Haste\Http\Middleware\AuthenticationMiddleware;
 
 class Client extends AbstractClient
@@ -155,19 +154,19 @@ class Client extends AbstractClient
         return $this->expiresAt;
     }
 
-    public function users() : Users
+    public function users() : UsersRepository
     {
-        return new Users($this->httpClient);
+        return new UsersRepository($this->httpClient);
     }
 
-    public function trophyTitles(LanguageType $language = null) : TrophyTitles
+    public function trophyTitles() : TrophyTitlesRepository
     {
-        return new TrophyTitles($this->httpClient, $language);
+        return new TrophyTitlesRepository($this->httpClient);
     }
 
-    public function messageThreads() : MessageThreads
+    public function messageThreads() : MessageThreadsRepository
     {
-        return new MessageThreads($this->httpClient);
+        return new MessageThreadsRepository($this->httpClient);
     }
 
     /**

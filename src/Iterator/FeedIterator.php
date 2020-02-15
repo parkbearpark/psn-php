@@ -2,37 +2,33 @@
 namespace Tustin\PlayStation\Iterator;
 
 use RuntimeException;
-use InvalidArgumentException;
-use Tustin\PlayStation\Api\Model\User;
 use Tustin\PlayStation\Api\Model\Story;
+use Tustin\PlayStation\Api\FeedRepository;
 
 class FeedIterator extends AbstractApiIterator
 {
-    protected bool $includeComments = false;
-
-    protected int $limit = 10;
+    /**
+     * Feed Repository.
+     *
+     * @var FeedRepository
+     */
+    private $feedRepository;
     
-    protected User $user;
-    
-    public function __construct(User $user, bool $includeComments, int $limit = 10)
+    public function __construct(FeedRepository $feedRepository)
     {
-        if ($limit <= 0)
-        {
-            throw new InvalidArgumentException('$limit must be greater than zero.');
-        }
+        parent::__construct($feedRepository->httpClient);
 
-        parent::__construct($user->httpClient);
-        $this->user = $user;
-        $this->includeComments = $includeComments;
-        $this->limit = $limit;
+        $this->limit = 10;
         $this->access(0);
     }
 
     public function access($cursor) : void
     {
+        $user = $this->feedRepository->getUser();
+
         // I don't think the API actually cares what page is set. It seems to just use the offset either way.
-        $results = $this->get('https://activity.api.np.km.playstation.net/activity/api/v2/users/' . $this->user->onlineId() . '/feed/1', [
-            'includeComments' => $this->includeComments,
+        $results = $this->get('https://activity.api.np.km.playstation.net/activity/api/v2/users/' . $user->onlineId() . '/feed/1', [
+            'includeComments' => $this->feedRepository->getIncludeComments(),
             'offset' => $cursor,
             'blockSize' => $this->limit
         ]);
@@ -56,14 +52,29 @@ class FeedIterator extends AbstractApiIterator
         throw new RuntimeException("getTotalResults is not supported by the feed API.");
     }
 
+    /**
+     * Checks if the current offset exists.
+     * 
+     * $offset is negated in the FeedIterator because Sony doesn't use an offset.
+     * We instead rely on a bool propetty $lastBlock.
+     *
+     * @param mixed $offset
+     * @return boolean
+     */
     public function offsetExists($offset) : bool
     {
         return !$this->lastBlock;
     }
 
-    public function current()
+    /**
+     * Gets the current story.
+     *
+     * @return Story
+     */
+    public function current() : Story
     {
-        return new Story(
+        return Story::fromObject(
+            $this->feedRepository,
             $this->getFromOffset($this->currentOffset),
         );
     }

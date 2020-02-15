@@ -2,9 +2,9 @@
 namespace Tustin\PlayStation\Api\Model;
 
 use InvalidArgumentException;
-use Tustin\PlayStation\Api\Trophies;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Enum\TrophyType;
+use Tustin\PlayStation\Api\TrophiesRepository;
 
 class TrophyGroup
 {
@@ -12,10 +12,15 @@ class TrophyGroup
 
     private $trophyTitle;
 
-    public function __construct(TrophyTitle $title, object $data)
+    public function __construct(TrophyTitle $trophyTitle, object $data)
     {
         $this->setCache($data);
-        $this->trophyTitle = $title;
+        $this->trophyTitle = $trophyTitle;
+    }
+
+    public static function fromObject(TrophyTitle $trophyTitle, object $data) : TrophyGroup
+    {
+        return new static($trophyTitle, $data);
     }
 
     public function title() : TrophyTitle
@@ -26,11 +31,11 @@ class TrophyGroup
     /**
      * Gets all the trophies in the trophy group.
      *
-     * @return Trophies
+     * @return TrophiesRepository
      */
-    public function trophies() : Trophies
+    public function trophies() : TrophiesRepository
     {
-        return new Trophies($this);
+        return new TrophiesRepository($this);
     }
 
     /**

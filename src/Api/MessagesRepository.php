@@ -8,7 +8,7 @@ use Tustin\PlayStation\Api\Model\MessageThread;
 use Tustin\PlayStation\Iterator\MessagesIterator;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 
-class Messages extends Api implements IteratorAggregate
+class MessagesRepository extends Api implements IteratorAggregate
 {
     /**
      * The message thread for these messages.

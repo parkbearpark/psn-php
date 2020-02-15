@@ -1,25 +1,25 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Carbon\Carbon;
-use GuzzleHttp\Client;
-use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\MessageThread;
+use Tustin\PlayStation\Api\MessageThreadsRepository;
 
 class MessageThreadsIterator extends AbstractApiIterator
 {
-    protected Carbon $since;
+    /**
+     * The message threads repository.
+     *
+     * @var MessageThreadsRepository
+     */
+    private $messageThreadsRepository;
     
-    public function __construct(Client $client, ?Carbon $since = null, int $limit = 20)
+    public function __construct(MessageThreadsRepository $messageThreadsRepository)
     {
-        if ($limit <= 0)
-        {
-            throw new InvalidArgumentException('$limit must be greater than zero.');
-        }
-        
-        parent::__construct($client);
-        $this->since = $since ?? Carbon::createFromTimestamp(0);
-        $this->limit = $limit;
+        parent::__construct($messageThreadsRepository->httpClient);
+
+        $this->messageThreadsRepository = $messageThreadsRepository;
+        $this->limit = 20;
+
         $this->access(0);
     }
 
@@ -29,7 +29,7 @@ class MessageThreadsIterator extends AbstractApiIterator
             'fields' => 'threadMembers',
             'limit' => $this->limit,
             'offset' => $cursor,
-            'sinceReceivedDate' => $this->since->toIso8601ZuluString()
+            'sinceReceivedDate' => $this->messageThreadsRepository->getSinceDate()->toIso8601ZuluString()
         ]);
 
         $this->update($results->totalSize, $results->threads);
@@ -37,12 +37,9 @@ class MessageThreadsIterator extends AbstractApiIterator
 
     public function current()
     {
-        $it = $this->getFromOffset($this->currentOffset);
-        
-        return new MessageThread(
-            $this->httpClient,
-            $it->threadId,
-            $it->threadMembers
+        return MessageThread::fromObject(
+            $this->messageThreadsRepository,
+            $this->getFromOffset($this->currentOffset)
         );
     }
 }

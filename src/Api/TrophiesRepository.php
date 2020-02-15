@@ -3,11 +3,10 @@ namespace Tustin\PlayStation\Api;
 
 use Iterator;
 use IteratorAggregate;
-use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Api\Model\TrophyGroup;
 use Tustin\PlayStation\Iterator\TrophyIterator;
 
-class Trophies extends Api implements IteratorAggregate
+class TrophiesRepository implements IteratorAggregate
 {
     /**
      * The trophy groups' title.
@@ -23,8 +22,6 @@ class Trophies extends Api implements IteratorAggregate
 
     public function __construct(TrophyGroup $group)
     {
-        parent::__construct($group->title()->httpClient);
-
         $this->group = $group;
     }
 
