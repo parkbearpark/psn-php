@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Tustin\Haste\AbstractClient;
 
 use Tustin\PlayStation\Api\UsersRepository;
+use Tustin\PlayStation\Api\CommunitiesRepository;
 use Tustin\PlayStation\Api\TrophyTitlesRepository;
 use Tustin\PlayStation\Api\MessageThreadsRepository;
 use Tustin\Haste\Http\Middleware\AuthenticationMiddleware;
@@ -156,17 +157,22 @@ class Client extends AbstractClient
 
     public function users() : UsersRepository
     {
-        return new UsersRepository($this->httpClient);
+        return new UsersRepository($this->getHttpClient());
     }
 
     public function trophyTitles() : TrophyTitlesRepository
     {
-        return new TrophyTitlesRepository($this->httpClient);
+        return new TrophyTitlesRepository($this->getHttpClient());
     }
 
     public function messageThreads() : MessageThreadsRepository
     {
-        return new MessageThreadsRepository($this->httpClient);
+        return new MessageThreadsRepository($this->getHttpClient());
+    }
+
+    public function communities() : CommunitiesRepository
+    {
+        return new CommunitiesRepository($this->getHttpClient());
     }
 
     /**
