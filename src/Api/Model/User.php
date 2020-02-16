@@ -9,6 +9,7 @@ use Tustin\PlayStation\Api\FeedRepository;
 use Tustin\PlayStation\Api\UsersRepository;
 use Tustin\PlayStation\Interfaces\Fetchable;
 use Tustin\PlayStation\Api\FriendsRepository;
+use Tustin\PlayStation\Api\CommunitiesRepository;
 use Tustin\PlayStation\Api\TrophyTitlesRepository;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 use Tustin\PlayStation\Api\MessageThreadsRepository;
@@ -66,6 +67,17 @@ class User extends Api implements RepositoryInterface, Fetchable
     public function trophyTitles() : TrophyTitlesRepository
     {
         return (new TrophyTitlesRepository($this->getHttpClient()))
+        ->forUser($this);
+    }
+
+    /**
+     * Gets the communities the user is in.
+     *
+     * @return CommunitiesRepository
+     */
+    public function communities() : CommunitiesRepository
+    {
+        return (new CommunitiesRepository($this->getHttpClient()))
         ->forUser($this);
     }
 
