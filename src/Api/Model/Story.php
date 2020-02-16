@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Enum\StoryType;
 use Tustin\PlayStation\Api\FeedRepository;
+use Tustin\PlayStation\Api\Model\StoryComponent;
 use Tustin\PlayStation\Iterator\CondensedStoryIterator;
 
 class Story
@@ -62,6 +63,11 @@ class Story
         return new CondensedStoryIterator($this->feedRepository, $this->pluck('condensedStories'));
     }
 
+    /**
+     * Checks whether this story has condensed stories.
+     *
+     * @return boolean
+     */
     public function hasCondensedStories() : bool
     {
         return !is_null($this->pluck('condensedStories'));
@@ -76,8 +82,7 @@ class Story
      */
     public function captionComponents() : array
     {
-        // TODO: Make this a list of proper classes to make it easier to decipher what components this story has.
-        return $this->pluck('captionComponents');
+        return array_map(fn($c) => StoryComponent::fromArray($c), $this->pluck('captionComponents'));
     }
 
     /**
@@ -195,5 +200,29 @@ class Story
     public function id() : string
     {
         return $this->pluck('storyId');
+    }
+
+    /**
+     * Formats the Story::captionTemplate with Story::captionComponents.
+     *
+     * @return string
+     */
+    public function format() : string
+    {
+        $template = $this->captionTemplate();
+        
+        $components = $this->captionComponents();
+
+        foreach ($components as $component)
+        {
+            $template = str_replace($component->getKeyInTemplate(), $component->getValue(), $template);
+        }
+
+        return $template;
+    }
+
+    public function __toString()
+    {
+        return $this->format();
     }
 }

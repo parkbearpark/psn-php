@@ -46,7 +46,8 @@ trait Model
 
         if (!array_key_exists($root, $this->cache))
         {
-            throw new InvalidArgumentException("[$root] is not a valid property for model [" . get_class($this) . "]");
+            return null;
+            // throw new InvalidArgumentException("[$root] is not a valid property for model [" . get_class($this) . "]");
         }
 
         $value = $this->cache[$root];
