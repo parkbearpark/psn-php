@@ -18,6 +18,8 @@ class FeedIterator extends AbstractApiIterator
     {
         parent::__construct($feedRepository->httpClient);
 
+        $this->feedRepository = $feedRepository;
+
         $this->limit = 10;
         $this->access(0);
     }

@@ -3,6 +3,6 @@ namespace Tustin\PlayStation\Iterator;
 
 use Tustin\PlayStation\Iterator\AbstractInternalIterator;
 
-class MembersIterator extends AbstractInternalIterator
+class MessageThreadMembersIterator extends AbstractInternalIterator
 {
 }

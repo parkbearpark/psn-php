@@ -14,12 +14,11 @@ class UsersRepository extends Api implements RepositoryInterface
      *
      * @param string $query
      * @param array $searchFields
-     * @param integer $limit
      * @return UsersSearchIterator
      */
-    public function search(string $query, array $searchFields = ['onlineId'], int $limit = 50) : UsersSearchIterator
+    public function search(string $query, array $searchFields = ['onlineId']) : UsersSearchIterator
     {
-        return new UsersSearchIterator($this->httpClient, $query, $searchFields, $limit);
+        return new UsersSearchIterator($this, $query, $searchFields);
     }
 
     /**
@@ -30,7 +29,7 @@ class UsersRepository extends Api implements RepositoryInterface
      */
     public function find(string $onlineId) : User
     {
-        return new User($this->httpClient, $onlineId);
+        return new User($this, $onlineId);
     }
 
     /**
@@ -40,6 +39,6 @@ class UsersRepository extends Api implements RepositoryInterface
      */
     public function me() : User
     {
-        return new User($this->httpClient, 'me');
+        return new User($this, 'me');
     }
 }

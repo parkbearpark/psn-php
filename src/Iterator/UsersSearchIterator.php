@@ -1,36 +1,49 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use GuzzleHttp\Client;
 use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\User;
+use Tustin\PlayStation\Api\UsersRepository;
 
 class UsersSearchIterator extends AbstractApiIterator
 {
-    protected string $query;
+    /**
+     * The search query.
+     *
+     * @var string
+     */
+    protected $query;
 
-    protected string $searchFields;
+    /**
+     * The fields to search in (comma delimited).
+     *
+     * @var string
+     */
+    protected $searchFields;
+
+    /**
+     * The users repository.
+     *
+     * @var UsersRepository
+     */
+    private $usersRepository;
     
-    public function __construct(Client $client, string $query, array $searchFields, int $limit)
+    public function __construct(UsersRepository $usersRepository, string $query, array $searchFields)
     {
         if (empty($query))
         {
-            throw new InvalidArgumentException('$query must contain a value.');
+            throw new InvalidArgumentException('[query] must contain a value.');
         }
 
         if (empty($searchFields))
         {
-            throw new InvalidArgumentException('$searchFields must contain at least one value.');
+            throw new InvalidArgumentException('[searchFields] must contain at least one value.');
         }
 
-        if ($limit <= 0)
-        {
-            throw new InvalidArgumentException('$limit must be greater than zero.');
-        }
-
-        parent::__construct($client);
+        parent::__construct($usersRepository->httpClient);
+        $this->usersRepository = $usersRepository;
         $this->query = $query;
-        $this->limit = $limit;
+        $this->limit = 50;
         $this->searchFields = implode(',', $searchFields);
         $this->access(0);
     }
@@ -52,10 +65,9 @@ class UsersSearchIterator extends AbstractApiIterator
 
     public function current()
     {
-        return new User(
-            $this->httpClient,
-            $this->getFromOffset($this->currentOffset)->onlineId,
-            true
+        return User::fromObject(
+            $this->usersRepository,
+            $this->getFromOffset($this->currentOffset)
         );
     }
 }

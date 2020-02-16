@@ -2,11 +2,11 @@
 namespace Tustin\PlayStation\Iterator;
 
 use Countable;
-use Generator;
+use Traversable;
 use ArrayIterator;
 use IteratorAggregate;
 use CallbackFilterIterator;
-use Tustin\PlayStation\Contract\Filterable;
+use Tustin\PlayStation\Interfaces\Filterable;
 
 abstract class AbstractInternalIterator implements IteratorAggregate, Countable, Filterable
 {
@@ -26,9 +26,9 @@ abstract class AbstractInternalIterator implements IteratorAggregate, Countable,
         );
     }
 
-    public function getIterator() : Generator
+    public function getIterator() : Traversable
     {
-        yield from $this->iterator;
+       return $this->iterator;
     }
 
     public function count() : int

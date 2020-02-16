@@ -5,11 +5,11 @@ namespace Tustin\PlayStation\Api\Model;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Api\Model\Message;
-use Tustin\PlayStation\Contract\Fetchable;
+use Tustin\PlayStation\Interfaces\Fetchable;
 use Tustin\PlayStation\Api\MessagesRepository;
-use Tustin\PlayStation\Iterator\MembersIterator;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 use Tustin\PlayStation\Api\MessageThreadsRepository;
+use Tustin\PlayStation\Api\MessageThreadMembersRepository;
 
 class MessageThread extends Api implements Fetchable
 {
@@ -37,13 +37,21 @@ class MessageThread extends Api implements Fetchable
     /**
      * Gets all the members in the message thread.
      *
-     * @return MembersIterator
+     * @return MessageThreadMembersRepository
      */
-    public function members() : MembersIterator
+    public function members() : MessageThreadMembersRepository
     {
-        return new MembersIterator($this->httpClient,
-            !empty($this->members) ? $this->members : $this->pluck('threadMembers')
-        );
+        return new MessageThreadMembersRepository($this);
+    }
+
+    /**
+     * Gets all the message thread members as an array.
+     *
+     * @return array
+     */
+    public function membersArray() : array
+    {
+        return $this->members ??= $this->pluck('threadMembers');
     }
 
     /**

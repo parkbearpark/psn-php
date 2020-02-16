@@ -4,7 +4,7 @@ namespace Tustin\PlayStation\Traits;
 use ReflectionClass;
 use RuntimeException;
 use InvalidArgumentException;
-use Tustin\PlayStation\Contract\Fetchable;
+use Tustin\PlayStation\Interfaces\Fetchable;
 use Tustin\PlayStation\Interfaces\RepositoryInterface;
 
 trait Model

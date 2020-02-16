@@ -1,47 +1,34 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use GuzzleHttp\Client;
-use InvalidArgumentException;
 use Tustin\PlayStation\Api\Model\User;
+use Tustin\PlayStation\Api\FriendsRepository;
 
 class FriendsIterator extends AbstractApiIterator
 {
-    protected string $parameter;
-    
-    protected string $sort;
-    
-    public function __construct(Client $client, string $parameter, string $sort, int $limit)
+    /**
+     * The friends repository.
+     *
+     * @var FriendsRepository
+     */
+    private $friendsRepository;
+
+    public function __construct(FriendsRepository $friendsRepository)
     {
-        if (empty($parameter))
-        {
-            throw new InvalidArgumentException('$parameter must not be empty.');
-        }
+        parent::__construct($friendsRepository->getHttpClient());
 
-        if (empty($sort))
-        {
-            throw new InvalidArgumentException('$sort must not be empty.');
-        }
+        $this->limit = 36;
 
-        if ($limit <= 0)
-        {
-            throw new InvalidArgumentException('$limit must be greater than zero.');
-        }
-
-        parent::__construct($client);
-        $this->parameter = $parameter;
-        $this->sort = $sort;
-        $this->limit = $limit;
         $this->access(0);
     }
 
     public function access($cursor) : void
     {
-        $results = $this->get('https://us-prof.np.community.playstation.net/userProfile/v1/users/' . $this->parameter . '/friends/profiles2', [
+        $results = $this->get('https://us-prof.np.community.playstation.net/userProfile/v1/users/' . $this->friendsRepository->getUser()->onlineId() . '/friends/profiles2', [
             'fields' => 'onlineId',
             'limit' => $this->limit,
             'offset' => $cursor,
-            'sort' => $this->sort,
+            'sort' => $this->friendsRepository->getSortBy(),
         ]);
 
         $this->update($results->totalResults, $results->profiles);
@@ -49,8 +36,8 @@ class FriendsIterator extends AbstractApiIterator
 
     public function current() : User
     {
-        return new User(
-            $this->httpClient,
+        return User::create(
+            $this->friendsRepository->getHttpClient(),
             $this->getFromOffset($this->currentOffset)->onlineId,
             true
         );

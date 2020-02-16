@@ -1,5 +1,5 @@
 <?php
-namespace Tustin\PlayStation\Contract;
+namespace Tustin\PlayStation\Interfaces;
 
 interface Filterable
 {

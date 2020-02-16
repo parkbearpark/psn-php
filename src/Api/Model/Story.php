@@ -47,12 +47,24 @@ class Story
      * 
      * Basically, a story can be a story that just includes other stories. You will typically see these for multiple trophy unlocks
      * for the same game. Sony does this to help prevent spam in the activity feed.
+     * 
+     * Returns null if no condensed stories exist for this story.
      *
-     * @return CondensedStoryIterator
+     * @return CondensedStoryIterator|null
      */
-    public function condensedStories() : CondensedStoryIterator
+    public function condensedStories() : ?CondensedStoryIterator
     {
-        return new CondensedStoryIterator($this->pluck('condensedStories'));
+        if (!$this->hasCondensedStories())
+        {
+            return null;
+        }
+        
+        return new CondensedStoryIterator($this->feedRepository, $this->pluck('condensedStories'));
+    }
+
+    public function hasCondensedStories() : bool
+    {
+        return !is_null($this->pluck('condensedStories'));
     }
 
     /**

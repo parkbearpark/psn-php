@@ -2,12 +2,13 @@
 
 namespace Tustin\PlayStation\Api\Model;
 
+use GuzzleHttp\Client;
 use Tustin\PlayStation\Api\Api;
 use Tustin\PlayStation\Traits\Model;
 use Tustin\PlayStation\Api\FeedRepository;
-use Tustin\PlayStation\Contract\Fetchable;
 use Tustin\PlayStation\Api\UsersRepository;
-use Tustin\PlayStation\Iterator\FriendsIterator;
+use Tustin\PlayStation\Interfaces\Fetchable;
+use Tustin\PlayStation\Api\FriendsRepository;
 use Tustin\PlayStation\Api\TrophyTitlesRepository;
 use Tustin\PlayStation\Api\Message\AbstractMessage;
 use Tustin\PlayStation\Api\MessageThreadsRepository;
@@ -28,30 +29,33 @@ class User extends Api implements RepositoryInterface, Fetchable
         $this->exact = $exact;
     }
 
+    public static function create(Client $client, string $onlineId, bool $exact = false)
+    {
+        return new static(new UsersRepository($client), $onlineId, $exact);
+    }
+
     /**
      * Create a new instance of User using existing API data.
+     * 
      * @param UsersRepository $usersRepository
      * @param object $data
      * @return User
      */
     public static function fromObject(UsersRepository $usersRepository, object $data) : User
     {
-        $instance = new static($usersRepository, $data->profile->onlineId ?? $data->onlineId,  true);
+        $instance = new static($usersRepository, $data->profile->onlineId ?? $data->onlineId, true);
         $instance->setCache($data);
-
         return $instance;
     }
 
     /**
      * Gets all the user's friends.
      *
-     * @param string $sort
-     * @param integer $limit
-     * @return FriendsIterator
+     * @return FriendsRepository
      */
-    public function friends(string $sort = 'onlineStatus', int $limit = 36) : FriendsIterator
+    public function friends() : FriendsRepository
     {
-        return new FriendsIterator($this->httpClient, $this->onlineIdParameter, $sort, $limit);
+        return new FriendsRepository($this);
     }
 
     /**
@@ -61,7 +65,7 @@ class User extends Api implements RepositoryInterface, Fetchable
      */
     public function trophyTitles() : TrophyTitlesRepository
     {
-        return (new TrophyTitlesRepository($this->httpClient))
+        return (new TrophyTitlesRepository($this->getHttpClient()))
         ->forUser($this);
     }
 
@@ -73,7 +77,7 @@ class User extends Api implements RepositoryInterface, Fetchable
      */
     public function sendMessage(AbstractMessage $message) : Message
     {
-        return (new MessageThreadsRepository($this->httpClient))
+        return (new MessageThreadsRepository($this->getHttpClient()))
         ->with($this->onlineId())
         ->only()
         ->first()
@@ -87,7 +91,7 @@ class User extends Api implements RepositoryInterface, Fetchable
      */
     public function messageThreads() : MessageThreadsRepository
     {
-        return (new MessageThreadsRepository($this->httpClient))
+        return (new MessageThreadsRepository($this->getHttpClient()))
         ->with($this->onlineId());
     }
 
@@ -98,7 +102,7 @@ class User extends Api implements RepositoryInterface, Fetchable
      */
     public function feed() : FeedRepository
     {
-        return (new FeedRepository($this->httpClient))
+        return (new FeedRepository($this->getHttpClient()))
         ->forUser($this);
     }
 
