@@ -14,10 +14,10 @@ class MessagesIterator extends AbstractApiIterator
      */
     protected $thread;
 
-    protected int $limit;
+    protected ?int $limit;
 
     protected string $maxEventIndexCursor;
-        
+
     public function __construct(MessageThread $thread, int $limit = 20)
     {
         if ($limit <= 0)
@@ -44,12 +44,12 @@ class MessagesIterator extends AbstractApiIterator
             {
                 throw new InvalidArgumentException("$cursor must be a string.");
             }
-       
+
             $params['maxEventIndex'] = $cursor;
         }
 
         $results = $this->get(
-            'https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->thread->id(), 
+            'https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->thread->id(),
             $params
         );
 
