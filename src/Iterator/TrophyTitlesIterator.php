@@ -1,25 +1,24 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Tustin\PlayStation\Model\TrophyTitle;
-use Tustin\PlayStation\Model\UserTrophyTitle;
-use Tustin\PlayStation\Factory\TrophyTitlesFactory;
+use Tustin\PlayStation\Api\Model\TrophyTitle;
+use Tustin\PlayStation\Api\TrophyTitlesRepository;
 
 class TrophyTitlesIterator extends AbstractApiIterator
 {
     private $platforms;
 
-    private $trophyTitlesFactory;
+    private $trophyTitles;
     
-    public function __construct(TrophyTitlesFactory $trophyTitlesFactory)
+    public function __construct(TrophyTitlesRepository $titles)
     {
-        parent::__construct($trophyTitlesFactory->getHttpClient());
+        parent::__construct($titles->httpClient);
 
-        $this->trophyTitlesFactory = $trophyTitlesFactory;
+        $this->trophyTitles = $titles;
         
-        $this->platforms = implode(',', $trophyTitlesFactory->getPlatforms());
+        $this->platforms = implode(',', $titles->getPlatforms());
 
-        $this->limit = 100;
+        $this->limit = 128;
         
         $this->access(0);
     }
@@ -27,21 +26,30 @@ class TrophyTitlesIterator extends AbstractApiIterator
     public function access($cursor) : void
     {
         $body = [
+            'fields' => implode(',', [
+                '@default'
+            ]),
+            'platform' => $this->platforms,
             'limit' => $this->limit,
             'offset' => $cursor,
+            'npLanguage' => $this->trophyTitles->getLanguage()->getValue()
         ];
 
-        $results = $this->get('trophy/v1/users/' . $this->trophyTitlesFactory->getUser()->accountId() .'/trophyTitles', $body);
+        if (!is_null($this->trophyTitles->getComparedUser()))
+        {
+            $body['comparedUser'] = $this->trophyTitles->getComparedUser()->onlineId();
+        }
 
-        $this->update($results->totalItemCount, $results->trophyTitles);
+        $results = $this->get('https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles', $body);
+
+        $this->update($results->totalResults, $results->trophyTitles);
     }
 
     public function current()
     {
-		$title = new UserTrophyTitle($this->trophyTitlesFactory->getHttpClient());
-		$title->setFactory($this->trophyTitlesFactory);
-		$title->setCache($this->getFromOffset($this->currentOffset));
-
-		return $title;
+        return TrophyTitle::fromObject(
+            $this->trophyTitles,
+            $this->getFromOffset($this->currentOffset)
+        );
     }
 }

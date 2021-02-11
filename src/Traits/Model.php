@@ -5,26 +5,16 @@ use ReflectionClass;
 use RuntimeException;
 use InvalidArgumentException;
 use Tustin\PlayStation\Interfaces\Fetchable;
-use Tustin\PlayStation\Interfaces\FactoryInterface;
+use Tustin\PlayStation\Interfaces\RepositoryInterface;
 
 trait Model
 {
-    /**
-     * The cache for the model.
-     *
-     * @var array
-     */
-    private $cache = [];
+    private array $cache = [];
+
+    public static abstract function fromObject(RepositoryInterface $repository, object $data);
 
     /**
-     * The factory the model was instantiated by.
-     *
-     * @var FactoryInterface
-     */
-    private $factory;
-
-    /**
-     * Plucks an API property from the cache. Will populate cache if necessary.
+     * Plucks an API property from the cache. Will populare cache if necessary
      *
      * @suppress PhanUndeclaredMethod
      * @param string $property
@@ -37,9 +27,8 @@ trait Model
         {
             if (!(new ReflectionClass($this))->implementsInterface(Fetchable::class))
             {
-				return null;
-                // throw new RuntimeException('Model [' . get_class($this) . '] has not been cached, 
-                // but doesn\'t implement Fetchable to make requests.');
+                throw new RuntimeException('Model [' . get_class($this) . '] has not been cached, 
+                but doesn\'t implement Fetchable to make requests.');
             }
 
             $this->setCache($this->fetch());
@@ -83,19 +72,9 @@ trait Model
         return isset($this->cache) && !empty($this->cache);
     }
 
-    public function setCache($data)
+    protected function setCache($data)
     {
         // So this is bad and probably slow, but it's less annoying than some recursive method.
         $this->cache = json_decode(json_encode($data, JSON_FORCE_OBJECT), true);
-    }
-
-    public function getFactory() : FactoryInterface
-    {
-        return $this->factory;
-    }
-
-    public function setFactory(FactoryInterface $factory)
-    {
-        $this->factory = $factory;
     }
 }

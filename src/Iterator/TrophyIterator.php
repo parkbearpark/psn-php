@@ -1,9 +1,8 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Tustin\PlayStation\Model\Trophy;
-use Tustin\PlayStation\Model\TrophyGroup;
-use Tustin\PlayStation\Model\UserTrophyTitle;
+use Tustin\PlayStation\Api\Model\Trophy;
+use Tustin\PlayStation\Api\Model\TrophyGroup;
 
 class TrophyIterator extends AbstractApiIterator
 {
@@ -12,46 +11,42 @@ class TrophyIterator extends AbstractApiIterator
      *
      * @var TrophyGroup
      */
-    private $trophyGroup;
+    private $group;
     
-    public function __construct(TrophyGroup $trophyGroup)
+    public function __construct(TrophyGroup $group)
     {
-        parent::__construct($trophyGroup->title()->getHttpClient());
+        parent::__construct($group->title()->httpClient);
 
-        $this->trophyGroup = $trophyGroup;
+        $this->group = $group;
 
         $this->access(0);
     }
 
     public function access($cursor) : void
     {
-        if ($this->trophyGroup->title() instanceof UserTrophyTitle)
-        {
-            $results = $this->get(
-                'trophy/v1/users/' . $this->trophyGroup->title()->getFactory()->getUser()->accountId() . '/npCommunicationIds/' . $this->trophyGroup->title()->npCommunicationId() .'/trophyGroups/' . $this->trophyGroup->id() . '/trophies',
-                [
-                    'npServiceName' => $this->trophyGroup->title()->serviceName()
-                ]
-            );
-        }
-        else
-        {
-            $results = $this->get(
-                'trophy/v1/npCommunicationIds/' . $this->trophyGroup->title()->npCommunicationId() . '/trophyGroups/' . $this->trophyGroup->id() . '/trophies',
-                [
-                    'npServiceName' => $this->trophyGroup->title()->serviceName(),
-                    'offset' => $cursor
-                ]
-            );
-        }
-        
-        $this->update($results->totalItemCount, $results->trophies);
+        $results = $this->get(
+            'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->group->title()->npCommunicationId() .'/trophyGroups/' . $this->group->id() .'/trophies',
+            [
+                'fields' => implode(',', [
+                    '@default',
+                    'trophyRare',
+                    'trophyEarnedRate',
+                    'hasTrophyGroups',
+                    'trophySmallIconUrl',
+                ]),
+                'iconSize' => 'm',
+                'visibleType' => 1, // ???,
+                'npLanguage' => $this->group->title()->getLanguage()->getValue()
+            ]
+        );
+
+        $this->update(count($results->trophyGroups), $results->trophyGroups);
     }
 
     public function current()
     {
-        return Trophy::fromObject(
-            $this->trophyGroup,
+        return new Trophy(
+            $this->group,
             $this->getFromOffset($this->currentOffset),
         );
     }

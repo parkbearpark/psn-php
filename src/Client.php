@@ -2,216 +2,195 @@
 
 namespace Tustin\PlayStation;
 
-use Tustin\Haste\AbstractClient;
-use Tustin\PlayStation\OAuthToken;
+use Carbon\Carbon;
 
-use Tustin\PlayStation\Model\Media;
-use Tustin\PlayStation\Model\TrophyTitle;
-use Tustin\PlayStation\Factory\UsersFactory;
-use Tustin\PlayStation\Factory\GroupsFactory;
+use Tustin\Haste\AbstractClient;
+
+use Tustin\PlayStation\Api\UsersRepository;
+use Tustin\PlayStation\Api\CommunitiesRepository;
+use Tustin\PlayStation\Api\TrophyTitlesRepository;
+use Tustin\PlayStation\Api\MessageThreadsRepository;
 use Tustin\Haste\Http\Middleware\AuthenticationMiddleware;
 
 class Client extends AbstractClient
 {
     private const VERSION = 'dev-3.0.0';
-
-    const AUTH_URL = 'https://ca.account.sony.com/api/';
-    const BASE_URL = 'https://m.np.playstation.net/api/';
+    // The client id and client secret are for the iOS PlayStation app.
+    // These cannot be generated at this time; therefore, we have to use their permissions scopes as well.
+    private const CLIENT_ID     = 'ebee17ac-99fd-487c-9b1e-18ef50c39ab5';
+    private const CLIENT_SECRET = 'e4Ru_s*LrL4_B2BD';
+    private const SCOPES = [
+        'kamaji:activity_feed_get_news_feed',
+        'kamaji:activity_feed_internal_feed_submit_story',
+        'kamaji:activity_feed_set_feed_privacy',
+        'kamaji:activity_feed_submit_feed_story',
+        'kamaji:communities',
+        'kamaji:game_list',
+        'kamaji:get_account_hash',
+        'kamaji:get_players_met',
+        'kamaji:satchel',
+        'kamaji:satchel_delete',
+        'kamaji:ugc:distributor',
+        'oauth:manage_device_usercodes',
+        'psn:sceapp',
+        'user:account.attributes.validate',
+        'user:account.profile.get',
+        'user:account.profile.update',
+        'user:account.settings.privacy.get'
+    ];
 
     private $accessToken;
+
     private $refreshToken;
+    
+    private $expiresAt;
 
     public function __construct(array $guzzleOptions = [])
     {
+        // We can't really use a base_uri here because Sony sucks.
         $guzzleOptions['allow_redirects'] = false;
         $guzzleOptions['headers']['User-Agent'] = 'psn-php/' . self::VERSION;
-        $guzzleOptions['headers']['Accept-Language'] = 'en-US';
-        $guzzleOptions['base_uri'] = self::BASE_URL;
-
+ 
         parent::__construct($guzzleOptions);
     }
 
     /**
-     * Login with an NPSSO token.
+     * Login using a npsso token.
      * 
      * @see https://tusticles.com/psn-php/first_login.html
      *
      * @param string $npsso
      * @return void
      */
-    public function loginWithNpsso(string $npsso)
+    public function loginWithNpsso(string $npsso) : void
     {
-        // With the PS App revamp, we now need a JWT token.
-        // @TODO: Clean up these params.
-        $response = $this->get(self::AUTH_URL . 'authz/v3/oauth/authorize', [
-            'access_type' => 'offline',
-            'app_context' => 'inapp_ios',
-            'auth_ver' => 'v3',
-            'cid' => '60351282-8C5F-4D5E-9033-E48FEA973E11',
-            'client_id' => 'ac8d161a-d966-4728-b0ea-ffec22f69edc',
-            'darkmode' => 'true',
-            'device_base_font_size' => 10,
-            'device_profile' => 'mobile',
-            'duid' => '0000000d0004008088347AA0C79542D3B656EBB51CE3EBE1',
-            'elements_visibility' => 'no_aclink',
-            'extraQueryParams' => '{
-                PlatformPrivacyWs1 = minimal;
-            }',
-            'no_captcha' => 'true',
-            'redirect_uri' => 'com.playstation.PlayStationApp://redirect',
-            'response_type' => 'code',
-            'scope' => 'psn:mobile.v1 psn:clientapp',
-            'service_entity' => 'urn:service-entity:psn',
-            'service_logo' => 'ps',
-            'smcid' => 'psapp:settings-entrance',
-            'support_scheme' => 'sneiprls',
-            'token_format' => 'jwt',
-            'ui' => 'pr',
-        ], [
-            'Cookie' => 'npsso=' . $npsso
-        ]);
+        $response = $this->post('https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/token', [
+            'client_id' => self::CLIENT_ID,
+            'client_secret' => self::CLIENT_SECRET,
+            'scope' => implode(' ', self::SCOPES),
+            'grant_type' => 'sso_cookie',
+        ], [ 'Cookie' => 'npsso=' . $npsso ]);
 
-        $lastResponse = $this->getLastResponse();
-
-        if ($lastResponse->getStatusCode() !== 302) {
-            throw new \Exception('Incorrect response code from oauth/authorize.');
-        }
-
-        $location = $lastResponse->getHeaderLine('Location');
-
-        if (!$location) {
-            throw new \Exception('Missing redirect location from oauth/authorize.');
-        }
-
-        parse_str(parse_url($location, PHP_URL_QUERY), $params);
-
-        if (!array_key_exists('code', $params)) {
-            throw new \Exception('Missing code from oauth/authorize.');
-        }
-
-        $response = $this->post(self::AUTH_URL . 'authz/v3/oauth/token', [
-            'smcid' => 'psapp%3Asettings-entrance',
-            'access_type' => 'offline',
-            'code' => $params['code'],
-            'service_logo' => 'ps',
-            'ui' => 'pr',
-            'elements_visibility' => 'no_aclink',
-            'redirect_uri' => 'com.playstation.PlayStationApp://redirect',
-            'support_scheme' => 'sneiprls',
-            'grant_type' => 'authorization_code',
-            'darkmode' => 'true',
-            'device_base_font_size' => 10,
-            'device_profile' => 'mobile',
-            'app_context' => 'inapp_ios',
-            'extraQueryParams' => '{
-                PlatformPrivacyWs1 = minimal;
-            }',
-            'token_format' => 'jwt'
-        ], [
-            'Cookie' => 'npsso=' . $npsso,
-            'Authorization' => 'Basic YWM4ZDE2MWEtZDk2Ni00NzI4LWIwZWEtZmZlYzIyZjY5ZWRjOkRFaXhFcVhYQ2RYZHdqMHY=',
-        ]);
-
-        $this->finalizeLogin($response);
+        $this->postLogin($response);
     }
 
     /**
-     * Login with an existing refresh token.
+     * Login using an existing refresh token.
      * 
      * @see https://tusticles.com/psn-php/future_logins.html
      *
      * @param string $refreshToken
      * @return void
      */
-    public function loginWithRefreshToken(string $refreshToken)
+    public function loginWithRefreshToken(string $refreshToken) : void
     {
-        // @TODO: Handle errors.
-        $response = $this->getHttpClient()->post('authz/v3/oauth/token', [
-            'scope' => 'psn:mobile.v1 psn:clientapp',
-            'refresh_token' => $refreshToken,
+        $response = $this->post('https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/token', [
+            'client_id' => self::CLIENT_ID,
+            'client_secret' => self::CLIENT_SECRET,
+            'scope' => implode(' ', self::SCOPES),
             'grant_type' => 'refresh_token',
-            'token_format' => 'jwt',
-        ], ['Authorization' => 'Basic YWM4ZDE2MWEtZDk2Ni00NzI4LWIwZWEtZmZlYzIyZjY5ZWRjOkRFaXhFcVhYQ2RYZHdqMHY=']);
+            'refresh_token' => $refreshToken
+        ]);
 
-        $this->finalizeLogin($response);
-    }
-
-    /**
-     * Finishes the login flow and sets up future request middleware.
-     *
-     * @param object $response
-     * @return void
-     */
-    private function finalizeLogin(object $response)
-    {
-        $this->accessToken = new OAuthToken($response->access_token, $response->expires_in);
-        $this->refreshToken = new OAuthToken($response->refresh_token, $response->refresh_token_expires_in);
-
-        $this->pushAuthenticationMiddleware(new AuthenticationMiddleware([
-            'Authorization' => 'Bearer ' . $this->getAccessToken()->getToken(),
-        ]));
+        $this->postLogin($response);
     }
 
     /**
      * Access the PlayStation API using an existing access token.
+     * 
+     * @see https://tusticles.com/psn-php/future_logins.html
      *
      * @param string $accessToken
      * @return void
      */
-    public function setAccessToken(string $accessToken)
+    public function setAccessToken(string $accessToken) : void
     {
+        $this->accessToken = $accessToken;
+
         $this->pushAuthenticationMiddleware(new AuthenticationMiddleware([
-            'Authorization' => 'Bearer ' . $accessToken
+            'Authorization' => 'Bearer ' . $this->accessToken(),
         ]));
     }
 
     /**
-     * Gets the access token.
+     * Sets information from a login response.
      *
-     * @return OAuthToken
+     * @param object $response
+     * @return void
      */
-    public function getAccessToken(): OAuthToken
+    private function postLogin(object $response) : void
+    {
+        $this->setAccessToken($response->access_token);
+        $this->refreshToken = $response->refresh_token;
+        $this->expiresAt = Carbon::now()->addSeconds($response->expires_in);
+    }
+    
+    /**
+     * Gets the current access token.
+     *
+     * @return string
+     */
+    public function accessToken() : string
     {
         return $this->accessToken;
     }
 
     /**
-     * Gets the refresh token.
+     * Gets the current refresh token.
      *
-     * @return OAuthToken
+     * @return string
      */
-    public function getRefreshToken(): OAuthToken
+    public function refreshToken() : string
     {
         return $this->refreshToken;
     }
 
     /**
-     * Creates a UsersFactory to query user information.
+     * Gets the expiration date for the access token.
      *
-     * @return UsersFactory
+     * @return Carbon
      */
-    public function users(): UsersFactory
+    public function expireDate() : Carbon
     {
-        return new UsersFactory($this->getHttpClient());
+        return $this->expiresAt;
     }
 
-    public function trophies(string $npCommunicationId, string $serviceName): TrophyTitle
+    public function users() : UsersRepository
     {
-        return new TrophyTitle($this->getHttpClient(), $npCommunicationId, $serviceName);
+        return new UsersRepository($this->getHttpClient());
     }
 
-    public function store()
+    public function trophyTitles() : TrophyTitlesRepository
     {
-        // TODO
+        return new TrophyTitlesRepository($this->getHttpClient());
     }
 
-    public function groups(): GroupsFactory
+    public function messageThreads() : MessageThreadsRepository
     {
-        return new GroupsFactory($this->getHttpClient());
+        return new MessageThreadsRepository($this->getHttpClient());
     }
 
-    public function media(string $ugcId): Media
+    public function communities() : CommunitiesRepository
     {
-        return new Media($this->getHttpClient(), $ugcId);
+        return new CommunitiesRepository($this->getHttpClient());
+    }
+
+    /**
+     * Calls any API methods.
+     *
+     * @param string $method
+     * @param array $parameters
+     * @return object
+     */
+    public function __call(string $method, array $parameters) : object
+    {
+        $class = "\\Tustin\\PlayStation\\Api\\" . ucwords($method);
+
+        if (class_exists($class))
+        {
+            return new $class($this->httpClient);
+        }
+
+        throw new \BadMethodCallException("'{$method}' does not exist.");
     }
 }

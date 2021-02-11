@@ -1,22 +1,21 @@
 <?php
 namespace Tustin\PlayStation\Iterator;
 
-use Tustin\PlayStation\Model\TrophyGroup;
-use Tustin\PlayStation\AbstractTrophyTitle;
-use Tustin\PlayStation\Model\UserTrophyTitle;
+use Tustin\PlayStation\Api\Model\TrophyGroup;
+use Tustin\PlayStation\Api\Model\TrophyTitle;
 
 class TrophyGroupsIterator extends AbstractApiIterator
 {
     /**
      * Current trophy title.
      *
-     * @var AbstractTrophyTitle
+     * @var TrophyTitle
      */
     private $title;
 
-    public function __construct(AbstractTrophyTitle $title)
+    public function __construct(TrophyTitle $title)
     {
-        parent::__construct($title->getHttpClient());
+        parent::__construct($title->httpClient);
 
         $this->title = $title;
 
@@ -25,37 +24,24 @@ class TrophyGroupsIterator extends AbstractApiIterator
 
     public function access($cursor) : void
     {
-        if ($this->title instanceof UserTrophyTitle)
-        {
-            $results = $this->get(
-                'trophy/v1/users/' . $this->title->getFactory()->getUser()->accountId() . '/npCommunicationIds/' . $this->title->npCommunicationId() . '/trophyGroups',
-                [
-                    'npServiceName' => $this->title->serviceName()
-                ]
-            );
-        }
-        else
-        {
-            $results = $this->get(
-                'trophy/v1/npCommunicationIds/' . $this->title->npCommunicationId() . '/trophyGroups',
-                [
-                    'npServiceName' => $this->title->serviceName()
-                ]
-            );
-        }
+        $results = $this->get(
+            'https://us-tpy.np.community.playstation.net/trophy/v1/trophyTitles/' . $this->title->npCommunicationId() .'/trophyGroups',
+            [
+                'fields' => implode(',', [
+                    '@default'
+                ]),
+                'npLanguage' => $this->title->getLanguage()->getValue()
+            ]
+        );
 
         $this->update(count($results->trophyGroups), $results->trophyGroups);
     }
 
     public function current()
     {
-        if ($this->title instanceof UserTrophyTitle)
-        {
-            return new TrophyGroup($this->title, $this->getFromOffset($this->currentOffset)->trophyGroupId);
-        }
-        else
-        {
-            return new TrophyGroup($this->title, $this->getFromOffset($this->currentOffset)->trophyGroupId, $this->getFromOffset($this->currentOffset)->trophyGroupName, $this->getFromOffset($this->currentOffset)->trophyGroupIconUrl);
-        }
+        return new TrophyGroup(
+            $this->title,
+            $this->getFromOffset($this->currentOffset),
+        );
     }
 }

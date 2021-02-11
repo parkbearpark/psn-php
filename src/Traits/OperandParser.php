@@ -50,7 +50,7 @@ trait OperandParser
             case '<>':
             return $lhs !== $rhs;
             default:
-            throw new RuntimeException("Operator value [$this->operator] is not supported.");
+            throw new RuntimeException("operator value [$this->operator] is not supported.");
         }
 
     }

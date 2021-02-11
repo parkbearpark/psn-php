@@ -1,76 +1,77 @@
 <?php
-
 namespace Tustin\PlayStation\Iterator;
 
 use InvalidArgumentException;
-use Tustin\PlayStation\Model\Message;
-use Tustin\PlayStation\Model\MessageThread;
-use Tustin\PlayStation\Model\Message\AbstractMessage;
+use Tustin\PlayStation\Api\Model\Message;
+use Tustin\PlayStation\Api\Model\MessageThread;
 
 class MessagesIterator extends AbstractApiIterator
 {
     /**
-     * @var MessageThread
+     * The message thread that these messages are in.
+     *
+     * @var MessageThread $thread
      */
     protected $thread;
 
-    /**
-     * @var int
-     */
-    protected $limit;
+    protected int $limit;
 
-    private $totalCount = 0;
-
+    protected string $maxEventIndexCursor;
+        
     public function __construct(MessageThread $thread, int $limit = 20)
     {
-        if ($limit <= 0) {
+        if ($limit <= 0)
+        {
             throw new InvalidArgumentException('$limit must be greater than zero.');
         }
 
-        parent::__construct($thread->getHttpClient());
+        parent::__construct($thread->httpClient);
         $this->thread = $thread;
         $this->limit = $limit;
         $this->access(null);
     }
 
-    public function access($cursor): void
+    public function access($cursor) : void
     {
-        $params = [];
+        $params = [
+            'fields' => 'threadEvents',
+            'count' => $this->limit,
+        ];
 
-        if ($cursor != null) {
-            if (!is_string($cursor)) {
+        if ($cursor != null)
+        {
+            if (!is_string($cursor))
+            {
                 throw new InvalidArgumentException("$cursor must be a string.");
             }
-
-            $params['before'] = $cursor;
+       
+            $params['maxEventIndex'] = $cursor;
         }
 
-        $results = $this->get('gamingLoungeGroups/v1/members/me/groups/' . $this->thread->group()->id() . '/threads/' . $this->thread->id() . '/messages', $params);
+        $results = $this->get(
+            'https://us-gmsg.np.community.playstation.net/groupMessaging/v1/threads/' . $this->thread->id(), 
+            $params
+        );
 
-        $this->totalCount += $results->messageCount;
-        // if ($results->reachedEndOfPage && $results->messageCount == 0) {
-        //     return;
-        // }
+        $this->maxEventIndexCursor = $results->maxEventIndexCursor;
 
-        // $this->force(!$results->reachedEndOfPage);
-        $this->update($this->totalCount, $results->messages, $results->previous);
+        $this->update($results->resultsCount, $results->threadEvents);
     }
 
-    public function next(): void
+    public function next() : void
     {
         $this->currentOffset++;
-
-        // Since totalResults for the messages API just returns the amount of messages sent in the response, we have to do it like this.
-        if ($this->currentOffset == $this->totalResults) {
-            $this->access($this->customCursor);
+        if (($this->currentOffset % $this->limit) == 0)
+        {
+            $this->access($this->maxEventIndexCursor);
         }
     }
 
     public function current()
     {
-        return AbstractMessage::create(
+        return new Message(
             $this->thread,
-            $this->getFromOffset($this->currentOffset)
+            $this->getFromOffset($this->currentOffset)->messageEventDetail
         );
     }
 }

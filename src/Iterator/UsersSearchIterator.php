@@ -1,11 +1,9 @@
 <?php
-
 namespace Tustin\PlayStation\Iterator;
 
-use Tustin\PlayStation;
 use InvalidArgumentException;
-use Tustin\PlayStation\Model\User;
-use Tustin\PlayStation\Factory\UsersFactory;
+use Tustin\PlayStation\Api\Model\User;
+use Tustin\PlayStation\Api\UsersRepository;
 
 class UsersSearchIterator extends AbstractApiIterator
 {
@@ -17,74 +15,59 @@ class UsersSearchIterator extends AbstractApiIterator
     protected $query;
 
     /**
-     * The language to search with.
+     * The fields to search in (comma delimited).
      *
      * @var string
      */
-    protected $languageCode;
+    protected $searchFields;
 
     /**
-     * The country code.
+     * The users repository.
      *
-     * @var string
+     * @var UsersRepository
      */
-    protected $countryCode;
-
-    /**
-     * The users factory.
-     *
-     * @var UsersFactory
-     */
-    private $usersFactory;
-
-    public function __construct(UsersFactory $usersFactory, string $query, string $languageCode = 'en', string $countryCode = 'us')
+    private $usersRepository;
+    
+    public function __construct(UsersRepository $usersRepository, string $query, array $searchFields)
     {
-        if (empty($query)) {
+        if (empty($query))
+        {
             throw new InvalidArgumentException('[query] must contain a value.');
         }
 
-        parent::__construct($usersFactory->getHttpClient());
-        $this->usersFactory = $usersFactory;
+        if (empty($searchFields))
+        {
+            throw new InvalidArgumentException('[searchFields] must contain at least one value.');
+        }
+
+        parent::__construct($usersRepository->httpClient);
+        $this->usersRepository = $usersRepository;
         $this->query = $query;
-        $this->languageCode = $languageCode;
-        $this->countryCode = $countryCode;
         $this->limit = 50;
-        $this->access('');
+        $this->searchFields = implode(',', $searchFields);
+        $this->access(0);
     }
 
-    public function access($cursor): void
+    public function access($cursor) : void
     {
-        // @TODO: Since the search function seems to be streamlined now, we could probably throw this into the abstract api iterator??
-        $results = $this->postJson('search/v1/universalSearch', [
-            'age' => '69',
-            'countryCode' => $this->countryCode,
-            'domainRequests' => [
-                [
-                    'domain' => 'SocialAllAccounts',
-                    'pagination' => [
-                        'cursor' => $cursor,
-                        'pageSize' => '50' // 50 is max.
-                    ]
-                ]
-            ],
-            'languageCode' => $this->languageCode,
-            'searchTerm' => $this->query
+        $results = $this->get('https://friendfinder.api.np.km.playstation.net/friend-finder/api/v1/users/me/search', [
+            'fields' => 'onlineId',
+            'query' => $this->query,
+            'searchTarget' => 'all',
+            'searchFields' => $this->searchFields,
+            'limit' => $this->limit,
+            'offset' => $cursor,
+            'rounded' => true
         ]);
 
-        $domainResponse = $results->domainResponses[0];
-
-        $this->update($domainResponse->totalResultCount, $domainResponse->results, $domainResponse->next);
+        $this->update($results->totalResults, $results->searchResults);
     }
 
     public function current()
     {
-        $socialMetadata = $this->getFromOffset($this->currentOffset)->socialMetadata;
-        $token = $this->getFromOffset($this->currentOffset)->id;
-
         return User::fromObject(
-            $this->usersFactory->getHttpClient(),
-            $socialMetadata,
-            $token
+            $this->usersRepository,
+            $this->getFromOffset($this->currentOffset)
         );
     }
 }

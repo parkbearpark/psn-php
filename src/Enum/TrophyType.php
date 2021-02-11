@@ -3,6 +3,7 @@ namespace Tustin\PlayStation\Enum;
 
 use MyCLabs\Enum\Enum;
 
+
 class TrophyType extends Enum
 {
     private const platinum = 'platinum';
