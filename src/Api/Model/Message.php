@@ -124,7 +124,7 @@ class Message extends Api
      */
     public function senderName() : string
     {
-        return $this->pluck('sender.name');
+        return $this->pluck('sender.onlineId');
     }
 
 
