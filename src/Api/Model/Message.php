@@ -16,7 +16,7 @@ class Message extends Api
      * @var MessageThread
      */
     private $thread;
-    
+
     public function __construct(MessageThread $thread, object $messageData)
     {
         $this->setCache($messageData);
@@ -33,7 +33,7 @@ class Message extends Api
 
     /**
      * Gets the type of message.
-     * 
+     *
      * Returns MessageType::unknown on unmapped message types. If you receive this type, open a PR/issue.
      *
      * @return MessageType
@@ -73,7 +73,7 @@ class Message extends Api
 
     /**
      * Gets the event index ID for the message.
-     * 
+     *
      * Used as a cursor for pagination.
      *
      * @return string
@@ -112,8 +112,20 @@ class Message extends Api
     public function sender() : User
     {
         return new User(
-            $this->messageThread()->httpClient, 
+            $this->messageThread()->httpClient,
             $this->pluck('sender.onlineId')
         );
     }
+
+    /**
+     * Gets the message sender name.
+     *
+     * @return string
+     */
+    public function senderName() : string
+    {
+        return $this->pluck('sender.name');
+    }
+
+
 }
