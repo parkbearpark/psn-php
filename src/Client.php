@@ -33,7 +33,7 @@ class Client extends AbstractClient
     {
         // We can't really use a base_uri here because Sony sucks.
         $guzzleOptions['allow_redirects'] = false;
-        $guzzleOptions['headers']['User-Agent'] = 'psn-php/' . self::VERSION;
+        // $guzzleOptions['headers']['User-Agent'] = 'psn-php/' . self::VERSION;
 
         parent::__construct($guzzleOptions);
     }
