@@ -21,6 +21,7 @@ class Client extends AbstractClient
     private const SCOPES = [
         'psn:clientapp', 'psn:mobile.v1'
     ];
+    private const BASIC_AUTH = 'Basic YWM4ZDE2MWEtZDk2Ni00NzI4LWIwZWEtZmZlYzIyZjY5ZWRjOkRFaXhFcVhYQ2RYZHdqMHY=';
 
     private $accessToken;
 
@@ -72,7 +73,7 @@ class Client extends AbstractClient
             'scope' => implode(' ', self::SCOPES),
             'grant_type' => 'refresh_token',
             'refresh_token' => $refreshToken
-        ]);
+        ], [ 'Authorization' => self::BASIC_AUTH ]);
 
         $this->postLogin($response);
     }
